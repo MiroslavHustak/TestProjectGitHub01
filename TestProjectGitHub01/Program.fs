@@ -21,7 +21,7 @@ module Program =
     Console.OutputEncoding  <- System.Text.Encoding.Unicode
 
     //*****************************WebScraping1******************************
-    webscraping21() 
+    webscraping1() 
 
     //*****************************WebScraping2******************************
     //normalScraping()

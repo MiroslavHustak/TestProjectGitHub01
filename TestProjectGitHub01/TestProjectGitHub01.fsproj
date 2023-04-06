@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Auxiliaries\Helpers.fs" />
     <Content Include="JSONFile1.json" />
     <Content Include="XMLFile1.xml" />
     <Compile Include="CodeChallenge.fs" />
@@ -25,6 +26,7 @@
     <PackageReference Include="Fantomas.Core" Version="5.1.0-alpha-005" />
     <PackageReference Include="Fizzler.Systems.HtmlAgilityPack" Version="1.2.1" />
     <PackageReference Include="FSharp.Data" Version="6.0.1-beta002" />
+    <PackageReference Include="Fugit" Version="0.4.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
