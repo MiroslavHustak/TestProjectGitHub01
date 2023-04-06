@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="JSONFile1.json" />
+    <Content Include="XMLFile1.xml" />
+    <Compile Include="CodeChallenge.fs" />
+    <Compile Include="Settings.fs" />
+    <Compile Include="Csv.fs" />
+    <Compile Include="WebScraping4.fs" />
+    <Compile Include="WebScraping3.fs" />
+    <Compile Include="WebScraping2.fs" />
+    <Compile Include="WebScraping1.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="canopy" Version="2.1.5" />
+    <PackageReference Include="ExcelDataReader" Version="3.7.0-develop00310" />
+    <PackageReference Include="ExcelDataReader.DataSet" Version="3.7.0-develop00310" />
+    <PackageReference Include="Fantomas.Core" Version="5.1.0-alpha-005" />
+    <PackageReference Include="Fizzler.Systems.HtmlAgilityPack" Version="1.2.1" />
+    <PackageReference Include="FSharp.Data" Version="6.0.1-beta002" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="7.0.0-beta.22473.1" />
+  </ItemGroup>
+
+</Project>

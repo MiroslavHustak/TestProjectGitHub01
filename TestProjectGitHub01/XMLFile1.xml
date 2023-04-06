@@ -1,0 +1,28 @@
+﻿
+<div id="__next" data-reactroot="">
+	<main class="mt-16">
+		<div class="container">			
+			<div class="mb-12">
+				<ul class="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-2">
+					<li class="Card_wrapper__ZQ5Fp">						
+						<div class="Card_actions__HhB_f">
+							<a href="https://kodis-files.s3.eu-central-1.amazonaws.com/232_2022_12_11_2023_12_09_d02eef94bc.pdf" target="_blank" class="Button_main__pEB6O Button_secondary__R6QEg Button_md__1RLR1" data-testid="button-elementAnchor" title="Pravidelný jízdní řád">
+								
+							</a>
+						</div>
+					</li>
+					<li class="Card_wrapper__ZQ5Fp">						
+						<div class="Card_actions__HhB_f">
+							<a href="https://kodis-files.s3.eu-central-1.amazonaws.com/233_2023_03_07_2023_12_09_a9cfa66c67.pdf" target="_blank" class="Button_main__pEB6O Button_secondary__R6QEg Button_md__1RLR1" data-testid="button-elementAnchor" title="Pravidelný jízdní řád">
+								
+							</a>
+						</div>
+					</li>
+					
+				</ul>				
+			</div>
+		</div>
+	</main>
+</div>
+
+
