@@ -26,7 +26,7 @@ let webscrapingFromPage() =
 
     url "https://www.kodis.cz/lines/region?tab=232-293"
 
-    let linksShown () = (elements ".Card_wrapper__ZQ5Fp").Length >= 11 //podminka pro waitFor
+    let linksShown () = (elements ".Card_wrapper__ZQ5Fp").Length >= 11 //podminka pro waitFor - cekat na to, az se to zobrazi
        
     compareTimeout <- 10.0 //nutne u pomalejsich pripojeni
 

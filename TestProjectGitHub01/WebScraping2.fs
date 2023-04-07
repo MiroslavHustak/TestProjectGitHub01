@@ -11,7 +11,13 @@ open Fizzler.Systems.HtmlAgilityPack
 //TODO validations  
 //TODO Option.ofObj
 
+
+
 let normalScraping() = 
+
+
+   
+
 
     //********************FSharp.Data********************************
     let url1 = "https://scrapeme.live/shop/"

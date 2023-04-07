@@ -31,7 +31,7 @@ open System.Diagnostics
             function            
             | TryParserInt.Int i -> f i 
             | notANumber         ->  
-                                    printfn "Error while parsing: %s" notANumber 
+                                    printfn "Nebyla parsovana hodnota: %s" notANumber 
                                     -1 
    
    //Toto neni pouzivany kod, ale jen pattern pro tvorbu TryParserInt, TryParserDate atd. Neautorsky kod.
