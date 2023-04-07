@@ -61,6 +61,7 @@ let private client =
 let private split list =
     let num = sprintf"%s%s" pathToDir @"/" 
     let folder (a: string*string, b: string*string) (cur, acc) = 
+        //tryWith
         let cond = (snd a).Substring(num.Length, 3) = (snd b).Substring(num.Length, 3)
         match a with
         | _ when cond -> a::cur, acc
@@ -74,7 +75,12 @@ let private downloadFileTaskAsync (client: Http.HttpClient) (uri: string) (path:
         async
             {
                 let! stream = client.GetStreamAsync(uri) |> Async.AwaitTask                             
-                let fileStream = new FileStream(path, FileMode.CreateNew)                                    
+                let fileStream = new FileStream(path, FileMode.CreateNew)
+                                 |> Option.ofObj     
+                                 |> function 
+                                     | Some value -> value
+                                     | None       -> printfn "%s" "Error9"
+                                                     new FileStream(path, FileMode.CreateNew) //whatever 
                 return! stream.CopyToAsync(fileStream) |> Async.AwaitTask 
             } 
     with
@@ -156,6 +162,7 @@ let private saveUpdatedJson() =
         
     (pathToJsonList, loadedJsonFiles)
     ||> List.iter2 (fun path json -> 
+                                    //TryWith
                                     use streamWriter = new StreamWriter(Path.GetFullPath(path))                   
                                     streamWriter.WriteLine(json)     
                                     streamWriter.Flush()   
@@ -191,10 +198,10 @@ let private myLinksSet() =
         *)  
 
     let kodisAttachments() = 
-
+         //tryWith
         pathToJsonList
         |> Array.ofList 
-        |> Array.collect (fun pathToJson ->  
+        |> Array.collect (fun pathToJson -> 
                                           let kodisJsonSamples = KodisTimetables.Parse(File.ReadAllText pathToJson) |> Option.ofObj 
 
                                           let fn1 (value: JsonProvider<pathJson>.Attachment array) =
@@ -231,10 +238,11 @@ let private sortTimetables myLinksSet =
 
     let currentTime = Fugit.now()
     
+    //tryWith substring, take
     let myList = 
         myLinksSet
         |> Set.toArray 
-        |> Array.Parallel.map (fun (item: string) ->                                    
+        |> Array.Parallel.map (fun (item: string) ->  
                                                     let fileName =                                     
                                                         match item.Contains("timetables") with
                                                         | true  -> let s = item.Replace("https://kodis-files.s3.eu-central-1.amazonaws.com", String.Empty).Replace("timetables", String.Empty)
@@ -275,7 +283,7 @@ let private sortTimetables myLinksSet =
                                                                  | true  -> item, fileNameFull
                                                                  | false -> 
                                                                            try
-                                                                               let dateOld = new DateTime(yearOld, monthOld, dayOld)
+                                                                               let dateOld = new DateTime(yearOld, monthOld, dayOld) 
                                                                                let dateNew = new DateTime(yearNew, monthNew, dayNew)                                   
                                                                                                                                                            
                                                                                let cond = ((currentTime |> Fugit.isAfter dateNew)
@@ -304,6 +312,7 @@ let private sortTimetables myLinksSet =
     
     //****************druha filtrace odkazu na neplatne jizdni rady***********************
     let myList = 
+        //tryWith substring 
         myList |> split         
         |> List.collect (fun item ->  
                                     match item.Length > 1 with
@@ -341,15 +350,23 @@ let private sortTimetables myLinksSet =
 let private downloadTimetables pathToDir (sortTimetables: (string*string) list) =    
     //TryWith   
     let dirInfo = new DirectoryInfo(pathToDir)
-                     |> Option.ofObj
-                     |> function 
-                         | Some value -> value  
-                         | None       -> printfn "%s" "Error8"
-                                         new DirectoryInfo(pathToDir)
+                  |> Option.ofObj
+                  |> function 
+                      | Some value -> value  
+                      | None       -> printfn "%s" "Error8"
+                                      new DirectoryInfo(pathToDir)
 
-    dirInfo.EnumerateFiles() |> Array.ofSeq |> Array.Parallel.iter (fun item -> item.Delete()) //smazeme stare soubory v adresari 
+    //smazeme stare soubory v adresari   
+    dirInfo.EnumerateFiles()
+    |> Option.ofObj 
+    |> function 
+        | Some value -> value  
+        | None       -> printfn "%s" "Error11"
+                        Seq.empty    
+    |> Array.ofSeq |> Array.Parallel.iter (fun item -> item.Delete()) 
 
-    //tady je download tech pdf souboru, ktere jsou aktualni
+    
+    //************************download pdf souboru, ktere jsou aktualni*******************************************
       
     sortTimetables //TryWith //Parallel vyhazuje chyby  
     |> List.iter (fun (link, pathToFile) -> async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously 
@@ -363,7 +380,7 @@ let private downloadTimetables pathToDir (sortTimetables: (string*string) list) 
                                             |> Async.RunSynchronously    *)                                      
                  )
 
-    printfn"Pocet jizdnich radu ke stazeni %i" sortTimetables.Length
+    printfn"Pocet stazenych jizdnich radu: %i" sortTimetables.Length
     
 let webscraping1() =
     processStart >> saveUpdatedJson >> myLinksSet 
