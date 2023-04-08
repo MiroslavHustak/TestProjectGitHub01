@@ -1,13 +1,14 @@
 ﻿module WebScraping1
 
+open Fugit
 open System
 open System.IO
 open System.Net
 open FSharp.Data
 
-open Fugit
-
 open Helpers
+open TryWith.TryWith
+open ProgressBarCSharp
 
 do System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance)
     
@@ -17,9 +18,11 @@ Console.InputEncoding   <- System.Text.Encoding.Unicode
 Console.OutputEncoding  <- System.Text.Encoding.Unicode
 
 //************************Constants and types**********************************************************************
+
 //tu a tam zkontrolovat json, zdali KODIS nezmenil jeho strukturu 
 let [<Literal>] pathJson = @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisMHDTotal.json" //musi byt forward slash"
 let [<Literal>] pathKodisWeb = @"https://kodisweb-backend.herokuapp.com/"
+let [<Literal>] pathKodisAmazonLink = @"https://kodis-files.s3.eu-central-1.amazonaws.com/"
 
 let private pathToDir = @"e:\E\Mirek po osme hodine a o vikendech\KODISTP\" 
 let private range = [ '1'; '2'; '3'; '4'; '5'; '6'; '7'; '8'; '9'; '0' ]
@@ -40,38 +43,40 @@ let private errorFn str err =
 let private timeStr = errorFn "HH:mm:ss" "Error1"                     
     
 let private processStart() =     
-    //TryWith
-    let processStartTime = errorFn $"Začátek procesu: {DateTime.Now.ToString(timeStr)}" "Error2"                           
-    printfn "%s" processStartTime
+    let processStartTime x = 
+        let processStartTime = errorFn $"Zacatek procesu: {DateTime.Now.ToString(timeStr)}" "Error2"                           
+        printfn "%s" processStartTime
+    tryWith processStartTime (fun x -> ()) String.Empty () |> deconstructor
     
 let private processEnd() =     
-    //TryWith
-    let processEndTime = errorFn $"Konec procesu: {DateTime.Now.ToString(timeStr)}" "Error3"                       
-    printfn "%s" processEndTime
+    let processEndTime x = 
+        let processEndTime = errorFn $"Konec procesu: {DateTime.Now.ToString(timeStr)}" "Error3"                       
+        printfn "%s" processEndTime
+    tryWith processEndTime (fun x -> ()) String.Empty () |> deconstructor
 
 let private client = 
-    //TryWith
-    new System.Net.Http.HttpClient() 
-    |> Option.ofObj
-    |> function 
-        | Some value -> value
-        | None       -> printfn "%s" "Error4"
-                        new System.Net.Http.HttpClient() //whatever 
+    let myClient x = 
+        new System.Net.Http.HttpClient() 
+        |> Option.ofObj
+        |> function 
+            | Some value -> value
+            | None       -> printfn "%s" "Error4"
+                            new System.Net.Http.HttpClient() //whatever 
+    tryWith myClient (fun x -> ()) String.Empty (new System.Net.Http.HttpClient()) |> deconstructor
 
 let private split list =
-    let num = sprintf"%s%s" pathToDir @"/" 
-    let folder (a: string*string, b: string*string) (cur, acc) = 
-        //tryWith
-        let cond = (snd a).Substring(num.Length, 3) = (snd b).Substring(num.Length, 3)
-        match a with
-        | _ when cond -> a::cur, acc
-        | _           -> [a], cur::acc
-
-    let result = List.foldBack folder (List.pairwise list) ([List.last list], []) 
-    (fst result)::(snd result)
+    let mySplitting x =
+        let folder (a: string, b: string) (cur, acc) =
+            let cond = a.Substring(0, 3) = b.Substring(0, 3) //3 je delka retezce pouze pro linky 001 az 999
+            match a with
+            | _ when cond -> a::cur, acc
+            | _           -> [a], cur::acc
+        let result = List.foldBack folder (List.pairwise list) ([List.last list], []) 
+        (fst result)::(snd result)
+    tryWith mySplitting (fun x -> ()) String.Empty [List.empty] |> deconstructor
     
 let private downloadFileTaskAsync (client: Http.HttpClient) (uri: string) (path: string) =    
-    try
+    let myDownload x = 
         async
             {
                 let! stream = client.GetStreamAsync(uri) |> Async.AwaitTask                             
@@ -83,10 +88,8 @@ let private downloadFileTaskAsync (client: Http.HttpClient) (uri: string) (path:
                                                      new FileStream(path, FileMode.CreateNew) //whatever 
                 return! stream.CopyToAsync(fileStream) |> Async.AwaitTask 
             } 
-    with
-    | _ -> printfn "Error10"
-           Async.Sleep 0  
-
+    tryWith myDownload (fun x -> ()) String.Empty (Async.Sleep 0) |> deconstructor
+  
 
 //************************Main code***********************************************************
 
@@ -156,35 +159,44 @@ let private pathToJsonList =
 
 let private saveUpdatedJson() = 
    
-    //TryWith
-    let loadedJsonFiles = 
-        jsonLinkList |> List.map (fun item -> async { return! client.GetStringAsync(item) |> Async.AwaitTask } |> Async.RunSynchronously)        
-        
-    (pathToJsonList, loadedJsonFiles)
-    ||> List.iter2 (fun path json -> 
-                                    //TryWith
-                                    use streamWriter = new StreamWriter(Path.GetFullPath(path))                   
-                                    streamWriter.WriteLine(json)     
-                                    streamWriter.Flush()   
-                   )      
+    let myUpdatedJson x = 
+        let loadedJsonFiles = 
+            use progress = new ProgressBar()
+            jsonLinkList |> List.mapi (fun i item ->                                                
+                                                   progress.Report(float (i/1000))  
+                                                   async { return! client.GetStringAsync(item) |> Async.AwaitTask } |> Async.RunSynchronously
+                                      )  
+
+        (pathToJsonList, loadedJsonFiles)
+        ||> List.iteri2 (fun i path json ->                                                                          
+                                          use streamWriter = new StreamWriter(Path.GetFullPath(path))                   
+                                          streamWriter.WriteLine(json)     
+                                          streamWriter.Flush()   
+                        ) 
+    tryWith myUpdatedJson (fun x -> ()) String.Empty () |> deconstructor                
 
 let private myLinksSet() = 
-    //TryWith
+    
     let kodisTimetables() = 
 
-        pathToJsonList 
-        |> Array.ofList 
-        |> Array.collect (fun pathToJson ->         
-                                          //TryWith 
-                                          let kodisJsonSamples = KodisTimetables.Parse(File.ReadAllText pathToJson) |> Option.ofObj
-                                          //let kodisJsonSamples = kodisJsonSamples.GetSamples() |> Option.ofObj                 
+        let myFunction x = 
+            pathToJsonList 
+            |> Array.ofList 
+            |> Array.collect (fun pathToJson ->         
+                                              
+                                              let kodisJsonSamples = KodisTimetables.Parse(File.ReadAllText pathToJson) |> Option.ofObj
+                                              //let kodisJsonSamples = kodisJsonSamples.GetSamples() |> Option.ofObj  //v pripade jen jednoho json               
                 
-                                          kodisJsonSamples
-                                          |> function 
-                                              | Some value -> value |> Array.map (fun item -> item.Timetable) //quli tomuto je nutno Array
-                                              | None       -> printfn "%s" "Error5"
-                                                              Array.empty    
-                         ) 
+                                              kodisJsonSamples
+                                              |> function 
+                                                  | Some value -> value |> Array.map (fun item -> item.Timetable) //quli tomuto je nutno Array
+                                                  | None       -> printfn "%s" "Error5"
+                                                                  Array.empty    
+                             ) 
+        tryWith myFunction (fun x -> ()) String.Empty Array.empty |> deconstructor
+
+    let kodisAttachments() = 
+
         (*
         //ponechavam pro pochopeni struktury u json type provider (pri pouziti option se to tahne az k susedovi)
         let kodisAttachments() = kodisJsonSamples                              
@@ -197,40 +209,39 @@ let private myLinksSet() =
                                                   )   
         *)  
 
-    let kodisAttachments() = 
-         //tryWith
-        pathToJsonList
-        |> Array.ofList 
-        |> Array.collect (fun pathToJson -> 
-                                          let kodisJsonSamples = KodisTimetables.Parse(File.ReadAllText pathToJson) |> Option.ofObj 
+        let myFunction x = 
+            pathToJsonList
+            |> Array.ofList 
+            |> Array.collect (fun pathToJson -> 
+                                              let kodisJsonSamples = KodisTimetables.Parse(File.ReadAllText pathToJson) |> Option.ofObj 
 
-                                          let fn1 (value: JsonProvider<pathJson>.Attachment array) =
-                                              value
-                                              |> Array.Parallel.map (fun item -> errorFn item.Url "Error7")
+                                              let fn1 (value: JsonProvider<pathJson>.Attachment array) =
+                                                  value
+                                                  |> Array.Parallel.map (fun item -> errorFn item.Url "Error7")
 
-                                          let fn2 (item: JsonProvider<pathJson>.Vyluky) =  //quli tomuto je nutno Array      
-                                              item.Attachments |> Option.ofObj        
-                                              |> function 
-                                                  | Some value -> value |> fn1
-                                                  | None       -> printfn "%s" "Error6"
-                                                                  Array.empty                 
+                                              let fn2 (item: JsonProvider<pathJson>.Vyluky) =  //quli tomuto je nutno Array      
+                                                  item.Attachments |> Option.ofObj        
+                                                  |> function 
+                                                      | Some value -> value |> fn1
+                                                      | None       -> printfn "%s" "Error6"
+                                                                      Array.empty                 
 
-                                          let fn3 (item: JsonProvider<pathJson>.Root) =  //quli tomuto je nutno Array
-                                              item.Vyluky |> Option.ofObj
-                                              |> function 
-                                                  | Some value -> value |> Array.collect fn2 
-                                                  | None       -> printfn "%s" "Error6"
-                                                                  Array.empty 
+                                              let fn3 (item: JsonProvider<pathJson>.Root) =  //quli tomuto je nutno Array
+                                                  item.Vyluky |> Option.ofObj
+                                                  |> function 
+                                                      | Some value -> value |> Array.collect fn2 
+                                                      | None       -> printfn "%s" "Error6"
+                                                                      Array.empty 
            
-                                          kodisJsonSamples 
-                                          |> function 
-                                              | Some value -> value |> Array.collect fn3 
-                                              | None       -> printfn "%s" "Error6"
-                                                              Array.empty                                 
-                         ) 
+                                              kodisJsonSamples 
+                                              |> function 
+                                                  | Some value -> value |> Array.collect fn3 
+                                                  | None       -> printfn "%s" "Error6"
+                                                                  Array.empty                                 
+                             ) 
+        tryWith myFunction (fun x -> ()) String.Empty Array.empty |> deconstructor
 
-    (Array.append <| kodisAttachments() <| kodisTimetables()) |> Set.ofArray //konverzi na Set vyhodime stejne polozky  
-        
+    (Array.append <| kodisAttachments() <| kodisTimetables()) |> Set.ofArray //jen z vyukovych duvodu -> konverzi na Set vyhodime stejne polozky, jinak staci jen |> Array.distinct 
 
 let private sortTimetables myLinksSet = 
 
@@ -238,23 +249,22 @@ let private sortTimetables myLinksSet =
 
     let currentTime = Fugit.now()
     
-    //tryWith substring, take
+    use progress = new ProgressBar()
     let myList = 
-        myLinksSet
-        |> Set.toArray 
-        |> Array.Parallel.map (fun (item: string) ->  
-                                                    let fileName =                                     
-                                                        match item.Contains("timetables") with
-                                                        | true  -> let s = item.Replace("https://kodis-files.s3.eu-central-1.amazonaws.com", String.Empty).Replace("timetables", String.Empty)
-                                                                   s.Substring(0, s.Length - 4).Remove(0, 2)                                                 
-                                                        | false -> let s = item.Replace("https://kodis-files.s3.eu-central-1.amazonaws.com", String.Empty)
-                                                                   s.Substring(0, s.Length - 15).Remove(0, 1)
+        let myFunction x =
+            myLinksSet
+            |> Set.toArray 
+            |> Array.Parallel.map (fun (item: string) ->         
+                                                        let fileName = item.Replace(pathKodisAmazonLink, String.Empty) 
                                                     
-                                                    let charList = fileName.ToCharArray() |> Array.toList |> List.take 3
-
-                                                    let a i range = range |> List.filter (fun item -> charList |> List.item i = item)
-
-                                                    let link, fileName = 
+                                                        let charList = 
+                                                                       match fileName |> String.length >= 3  with  //3 je delka retezce pouze pro linky 001 az 999
+                                                                       | true  -> fileName.ToCharArray() |> Array.toList |> List.take 3
+                                                                       | false -> printfn "Error11"
+                                                                                  List.empty
+                                             
+                                                        let a i range = range |> List.filter (fun item -> (charList |> List.item i = item))                                            
+                                                   
                                                         let fileNameFull = 
                                                             match a 0 range <> List.empty with
                                                             | true  -> match a 1 range <> List.empty with
@@ -264,125 +274,147 @@ let private sortTimetables myLinksSet =
                                                                         | false -> sprintf "%s%s" "00" fileName
                                                             | false -> fileName  
 
-                                                        match not (fileNameFull |> String.length >= 25) with //113_2022_12_11_2023_12_09.pdf
-                                                        | true  -> String.Empty, String.Empty
-                                                        | false ->                                     
-                                                                 let lineNumberStr = fileNameFull.Substring(0, 3) //Substring(startIndex, length)
-                                                                 let lineNumberInt = Parsing.parseMe(lineNumberStr)
-
-                                                                 let yearOld = Parsing.parseMe(fileNameFull.Substring(4, 4)) //overovat, jestli se v jsonu neco nezmenilo //113_2022_12_11_2023_12_09.pdf
-                                                                 let monthOld = Parsing.parseMe(fileNameFull.Substring(9, 2))
-                                                                 let dayOld = Parsing.parseMe(fileNameFull.Substring(12, 2))
-                                                                 let yearNew = Parsing.parseMe(fileNameFull.Substring(15, 4))
-                                                                 let monthNew = Parsing.parseMe(fileNameFull.Substring(20, 2))
-                                                                 let dayNew = Parsing.parseMe(fileNameFull.Substring(23, 2))
-                                   
-                                                                 let a = [ yearOld; monthOld; dayOld; yearNew; monthNew; dayNew ]
-
-                                                                 match a |> List.contains -1 with
-                                                                 | true  -> item, fileNameFull
-                                                                 | false -> 
-                                                                           try
-                                                                               let dateOld = new DateTime(yearOld, monthOld, dayOld) 
-                                                                               let dateNew = new DateTime(yearNew, monthNew, dayNew)                                   
-                                                                                                                                                           
-                                                                               let cond = ((currentTime |> Fugit.isAfter dateNew)
-                                                                                          &&
-                                                                                          (currentTime |> Fugit.isAfter dateOld))
-                                                                                          || 
-                                                                                          (currentTime |> Fugit.isAfter dateNew)                                                          
-                                                                                
-                                                                               match cond with
-                                                                               | false -> item, fileNameFull                                               
-                                                                               | true  -> String.Empty, String.Empty    
-                                                                           with 
-                                                                           | _ -> String.Empty, String.Empty              
-
-                                                    let pathToFile = 
-                                                        match link = String.Empty with
+                                                        match not (fileNameFull |> String.length >= 25) with //113_2022_12_11_2023_12_09......
                                                         | true  -> String.Empty
-                                                        | false -> sprintf"%s/%s%s" pathToDir fileName ".pdf"
-                                                    link, pathToFile                                 
-                            ) |> Set.ofArray |> Set.toList |> List.sort 
-
-    let myList = 
-        match myList |> List.contains (String.Empty, String.Empty) with
-        | true  -> myList |> List.tail
-        | false -> myList
+                                                        | false ->     
+                                                                    //overovat, jestli se v jsonu nezmenila struktura nazvu //113_2022_12_11_2023_12_09.....
+                                                                   let yearOld = Parsing.parseMe(fileNameFull.Substring(4, 4)) 
+                                                                   let monthOld = Parsing.parseMe(fileNameFull.Substring(9, 2))
+                                                                   let dayOld = Parsing.parseMe(fileNameFull.Substring(12, 2))
+                                                                   let yearNew = Parsing.parseMe(fileNameFull.Substring(15, 4))
+                                                                   let monthNew = Parsing.parseMe(fileNameFull.Substring(20, 2))
+                                                                   let dayNew = Parsing.parseMe(fileNameFull.Substring(23, 2))
+                                                                                                                                                                  
+                                                                   let a = [ yearOld; monthOld; dayOld; yearNew; monthNew; dayNew ]
+                                                                
+                                                                   match a |> List.contains -1 with
+                                                                   | true  -> fileNameFull 
+                                                                   | false -> 
+                                                                            try
+                                                                                let dateOld = new DateTime(yearOld, monthOld, dayOld) 
+                                                                                let dateNew = new DateTime(yearNew, monthNew, dayNew)                                   
+                                                                                                                                                           
+                                                                                let cond1 = (dateNew |> Fugit.isBefore currentTime)  
+                                                                                let cond2 = (dateOld |> Fugit.isAfter currentTime)  
+                                                                                let cond3 = (dateOld |> Fugit.isBefore currentTime) && (dateNew |> Fugit.isBefore currentTime)                                                                           
+                                                                       
+                                                                                match cond1 || cond2 || cond3 with
+                                                                                | false -> fileNameFull                                                
+                                                                                | true  -> String.Empty    
+                                                                            with 
+                                                                            | _ -> String.Empty  
+                                                    
+                                ) |> Array.toList |> List.distinct 
+        tryWith myFunction (fun x -> ()) String.Empty List.empty |> deconstructor
+    
+    let myList1 = 
+        myList |> List.filter(fun item -> not <| String.IsNullOrWhiteSpace (item) && not <| String.IsNullOrEmpty (item))     
     
     //****************druha filtrace odkazu na neplatne jizdni rady***********************
-    let myList = 
-        //tryWith substring 
-        myList |> split         
-        |> List.collect (fun item ->  
-                                    match item.Length > 1 with
-                                    | false -> item 
-                                    | true  -> item                                           
-                                               |> List.map (fun (link, pathToFile) ->  
-                                                                                    //e:\E\Mirek po osme hodine a o vikendech\KODISTP\/929_2022_12_11_2023_12_09.pdf
-                                                                                    //= pathToDir + / + zbytek ...
-                                                                                    let length = pathToDir.Length + 1 //= 48 + 1 = 49
-                                                                                    let yearOld = Parsing.parseMe(pathToFile.Substring(length + 4, 4))
-                                                                                    let monthOld = Parsing.parseMe(pathToFile.Substring(length + 9, 2))
-                                                                                    let dayOld = Parsing.parseMe(pathToFile.Substring(length + 12, 2))
-                                                                                       
-                                                                                    match [ yearOld; monthOld; dayOld ] |> List.contains -1 with
-                                                                                    | true  -> String.Empty, String.Empty
-                                                                                    | false -> 
-                                                                                             try                                                                                                   
-                                                                                                 let dateOld = new DateTime(yearOld, monthOld, dayOld)
-                                                                                                 let dateValidityStart = new DateTime(2022, 12, 11) //zmenit s dalsim jizdnim radem                                                                                              
-                                                                                                    
-                                                                                                 match not <| dateOld.Equals(dateValidityStart) with
-                                                                                                 | true  -> match pathToFile.Contains("_v") with 
-                                                                                                            | true  -> link, pathToFile  
-                                                                                                            | false -> String.Empty, String.Empty                                                                                                                                                        
-                                                                                                 | false -> link, pathToFile                                                                                                                
-                                                                                             with 
-                                                                                             | _ -> String.Empty, String.Empty      
-                                                           )        
-                        ) |> List.distinctBy snd |> List.sort        
     
-    match myList |> List.contains (String.Empty, String.Empty) with
-    | true  -> myList |> List.tail
-    | false -> myList
+    let myList2 = 
+        let myFunction x = 
+            myList1 |> split         
+            |> List.collect (fun list ->  
+                                        match list.Length > 1 with
+                                        | false -> list 
+                                        | true  -> 
+                                                   list
+                                                   |> List.map (fun item ->
+                                                                            try
+                                                                                let yearOld = Parsing.parseMe(item.Substring(4, 4)) //overovat, jestli se v jsonu neco nezmenilo //113_2022_12_11_2023_12_09.....
+                                                                                let monthOld = Parsing.parseMe(item.Substring(9, 2))
+                                                                                let dayOld = Parsing.parseMe(item.Substring(12, 2))
+                                                                                                                                
+                                                                                let a = [ yearOld; monthOld; dayOld ]
+                                                                                let a = 
+                                                                                    match a |> List.contains -1 with
+                                                                                    | true  -> List.Empty 
+                                                                                    | false -> [ yearOld; monthOld; dayOld ]     
+                                                                                
+                                                                                let dateOld = new DateTime(a |> List.item 0, a |> List.item 1, a |> List.item 2) 
+                                                                                let dateStart = new DateTime(2022, 12, 11) //zmenit pri pravidelne zmene JR                            
+                                                                            
+                                                                                match dateOld |> Fugit.isBeforeOrEqual dateStart with
+                                                                                | false -> item                                                
+                                                                                | true  -> String.Empty    
+                                                                            with 
+                                                                            | _ -> String.Empty 
+                                                                )
+                             ) |> List.distinct
+        tryWith myFunction (fun x -> ()) String.Empty List.empty |> deconstructor  
+        
+    let myList3 = 
+        myList2 |> List.filter(fun item -> not <| String.IsNullOrWhiteSpace (item) && not <| String.IsNullOrEmpty (item))
 
+    let myList4 = 
+        let myFunction x = 
+            myList3 
+            |> List.map (fun item -> 
+                                    let str = item
+                                    let str =
+                                        match str.Substring(0, 2).Equals("00") with
+                                        | true   -> str.Remove(0, 2)
+                                        | false  -> match str.Substring(0, 1).Equals("0") with
+                                                    | false -> item
+                                                    | true  -> str.Remove(0, 1)
+                                    
+                                    let link = sprintf"%s%s" pathKodisAmazonLink str
+
+                                    let path = 
+                                        let fileName = item.Substring(0, item.Length - 15) //bez 15 znaku s generovanym kodem a priponou pdf dostaneme toto: 113_2022_12_11_2023_12_09 
+                                        sprintf"%s/%s%s" pathToDir fileName ".pdf"  //pdf opet musime pridat
+                                    link, path 
+                        )
+        tryWith myFunction (fun x -> ()) String.Empty List.empty |> deconstructor
+    myList4 |> List.sort    
+        
 let private downloadTimetables pathToDir (sortTimetables: (string*string) list) =    
-    //TryWith   
-    let dirInfo = new DirectoryInfo(pathToDir)
-                  |> Option.ofObj
-                  |> function 
-                      | Some value -> value  
-                      | None       -> printfn "%s" "Error8"
-                                      new DirectoryInfo(pathToDir)
+    
+    let myFileDelete x =   
+        let dirInfo = new DirectoryInfo(pathToDir)
+                      |> Option.ofObj
+                      |> function 
+                          | Some value -> value  
+                          | None       -> printfn "%s" "Error8"
+                                          new DirectoryInfo(pathToDir)
+        
+        //failwith "Testovani funkce tryWith"
 
-    //smazeme stare soubory v adresari   
-    dirInfo.EnumerateFiles()
-    |> Option.ofObj 
-    |> function 
-        | Some value -> value  
-        | None       -> printfn "%s" "Error11"
-                        Seq.empty    
-    |> Array.ofSeq |> Array.Parallel.iter (fun item -> item.Delete()) 
-
+        //smazeme stare soubory v adresari  
+        dirInfo.EnumerateFiles()
+        |> Option.ofObj 
+        |> function 
+            | Some value -> value  
+            | None       -> printfn "%s" "Error11"
+                            Seq.empty    
+        |> Array.ofSeq |> Array.Parallel.iter (fun item -> item.Delete()) 
+    tryWith myFileDelete (fun x -> ()) String.Empty () |> deconstructor
     
     //************************download pdf souboru, ktere jsou aktualni*******************************************
-      
-    sortTimetables //TryWith //Parallel vyhazuje chyby  
-    |> List.iter (fun (link, pathToFile) -> async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously 
-                                            (*
-                                            async 
-                                                {  
-                                                    let! responseBody = Async.Sleep 0
-                                                    printfn"%s" pathToFile
-                                                    return responseBody
-                                                }  
-                                            |> Async.RunSynchronously    *)                                      
-                 )
-
-    printfn"Pocet stazenych jizdnich radu: %i" sortTimetables.Length
     
+    //tryWith je ve funkci downloadFileTaskAsync
+    use progress = new ProgressBar()  
+    sortTimetables 
+    |> List.iteri (fun i (link, pathToFile) ->  //Array.Parallel.iter vyhazuje chybu  
+                                             progress.Report(float (i/1000))
+                                             async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously
+                         )
+                                             (*
+                                             async 
+                                                 {  
+                                                     let! responseBody = Async.Sleep 0
+                                                     printfn"%s" link
+                                                     //printfn"%s" pathToFile
+                                                     return responseBody
+                                                 }  
+                                             |> Async.RunSynchronously    
+                         )     *) 
+    printfn"Pocet stazenych jizdnich radu: %i" sortTimetables.Length
+   
+
 let webscraping1() =
     processStart >> saveUpdatedJson >> myLinksSet 
+    //processStart >> myLinksSet 
                  >> sortTimetables >> downloadTimetables pathToDir 
                  >> processEnd >> client.Dispose  

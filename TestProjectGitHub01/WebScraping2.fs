@@ -12,12 +12,8 @@ open Fizzler.Systems.HtmlAgilityPack
 //TODO Option.ofObj
 
 
-
+ //FOR TESTING PURPOSES ONLY       
 let normalScraping() = 
-
-
-   
-
 
     //********************FSharp.Data********************************
     let url1 = "https://scrapeme.live/shop/"
@@ -55,8 +51,7 @@ let normalScraping() =
 
 
     //*******************HtmlAgilityPack (.NET) *********************************         
-   
-         
+            
     // creating the HAP object 
     let web = new HtmlWeb()
       

@@ -41,7 +41,7 @@ let codeChallenge() =
     let depthBrackets3 = result3 |> Seq.scan (+) 0 |> Seq.max
     printfn "Depth3 = %i" depthBrackets1
 
-    //muj pokus o reseni, sice uspesny, ale toho kodu.......
+    //muj pokus o reseni, sice funguje, ale toho kodu.......
     let result77 =         
         strSeq
         |> Seq.mapi (fun i item ->                             
@@ -51,7 +51,7 @@ let codeChallenge() =
                                           | true  -> item
                                           | false -> '0'
                                  | false -> '0'
-                            ) 
+                    ) 
      
     let depthBrackets = result77 |> Seq.filter (fun x -> x <> '0')
 

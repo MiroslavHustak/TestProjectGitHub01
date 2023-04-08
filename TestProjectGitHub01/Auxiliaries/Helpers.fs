@@ -1,4 +1,4 @@
-﻿module Helpers
+﻿namespace Helpers
 
 open System
 open System.Diagnostics
@@ -31,7 +31,7 @@ open System.Diagnostics
             function            
             | TryParserInt.Int i -> f i 
             | notANumber         ->  
-                                    printfn "Parsovani neprobehlo korektne u teto hodnoty: %s" notANumber 
+                                    //printfn "Parsovani neprobehlo korektne u teto hodnoty: %s" notANumber 
                                     -1 
    
    //Toto neni pouzivany kod, ale jen pattern pro tvorbu TryParserInt, TryParserDate atd. Neautorsky kod.

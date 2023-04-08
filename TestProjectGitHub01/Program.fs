@@ -8,7 +8,6 @@ open System.Data
 open WebScraping1
 open WebScraping2
 open WebScraping3
-open WebScraping4
 open CodeChallenge
 
 module Program = 
@@ -20,6 +19,9 @@ module Program =
     Console.InputEncoding   <- System.Text.Encoding.Unicode
     Console.OutputEncoding  <- System.Text.Encoding.Unicode
 
+    //let str = @"https://kodis-files.s3.eu-central-1.amazonaws.com/801_2023_04_03_2023_06_11_v_582dde9c0b.pdf"
+
+
     //*****************************WebScraping1******************************
     webscraping1() ()
 
@@ -27,9 +29,6 @@ module Program =
     //normalScraping()
 
     //*****************************WebScraping3****************************** 
-    //webscrapingWithSplittingJson()
-
-    //*****************************WebScraping4****************************** 
     //webscrapingFromPage()
 
     //*****************************CodeChallenge*****************************
@@ -53,4 +52,3 @@ module Program =
     //example()
 
     //****************************************************************************************
-

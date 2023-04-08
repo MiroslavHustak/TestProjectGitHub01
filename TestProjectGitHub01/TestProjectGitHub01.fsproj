@@ -6,13 +6,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Auxiliaries\DiscriminatedUnions.fs" />
+    <Compile Include="Auxiliaries\TryWith.fs" />
     <Compile Include="Auxiliaries\Helpers.fs" />
     <Content Include="JSONFile1.json" />
     <Content Include="XMLFile1.xml" />
     <Compile Include="CodeChallenge.fs" />
     <Compile Include="Settings.fs" />
     <Compile Include="Csv.fs" />
-    <Compile Include="WebScraping4.fs" />
     <Compile Include="WebScraping3.fs" />
     <Compile Include="WebScraping2.fs" />
     <Compile Include="WebScraping1.fs" />
@@ -28,6 +29,10 @@
     <PackageReference Include="FSharp.Data" Version="6.0.1-beta002" />
     <PackageReference Include="Fugit" Version="0.4.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ProgressBarCSharp\ProgressBarCSharp.csproj" />
   </ItemGroup>
 
   <ItemGroup>
