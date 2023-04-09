@@ -11,7 +11,7 @@
     <Compile Include="Auxiliaries\TryWith.fs" />
     <Compile Include="Auxiliaries\Helpers.fs" />
     <Content Include="JSONFile1.json" />
-    <Content Include="XMLFile1.xml" />
+    <Content Include="HTMLFile1.html" />
     <Compile Include="CodeChallenge.fs" />
     <Compile Include="Settings.fs" />
     <Compile Include="Csv.fs" />

@@ -53,11 +53,10 @@ let private client =
     let myClient x = new System.Net.Http.HttpClient() |> (optionToGenerics "Error4" (new System.Net.Http.HttpClient()))         
     tryWith myClient (fun x -> ()) String.Empty (new System.Net.Http.HttpClient()) |> deconstructor
 
-let private splitList list = //tady lze menit podminku
+let private splitList list = 
     let mySplitting x =
         let folder (a: string, b: string) (cur, acc) =
-            //let cond = a.Substring(0, lineNumberLength) = b.Substring(0, lineNumberLength) 
-            let cond = a.Substring(0, lineNumberLength).Contains("00") && b.Substring(0, lineNumberLength).Contains("00") 
+            let cond = a.Substring(0, lineNumberLength) = b.Substring(0, lineNumberLength) 
             match a with
             | _ when cond -> a::cur, acc
             | _           -> [a], cur::acc
@@ -65,25 +64,41 @@ let private splitList list = //tady lze menit podminku
         (fst result)::(snd result)
     tryWith mySplitting (fun x -> ()) String.Empty [ List.empty ] |> deconstructor
 
-let private splitListByPrefix (inputList: string list) : string list list =
-    let prefix = (fun (x: string) -> x.Substring(0,3))
-    let groups = inputList |> List.groupBy prefix
+    (*
+    splitList will split the input list into groups of adjacent elements that have the same prefix.
+    splitListByPrefix will group together all elements that have the same prefix, regardless of whether they are adjacent in the input list or not.
+    *)
 
-    let filteredGroups = groups |> List.filter (fun (k, _) -> k.Substring(0, lineNumberLength).Contains("00") && k.Substring(0, lineNumberLength).Contains("00"))
-    let result = filteredGroups |> List.map snd
-    result
+let private splitListByPrefix (list: string list) : string list list =
+    let mySplitting x = 
+        let prefix = (fun (x: string) -> x.Substring(0, lineNumberLength))
+        let groups = list |> List.groupBy prefix  
+        let filteredGroups = groups |> List.filter (fun (k, _) -> k.Substring(0, lineNumberLength) = k.Substring(0, lineNumberLength))
+        let result = filteredGroups |> List.map snd
+        result
+    tryWith mySplitting (fun x -> ()) String.Empty [ List.empty ] |> deconstructor
+
+//ekvivalent splitListByPrefix za predpokladu existence teto podminky shodnosti k.Substring(0, lineNumberLength) = k.Substring(0, lineNumberLength)   
+let private splitList1 (list: string list) : string list list =
+    list |> List.groupBy (fun (item: string) -> item.Substring(0, lineNumberLength)) |> List.map (fun (key, group) -> group) 
     
 let private downloadFileTaskAsync (client: Http.HttpClient) (uri: string) (path: string) =    
-    let myDownload x = 
+    //muj custom made tryWith nezachyti exception u async
         async
-            {
-                let! stream = client.GetStreamAsync(uri) |> Async.AwaitTask                             
-                let fileStream = new FileStream(path, FileMode.CreateNew) |> (optionToGenerics "Error9" (new FileStream(path, FileMode.CreateNew)))                                 
-                return! stream.CopyToAsync(fileStream) |> Async.AwaitTask 
-            } 
-    tryWith myDownload (fun x -> ()) String.Empty (Async.Sleep 0) |> deconstructor
+            {   
+                //TODO priste zrob Async.Catch
+                try 
+                    let! stream = client.GetStreamAsync(uri) |> Async.AwaitTask                             
+                    use fileStream = new FileStream(path, FileMode.CreateNew) //|> (optionToGenerics "Error9" (new FileStream(path, FileMode.CreateNew))) //nelze, vytvari to dalsi stream a uklada to znovu                                
+                    return! stream.CopyToAsync(fileStream) |> Async.AwaitTask 
+                with
+                | ex -> printfn"\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
+                        do Console.ReadKey() |> ignore 
+                        do System.Environment.Exit(1)
+                        return ()
+            }     
   
-
+  
 //************************Main code***********************************************************
 
 let private jsonLinkList = 
@@ -157,7 +172,18 @@ let private downloadAndSaveUpdatedJson() =
             use progress = new ProgressBar()
             jsonLinkList |> List.mapi (fun i item ->                                                
                                                    progress.Report(float (i/1000))  
-                                                   async { return! client.GetStringAsync(item) |> Async.AwaitTask } |> Async.RunSynchronously
+                                                   //myUpdatedJson x nezachyti exception v async
+                                                   async  
+                                                       { 
+                                                            //TODO priste zrob Async.Catch
+                                                            try 
+                                                                return! client.GetStringAsync(item) |> Async.AwaitTask 
+                                                            with
+                                                            | ex -> printfn"\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
+                                                                    do Console.ReadKey() |> ignore 
+                                                                    do System.Environment.Exit(1)
+                                                                    return! client.GetStringAsync(String.Empty) |> Async.AwaitTask //whatever of that type
+                                                        } |> Async.RunSynchronously
                                       )  
 
         (pathToJsonList, loadedJsonFiles)
@@ -307,11 +333,9 @@ let private filterTimetables diggingResult =
     
     let myList2 = 
         let myFunction x = 
+            //list listu se stejnymi linkami s ruznou dobou platnosti JR      
             myList1 
-            |> List.groupBy (fun item -> item.Substring(0, 3))
-            |> List.map (fun (key, group) -> group) //
-            //|> splitListByPrefix 
-            //|> splitList   //splitList -> list listu se stejnymi linkami s ruznou dobou platnosti JR      
+            |> splitListByPrefix //splitList1 //splitList 
             |> List.collect (fun list ->  
                                         match list.Length > 1 with
                                         | false -> list 
@@ -344,7 +368,6 @@ let private filterTimetables diggingResult =
     let myList3 = 
         myList2 |> List.filter(fun item -> not <| String.IsNullOrWhiteSpace(item) && not <| String.IsNullOrEmpty(item))
 
-    myList3 |> List.iter (fun item -> printf"%s" item)
     let myList4 = 
         let myFunction x = 
             myList3 
@@ -390,15 +413,15 @@ let private downloadAndSaveTimetables pathToDir (sortTimetables: (string*string)
     sortTimetables 
     |> List.iteri (fun i (link, pathToFile) ->  //Array.Parallel.iter vyhazuje chybu, asi nelze parallelni stahovani z danych stranek  
                                              progress.Report(float (i/1000))
-                                             //async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously  
-                                             //async { printfn"%s" link; printfn"%s" pathToFile; return! Async.Sleep 0 } |> Async.RunSynchronously     
-                                             async {return! Async.Sleep 0 } |> Async.RunSynchronously   
+                                             async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously  
+                                             //async { printfn"%s" pathToFile; return! Async.Sleep 0 } |> Async.RunSynchronously   
+                                             //async {return! Async.Sleep 0 } |> Async.RunSynchronously   
                   )    
     printfn"Pocet stazenych jizdnich radu: %i" sortTimetables.Length   
 
 let webscraping1() =
     processStart 
-    //>> downloadAndSaveUpdatedJson
+    >> downloadAndSaveUpdatedJson
     >> digThroughJsonStructure 
     >> filterTimetables >> downloadAndSaveTimetables pathToDir     
     >> client.Dispose  

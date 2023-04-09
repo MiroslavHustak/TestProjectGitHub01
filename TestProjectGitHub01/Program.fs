@@ -23,8 +23,8 @@ module Program =
 
     
     //*****************************WebScraping1******************************
-    webscraping1() ()
-
+    do webscraping1() ()
+    do Console.ReadKey() |> ignore
     //*****************************WebScraping2******************************
     //normalScraping()
 
@@ -47,7 +47,7 @@ module Program =
 
         readDataFromExcel |> writeIntoCSV @"e:\E\Mirek po osme hodine a o vikendech\" @"LT-15381 az LT-17691 DGSada 03-04-2023" |> ignore
 
-        Console.ReadLine() |> ignore
+        do Console.ReadKey() |> ignore
 
     //example()
 
