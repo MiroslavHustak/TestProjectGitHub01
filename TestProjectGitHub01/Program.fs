@@ -21,7 +21,7 @@ module Program =
 
     //let str = @"https://kodis-files.s3.eu-central-1.amazonaws.com/801_2023_04_03_2023_06_11_v_582dde9c0b.pdf"
 
-
+    
     //*****************************WebScraping1******************************
     webscraping1() ()
 

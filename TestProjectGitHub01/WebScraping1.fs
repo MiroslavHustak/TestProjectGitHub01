@@ -23,6 +23,7 @@ Console.OutputEncoding  <- System.Text.Encoding.Unicode
 let [<Literal>] pathJson = @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisMHDTotal.json" //musi byt forward slash"
 let [<Literal>] pathKodisWeb = @"https://kodisweb-backend.herokuapp.com/"
 let [<Literal>] pathKodisAmazonLink = @"https://kodis-files.s3.eu-central-1.amazonaws.com/"
+let [<Literal>] lineNumberLength = 3 //3 je delka retezce pouze pro linky 001 az 999
 
 let private pathToDir = @"e:\E\Mirek po osme hodine a o vikendech\KODISTP\" 
 let private range = [ '1'; '2'; '3'; '4'; '5'; '6'; '7'; '8'; '9'; '0' ]
@@ -32,60 +33,52 @@ type KodisTimetables = JsonProvider<pathJson>
 
 //************************Helpers**********************************************************************
 
-let private errorFn str err = 
-    str
-    |> Option.ofObj
-    |> function 
-        | Some value -> value
-        | None       -> printfn "%s" err
-                        String.Empty   
+let private errorStr str err = str |> (optionToGenerics err String.Empty)                            
 
-let private timeStr = errorFn "HH:mm:ss" "Error1"                     
+let private timeStr = errorStr "HH:mm:ss" "Error1"                     
     
 let private processStart() =     
     let processStartTime x = 
-        let processStartTime = errorFn $"Zacatek procesu: {DateTime.Now.ToString(timeStr)}" "Error2"                           
+        let processStartTime = errorStr (sprintf"Zacatek procesu:  %s" <| DateTime.Now.ToString(timeStr)) "Error2"                           
         printfn "%s" processStartTime
     tryWith processStartTime (fun x -> ()) String.Empty () |> deconstructor
     
 let private processEnd() =     
     let processEndTime x = 
-        let processEndTime = errorFn $"Konec procesu: {DateTime.Now.ToString(timeStr)}" "Error3"                       
+        let processEndTime = errorStr (sprintf"Konec procesu:  %s" <| DateTime.Now.ToString(timeStr)) "Error3"                       
         printfn "%s" processEndTime
     tryWith processEndTime (fun x -> ()) String.Empty () |> deconstructor
 
 let private client = 
-    let myClient x = 
-        new System.Net.Http.HttpClient() 
-        |> Option.ofObj
-        |> function 
-            | Some value -> value
-            | None       -> printfn "%s" "Error4"
-                            new System.Net.Http.HttpClient() //whatever 
+    let myClient x = new System.Net.Http.HttpClient() |> (optionToGenerics "Error4" (new System.Net.Http.HttpClient()))         
     tryWith myClient (fun x -> ()) String.Empty (new System.Net.Http.HttpClient()) |> deconstructor
 
-let private split list =
+let private splitList list = //tady lze menit podminku
     let mySplitting x =
         let folder (a: string, b: string) (cur, acc) =
-            let cond = a.Substring(0, 3) = b.Substring(0, 3) //3 je delka retezce pouze pro linky 001 az 999
+            //let cond = a.Substring(0, lineNumberLength) = b.Substring(0, lineNumberLength) 
+            let cond = a.Substring(0, lineNumberLength).Contains("00") && b.Substring(0, lineNumberLength).Contains("00") 
             match a with
             | _ when cond -> a::cur, acc
             | _           -> [a], cur::acc
         let result = List.foldBack folder (List.pairwise list) ([ List.last list ], []) 
         (fst result)::(snd result)
     tryWith mySplitting (fun x -> ()) String.Empty [ List.empty ] |> deconstructor
+
+let private splitListByPrefix (inputList: string list) : string list list =
+    let prefix = (fun (x: string) -> x.Substring(0,3))
+    let groups = inputList |> List.groupBy prefix
+
+    let filteredGroups = groups |> List.filter (fun (k, _) -> k.Substring(0, lineNumberLength).Contains("00") && k.Substring(0, lineNumberLength).Contains("00"))
+    let result = filteredGroups |> List.map snd
+    result
     
 let private downloadFileTaskAsync (client: Http.HttpClient) (uri: string) (path: string) =    
     let myDownload x = 
         async
             {
                 let! stream = client.GetStreamAsync(uri) |> Async.AwaitTask                             
-                let fileStream = new FileStream(path, FileMode.CreateNew)
-                                 |> Option.ofObj     
-                                 |> function 
-                                     | Some value -> value
-                                     | None       -> printfn "%s" "Error9"
-                                                     new FileStream(path, FileMode.CreateNew) //whatever 
+                let fileStream = new FileStream(path, FileMode.CreateNew) |> (optionToGenerics "Error9" (new FileStream(path, FileMode.CreateNew)))                                 
                 return! stream.CopyToAsync(fileStream) |> Async.AwaitTask 
             } 
     tryWith myDownload (fun x -> ()) String.Empty (Async.Sleep 0) |> deconstructor
@@ -157,7 +150,7 @@ let private pathToJsonList =
          @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisTrainSpesakyARychliky.json"                
     ]
 
-let private saveUpdatedJson() = 
+let private downloadAndSaveUpdatedJson() = 
    
     let myUpdatedJson x = 
         let loadedJsonFiles = 
@@ -175,7 +168,7 @@ let private saveUpdatedJson() =
                         ) 
     tryWith myUpdatedJson (fun x -> ()) String.Empty () |> deconstructor                
 
-let private myLinksSet() = 
+let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
     
     let kodisTimetables() = 
 
@@ -186,7 +179,7 @@ let private myLinksSet() =
                                               let kodisJsonSamples = KodisTimetables.Parse(File.ReadAllText pathToJson) |> Option.ofObj
                                               //let kodisJsonSamples = kodisJsonSamples.GetSamples() |> Option.ofObj  //v pripade jen jednoho json               
                 
-                                              kodisJsonSamples
+                                              kodisJsonSamples 
                                               |> function 
                                                   | Some value -> value |> Array.map (fun item -> item.Timetable) //quli tomuto je nutno Array
                                                   | None       -> printfn "%s" "Error5"
@@ -214,7 +207,7 @@ let private myLinksSet() =
             |> Array.collect (fun pathToJson ->
                                               let fn1 (value: JsonProvider<pathJson>.Attachment array) =
                                                   value
-                                                  |> Array.Parallel.map (fun item -> errorFn item.Url "Error7")
+                                                  |> Array.Parallel.map (fun item -> errorStr item.Url "Error7")
 
                                               let fn2 (item: JsonProvider<pathJson>.Vyluky) =  //quli tomuto je nutno Array      
                                                   item.Attachments |> Option.ofObj        
@@ -242,7 +235,7 @@ let private myLinksSet() =
 
     (Array.append <| kodisAttachments() <| kodisTimetables()) |> Set.ofArray //jen z vyukovych duvodu -> konverzi na Set vyhodime stejne polozky, jinak staci jen |> Array.distinct 
 
-let private sortTimetables myLinksSet = 
+let private filterTimetables diggingResult = 
 
     //****************prvni filtrace odkazu na neplatne jizdni rady***********************
 
@@ -251,14 +244,14 @@ let private sortTimetables myLinksSet =
     use progress = new ProgressBar()
     let myList = 
         let myFunction x =
-            myLinksSet
+            diggingResult
             |> Set.toArray 
             |> Array.Parallel.map (fun (item: string) ->         
                                                         let fileName = item.Replace(pathKodisAmazonLink, String.Empty) 
                                                     
                                                         let charList = 
-                                                                       match fileName |> String.length >= 3 with  //3 je delka retezce pouze pro linky 001 az 999
-                                                                       | true  -> fileName.ToCharArray() |> Array.toList |> List.take 3
+                                                                       match fileName |> String.length >= lineNumberLength with  
+                                                                       | true  -> fileName.ToCharArray() |> Array.toList |> List.take lineNumberLength
                                                                        | false -> printfn "Error11"
                                                                                   List.empty
                                              
@@ -270,10 +263,10 @@ let private sortTimetables myLinksSet =
                                                                         | true  -> match a 2 range <> List.empty with
                                                                                    | true  -> fileName                                                                     
                                                                                    | false -> sprintf "%s%s" "0" fileName                    
-                                                                        | false -> sprintf "%s%s" "00" fileName
+                                                                        | false -> sprintf "%s%s" "00" fileName //pocet "0" zavisi na delce retezce cisla linky
                                                             | false -> fileName  
 
-                                                        match not (fileNameFull |> String.length >= 25) with //113_2022_12_11_2023_12_09......
+                                                        match not (fileNameFull |> String.length >= 25) with //25 -> 113_2022_12_11_2023_12_09......
                                                         | true  -> String.Empty
                                                         | false ->     
                                                                     //overovat, jestli se v jsonu nezmenila struktura nazvu //113_2022_12_11_2023_12_09.....
@@ -307,13 +300,18 @@ let private sortTimetables myLinksSet =
         tryWith myFunction (fun x -> ()) String.Empty List.empty |> deconstructor
     
     let myList1 = 
-        myList |> List.filter(fun item -> not <| String.IsNullOrWhiteSpace (item) && not <| String.IsNullOrEmpty (item))     
+        myList |> List.filter(fun item -> not <| String.IsNullOrWhiteSpace(item) && not <| String.IsNullOrEmpty(item))    
+        
     
     //****************druha filtrace odkazu na neplatne jizdni rady***********************
     
     let myList2 = 
         let myFunction x = 
-            myList1 |> split   //split -> list listu se stejnymi linkami s ruznou dobou platnosti JR      
+            myList1 
+            |> List.groupBy (fun item -> item.Substring(0, 3))
+            |> List.map (fun (key, group) -> group) //
+            //|> splitListByPrefix 
+            //|> splitList   //splitList -> list listu se stejnymi linkami s ruznou dobou platnosti JR      
             |> List.collect (fun list ->  
                                         match list.Length > 1 with
                                         | false -> list 
@@ -329,7 +327,7 @@ let private sortTimetables myLinksSet =
                                                                                 let a = 
                                                                                     match a |> List.contains -1 with
                                                                                     | true  -> List.Empty 
-                                                                                    | false -> [ yearOld; monthOld; dayOld ]     
+                                                                                    | false -> a     
                                                                                 
                                                                                 let dateOld = new DateTime(a |> List.item 0, a |> List.item 1, a |> List.item 2) 
                                                                                 let dateStart = new DateTime(2022, 12, 11) //zmenit pri pravidelne zmene JR                            
@@ -344,8 +342,9 @@ let private sortTimetables myLinksSet =
         tryWith myFunction (fun x -> ()) String.Empty List.empty |> deconstructor  
         
     let myList3 = 
-        myList2 |> List.filter(fun item -> not <| String.IsNullOrWhiteSpace (item) && not <| String.IsNullOrEmpty (item))
+        myList2 |> List.filter(fun item -> not <| String.IsNullOrWhiteSpace(item) && not <| String.IsNullOrEmpty(item))
 
+    myList3 |> List.iter (fun item -> printf"%s" item)
     let myList4 = 
         let myFunction x = 
             myList3 
@@ -368,26 +367,20 @@ let private sortTimetables myLinksSet =
         tryWith myFunction (fun x -> ()) String.Empty List.empty |> deconstructor
     myList4 |> List.sort    
         
-let private downloadTimetables pathToDir (sortTimetables: (string*string) list) =    
+let private downloadAndSaveTimetables pathToDir (sortTimetables: (string*string) list) =    
     
     let myFileDelete x =   
         let dirInfo = new DirectoryInfo(pathToDir)
-                      |> Option.ofObj
-                      |> function 
-                          | Some value -> value  
-                          | None       -> printfn "%s" "Error8"
-                                          new DirectoryInfo(pathToDir)
+                      |> (optionToGenerics "Error8" (new DirectoryInfo(pathToDir)))                                                               
         
         //failwith "Testovani funkce tryWith"
 
         //smazeme stare soubory v adresari  
         dirInfo.EnumerateFiles()
-        |> Option.ofObj 
-        |> function 
-            | Some value -> value  
-            | None       -> printfn "%s" "Error11"
-                            Seq.empty    
-        |> Array.ofSeq |> Array.Parallel.iter (fun item -> item.Delete()) 
+        |> (optionToGenerics "Error11" Seq.empty)       
+        |> Array.ofSeq
+        |> Array.Parallel.iter (fun item -> item.Delete())
+        
     tryWith myFileDelete (fun x -> ()) String.Empty () |> deconstructor
     
     //************************download pdf souboru, ktere jsou aktualni*******************************************
@@ -397,21 +390,16 @@ let private downloadTimetables pathToDir (sortTimetables: (string*string) list) 
     sortTimetables 
     |> List.iteri (fun i (link, pathToFile) ->  //Array.Parallel.iter vyhazuje chybu, asi nelze parallelni stahovani z danych stranek  
                                              progress.Report(float (i/1000))
-                                             async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously
-                         )
-                                             (*
-                                             async 
-                                                 {  
-                                                     let! responseBody = Async.Sleep 0
-                                                     printfn"%s" link
-                                                     printfn"%s" pathToFile
-                                                     return responseBody
-                                                 }  
-                                             |> Async.RunSynchronously    
-                         )     *) 
+                                             //async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously  
+                                             //async { printfn"%s" link; printfn"%s" pathToFile; return! Async.Sleep 0 } |> Async.RunSynchronously     
+                                             async {return! Async.Sleep 0 } |> Async.RunSynchronously   
+                  )    
     printfn"Pocet stazenych jizdnich radu: %i" sortTimetables.Length   
 
 let webscraping1() =
-    processStart >> saveUpdatedJson >> myLinksSet 
-                 >> sortTimetables >> downloadTimetables pathToDir 
-                 >> processEnd >> client.Dispose  
+    processStart 
+    //>> downloadAndSaveUpdatedJson
+    >> digThroughJsonStructure 
+    >> filterTimetables >> downloadAndSaveTimetables pathToDir     
+    >> client.Dispose  
+    >> processEnd
