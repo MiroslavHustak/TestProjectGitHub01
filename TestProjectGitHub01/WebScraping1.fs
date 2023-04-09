@@ -326,7 +326,7 @@ let private filterTimetables diggingResult =
         tryWith myFunction (fun x -> ()) String.Empty List.empty |> deconstructor
     
     let myList1 = 
-        myList |> List.filter(fun item -> not <| String.IsNullOrWhiteSpace(item) && not <| String.IsNullOrEmpty(item))    
+        myList |> List.filter (fun item -> not <| String.IsNullOrWhiteSpace(item) && not <| String.IsNullOrEmpty(item))    
         
     
     //****************druha filtrace odkazu na neplatne jizdni rady***********************
@@ -366,7 +366,7 @@ let private filterTimetables diggingResult =
         tryWith myFunction (fun x -> ()) String.Empty List.empty |> deconstructor  
         
     let myList3 = 
-        myList2 |> List.filter(fun item -> not <| String.IsNullOrWhiteSpace(item) && not <| String.IsNullOrEmpty(item))
+        myList2 |> List.filter (fun item -> not <| String.IsNullOrWhiteSpace(item) && not <| String.IsNullOrEmpty(item))
 
     let myList4 = 
         let myFunction x = 
@@ -423,6 +423,7 @@ let webscraping1() =
     processStart 
     >> downloadAndSaveUpdatedJson
     >> digThroughJsonStructure 
-    >> filterTimetables >> downloadAndSaveTimetables pathToDir     
+    >> filterTimetables 
+    >> downloadAndSaveTimetables pathToDir     
     >> client.Dispose  
     >> processEnd
