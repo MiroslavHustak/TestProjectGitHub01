@@ -232,7 +232,7 @@ let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
             |> Array.ofList 
             |> Array.collect (fun pathToJson ->
                                               let fn1 (value: JsonProvider<pathJson>.Attachment array) =
-                                                  value
+                                                  value //Option je v errorStr 
                                                   |> Array.Parallel.map (fun item -> errorStr item.Url "Error7")
 
                                               let fn2 (item: JsonProvider<pathJson>.Vyluky) =  //quli tomuto je nutno Array      
