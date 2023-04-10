@@ -399,7 +399,7 @@ let private filterTimetables diggingResult =
         tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor
     myList4 |> List.sort    
         
-let private downloadAndSaveTimetables pathToDir (sortTimetables: (string*string) list) =    
+let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*string) list) =    
     
     let myFileDelete x =   
         let dirInfo = new DirectoryInfo(pathToDir)
@@ -419,7 +419,7 @@ let private downloadAndSaveTimetables pathToDir (sortTimetables: (string*string)
     
     //tryWith je ve funkci downloadFileTaskAsync
     use progress = new ProgressBar()  
-    sortTimetables 
+    filterTimetables 
     |> List.iteri (fun i (link, pathToFile) ->  //Array.Parallel.iter vyhazuje chybu, asi nelze parallelni stahovani z danych stranek  
                                              progress.Report(float (i/1000))
                                              async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously  
@@ -428,7 +428,7 @@ let private downloadAndSaveTimetables pathToDir (sortTimetables: (string*string)
                   )    
     printfn"%c" <| char(32)   
     printfn"%c" <| char(32)  
-    printfn"Pocet stazenych jizdnich radu: %i" sortTimetables.Length   
+    printfn"Pocet stazenych jizdnich radu: %i" filterTimetables.Length   
 
 let webscraping1() =
     processStart 
