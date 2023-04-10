@@ -168,8 +168,8 @@ let private pathToJsonList =
 
 let private downloadAndSaveUpdatedJson() = 
    
-    let myUpdatedJson x = 
-        let loadedJsonFiles = 
+    let updateJson x = 
+        let loadAndSaveJsonFiles = 
             use progress = new ProgressBar()
             jsonLinkList |> List.mapi (fun i item ->                                                
                                                    progress.Report(float (i/1000))  
@@ -185,16 +185,16 @@ let private downloadAndSaveUpdatedJson() =
                                                                     //do client.Dispose()
                                                                     do System.Environment.Exit(1)
                                                                     return! client.GetStringAsync(String.Empty) |> Async.AwaitTask //whatever of that type
-                                                        } |> Async.RunSynchronously
+                                                       } |> Async.RunSynchronously
                                       )  
-
-        (pathToJsonList, loadedJsonFiles)
+        //save updated json files
+        (pathToJsonList, loadAndSaveJsonFiles)
         ||> List.iteri2 (fun i path json ->                                                                          
                                           use streamWriter = new StreamWriter(Path.GetFullPath(path))                   
                                           streamWriter.WriteLine(json)     
                                           streamWriter.Flush()   
                         ) 
-    tryWith myUpdatedJson (fun x -> ()) () String.Empty () |> deconstructor                
+    tryWith updateJson (fun x -> ()) () String.Empty () |> deconstructor                
 
 let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
     
