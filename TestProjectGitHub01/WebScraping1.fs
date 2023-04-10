@@ -175,7 +175,7 @@ let private downloadAndSaveUpdatedJson() =
             use progress = new ProgressBar()
             jsonLinkList |> List.mapi (fun i item ->                                                
                                                    progress.Report(float (i/1000))  
-                                                   //myUpdatedJson x nezachyti exception v async
+                                                   //updateJson x nezachyti exception v async
                                                    async  
                                                        { 
                                                             //TODO priste zrob Async.Catch
@@ -184,7 +184,6 @@ let private downloadAndSaveUpdatedJson() =
                                                             with
                                                             | ex -> printfn"\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
                                                                     do Console.ReadKey() |> ignore 
-                                                                    //do client.Dispose()
                                                                     do System.Environment.Exit(1)
                                                                     return! client.GetStringAsync(String.Empty) |> Async.AwaitTask //whatever of that type
                                                        } |> Async.RunSynchronously
