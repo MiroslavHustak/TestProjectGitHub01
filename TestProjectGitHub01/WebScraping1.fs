@@ -27,6 +27,8 @@ let [<Literal>] lineNumberLength = 3 //3 je delka retezce pouze pro linky 001 az
 
 let private pathToDir = @"e:\E\Mirek po osme hodine a o vikendech\KODISTP\" 
 let private range = [ '1'; '2'; '3'; '4'; '5'; '6'; '7'; '8'; '9'; '0' ]
+let private rangeS = [ "S1_"; "S2_"; "S3_"; "S4_"; "S5_"; "S6_"; "S7_"; "S8_"; "S9_" ]
+let private rangeR = [ "R1_"; "R2_"; "R3_"; "R4_"; "R5_"; "R6_"; "R7_"; "R8_"; "R9_" ]
 
 type KodisTimetables = JsonProvider<pathJson> 
 
@@ -275,24 +277,30 @@ let private filterTimetables diggingResult =
             diggingResult
             |> Set.toArray 
             |> Array.Parallel.map (fun (item: string) ->         
-                                                        let fileName = item.Replace(pathKodisAmazonLink, String.Empty) 
+                                                        let fileName = item.Replace(pathKodisAmazonLink, String.Empty)                                                        
                                                     
                                                         let charList = 
-                                                                       match fileName |> String.length >= lineNumberLength with  
-                                                                       | true  -> fileName.ToCharArray() |> Array.toList |> List.take lineNumberLength
-                                                                       | false -> printfn "Error11"
-                                                                                  List.empty
+                                                            match fileName |> String.length >= lineNumberLength with  
+                                                            | true  -> fileName.ToCharArray() |> Array.toList |> List.take lineNumberLength
+                                                            | false -> printfn "Error11"
+                                                                       List.empty
                                              
-                                                        let a i range = range |> List.filter (fun item -> (charList |> List.item i = item))                                            
+                                                        let a i range = range |> List.filter (fun item -> (charList |> List.item i = item)) 
+                                                        let b range = range |> List.contains (fileName.Substring(0, 3))
                                                    
-                                                        let fileNameFull = 
-                                                            match a 0 range <> List.empty with
+                                                        let fileNameFullA = 
+                                                            match a 0 range <> List.empty  with
                                                             | true  -> match a 1 range <> List.empty with
                                                                         | true  -> match a 2 range <> List.empty with
                                                                                    | true  -> fileName                                                                     
                                                                                    | false -> sprintf "%s%s" "0" fileName                    
                                                                         | false -> sprintf "%s%s" "00" fileName //pocet "0" zavisi na delce retezce cisla linky
                                                             | false -> fileName  
+                                                         
+                                                        let fileNameFull =  
+                                                            match b rangeS || b rangeR with
+                                                            | true  -> sprintf "%s%s" "_" fileNameFullA                                                                       
+                                                            | false -> fileNameFullA  
 
                                                         match not (fileNameFull |> String.length >= 25) with //25 -> 113_2022_12_11_2023_12_09......
                                                         | true  -> String.Empty
@@ -378,7 +386,7 @@ let private filterTimetables diggingResult =
                                     let str =
                                         match str.Substring(0, 2).Equals("00") with
                                         | true   -> str.Remove(0, 2)
-                                        | false  -> match str.Substring(0, 1).Equals("0") with
+                                        | false  -> match str.Substring(0, 1).Equals("0") || str.Substring(0, 1).Equals("_") with
                                                     | false -> item
                                                     | true  -> str.Remove(0, 1)
                                     
