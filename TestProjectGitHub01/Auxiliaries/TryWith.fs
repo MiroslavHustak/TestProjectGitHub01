@@ -7,14 +7,15 @@ open DiscriminatedUnions
 
 module TryWith =
 
-    let tryWith f1 f2 x y = //x se ne vzdy pouziva, ale z duvodu jednotnosti ponechano 
+    let tryWith f1 f2 f3 x y = //x se ne vzdy pouziva, ale z duvodu jednotnosti ponechano 
         try
             try          
                f1 x |> Success
             finally
                f2 x
         with
-        | ex -> Failure (ex.Message, y)  
+        | ex -> f3
+                Failure (ex.Message, y)  
 
     let deconstructor =          
         function

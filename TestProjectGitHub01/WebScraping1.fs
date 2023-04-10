@@ -41,17 +41,17 @@ let private processStart() =
     let processStartTime x = 
         let processStartTime = errorStr (sprintf"Zacatek procesu:  %s" <| DateTime.Now.ToString(timeStr)) "Error2"                           
         printfn "%s" processStartTime
-    tryWith processStartTime (fun x -> ()) String.Empty () |> deconstructor
+    tryWith processStartTime (fun x -> ()) () String.Empty () |> deconstructor
     
 let private processEnd() =     
     let processEndTime x = 
         let processEndTime = errorStr (sprintf"Konec procesu:  %s" <| DateTime.Now.ToString(timeStr)) "Error3"                       
         printfn "%s" processEndTime
-    tryWith processEndTime (fun x -> ()) String.Empty () |> deconstructor
+    tryWith processEndTime (fun x -> ()) () String.Empty () |> deconstructor
 
 let private client = 
     let myClient x = new System.Net.Http.HttpClient() |> (optionToGenerics "Error4" (new System.Net.Http.HttpClient()))         
-    tryWith myClient (fun x -> ()) String.Empty (new System.Net.Http.HttpClient()) |> deconstructor
+    tryWith myClient (fun x -> ()) () String.Empty (new System.Net.Http.HttpClient()) |> deconstructor
 
 let private splitList list = 
     let mySplitting x =
@@ -62,7 +62,7 @@ let private splitList list =
             | _           -> [a], cur::acc
         let result = List.foldBack folder (List.pairwise list) ([ List.last list ], []) 
         (fst result)::(snd result)
-    tryWith mySplitting (fun x -> ()) String.Empty [ List.empty ] |> deconstructor
+    tryWith mySplitting (fun x -> ()) () String.Empty [ List.empty ] |> deconstructor
 
     (*
     splitList will split the input list into groups of adjacent elements that have the same prefix.
@@ -76,7 +76,7 @@ let private splitListByPrefix (list: string list) : string list list =
         let filteredGroups = groups |> List.filter (fun (k, _) -> k.Substring(0, lineNumberLength) = k.Substring(0, lineNumberLength))
         let result = filteredGroups |> List.map snd
         result
-    tryWith mySplitting (fun x -> ()) String.Empty [ List.empty ] |> deconstructor
+    tryWith mySplitting (fun x -> ()) () String.Empty [ List.empty ] |> deconstructor
 
 //ekvivalent splitListByPrefix za predpokladu existence teto podminky shodnosti k.Substring(0, lineNumberLength) = k.Substring(0, lineNumberLength)   
 let private splitList1 (list: string list) : string list list =
@@ -94,6 +94,7 @@ let private downloadFileTaskAsync (client: Http.HttpClient) (uri: string) (path:
                 with
                 | ex -> printfn"\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
                         do Console.ReadKey() |> ignore 
+                        do client.Dispose()
                         do System.Environment.Exit(1)
                         return ()
             }     
@@ -181,6 +182,7 @@ let private downloadAndSaveUpdatedJson() =
                                                             with
                                                             | ex -> printfn"\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
                                                                     do Console.ReadKey() |> ignore 
+                                                                    //do client.Dispose()
                                                                     do System.Environment.Exit(1)
                                                                     return! client.GetStringAsync(String.Empty) |> Async.AwaitTask //whatever of that type
                                                         } |> Async.RunSynchronously
@@ -192,7 +194,7 @@ let private downloadAndSaveUpdatedJson() =
                                           streamWriter.WriteLine(json)     
                                           streamWriter.Flush()   
                         ) 
-    tryWith myUpdatedJson (fun x -> ()) String.Empty () |> deconstructor                
+    tryWith myUpdatedJson (fun x -> ()) () String.Empty () |> deconstructor                
 
 let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
     
@@ -211,7 +213,7 @@ let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
                                                   | None       -> printfn "%s" "Error5"
                                                                   Array.empty    
                              ) 
-        tryWith myFunction (fun x -> ()) String.Empty Array.empty |> deconstructor
+        tryWith myFunction (fun x -> ()) () String.Empty Array.empty |> deconstructor
 
     let kodisAttachments() = 
 
@@ -257,7 +259,7 @@ let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
                                                   | None       -> printfn "%s" "Error6"
                                                                   Array.empty                                 
                              ) 
-        tryWith myFunction (fun x -> ()) String.Empty Array.empty |> deconstructor
+        tryWith myFunction (fun x -> ()) () String.Empty Array.empty |> deconstructor
 
     (Array.append <| kodisAttachments() <| kodisTimetables()) |> Set.ofArray //jen z vyukovych duvodu -> konverzi na Set vyhodime stejne polozky, jinak staci jen |> Array.distinct 
 
@@ -322,8 +324,8 @@ let private filterTimetables diggingResult =
                                                                             with 
                                                                             | _ -> String.Empty  
                                                     
-                                ) |> Array.toList |> List.distinct 
-        tryWith myFunction (fun x -> ()) String.Empty List.empty |> deconstructor
+                                  ) |> Array.toList |> List.distinct 
+        tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor
     
     let myList1 = 
         myList |> List.filter (fun item -> not <| String.IsNullOrWhiteSpace(item) && not <| String.IsNullOrEmpty(item))    
@@ -362,8 +364,8 @@ let private filterTimetables diggingResult =
                                                                             with 
                                                                             | _ -> String.Empty 
                                                                 )
-                             ) |> List.distinct
-        tryWith myFunction (fun x -> ()) String.Empty List.empty |> deconstructor  
+                            ) |> List.distinct
+        tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor  
         
     let myList3 = 
         myList2 |> List.filter (fun item -> not <| String.IsNullOrWhiteSpace(item) && not <| String.IsNullOrEmpty(item))
@@ -387,7 +389,7 @@ let private filterTimetables diggingResult =
                                         sprintf"%s/%s%s" pathToDir fileName ".pdf"  //pdf opet musime pridat
                                     link, path 
                         )
-        tryWith myFunction (fun x -> ()) String.Empty List.empty |> deconstructor
+        tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor
     myList4 |> List.sort    
         
 let private downloadAndSaveTimetables pathToDir (sortTimetables: (string*string) list) =    
@@ -404,7 +406,7 @@ let private downloadAndSaveTimetables pathToDir (sortTimetables: (string*string)
         |> Array.ofSeq
         |> Array.Parallel.iter (fun item -> item.Delete())
         
-    tryWith myFileDelete (fun x -> ()) String.Empty () |> deconstructor
+    tryWith myFileDelete (fun x -> ()) () String.Empty () |> deconstructor
     
     //************************download pdf souboru, ktere jsou aktualni*******************************************
     
@@ -413,15 +415,17 @@ let private downloadAndSaveTimetables pathToDir (sortTimetables: (string*string)
     sortTimetables 
     |> List.iteri (fun i (link, pathToFile) ->  //Array.Parallel.iter vyhazuje chybu, asi nelze parallelni stahovani z danych stranek  
                                              progress.Report(float (i/1000))
-                                             async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously  
+                                             //async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously  
                                              //async { printfn"%s" pathToFile; return! Async.Sleep 0 } |> Async.RunSynchronously   
-                                             //async {return! Async.Sleep 0 } |> Async.RunSynchronously   
+                                             async {return! Async.Sleep 0 } |> Async.RunSynchronously   
                   )    
+    printfn"%c" <| char(32)   
+    printfn"%c" <| char(32)  
     printfn"Pocet stazenych jizdnich radu: %i" sortTimetables.Length   
 
 let webscraping1() =
     processStart 
-    >> downloadAndSaveUpdatedJson
+    //>> downloadAndSaveUpdatedJson
     >> digThroughJsonStructure 
     >> filterTimetables 
     >> downloadAndSaveTimetables pathToDir     
