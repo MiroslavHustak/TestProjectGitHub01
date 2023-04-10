@@ -394,13 +394,13 @@ let private downloadAndSaveTimetables pathToDir (sortTimetables: (string*string)
     
     let myFileDelete x =   
         let dirInfo = new DirectoryInfo(pathToDir)
-                      |> (optionToGenerics "Error8" (new DirectoryInfo(pathToDir)))                                                               
+                      |> optionToGenerics "Error8" (new DirectoryInfo(pathToDir))                                                               
         
         //failwith "Testovani funkce tryWith"
 
         //smazeme stare soubory v adresari  
         dirInfo.EnumerateFiles()
-        |> (optionToGenerics "Error11" Seq.empty)       
+        |> optionToGenerics "Error11" Seq.empty       
         |> Array.ofSeq
         |> Array.Parallel.iter (fun item -> item.Delete())
         
