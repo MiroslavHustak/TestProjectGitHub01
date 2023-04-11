@@ -27,6 +27,7 @@ let [<Literal>] pathKodisAmazonLink = @"https://kodis-files.s3.eu-central-1.amaz
 let [<Literal>] lineNumberLength = 3 //3 je delka retezce pouze pro linky 001 az 999
 
 let private pathToDir = @"e:\E\Mirek po osme hodine a o vikendech\KODISTP\" 
+let private startDateOld = new DateTime(2022, 12, 11) //zmenit pri pravidelne zmene JR 
 let private range = [ '1'; '2'; '3'; '4'; '5'; '6'; '7'; '8'; '9'; '0' ]
 let private rangeS = [ "S1_"; "S2_"; "S3_"; "S4_"; "S5_"; "S6_"; "S7_"; "S8_"; "S9_" ]
 let private rangeR = [ "R1_"; "R2_"; "R3_"; "R4_"; "R5_"; "R6_"; "R7_"; "R8_"; "R9_" ]
@@ -42,13 +43,13 @@ let private timeStr = errorStr "HH:mm:ss" "Error1"
     
 let private processStart() =     
     let processStartTime x = 
-        let processStartTime = errorStr (sprintf"Zacatek procesu:  %s" <| DateTime.Now.ToString(timeStr)) "Error2"                           
+        let processStartTime = errorStr (sprintf"Zacatek procesu: %s" <| DateTime.Now.ToString(timeStr)) "Error2"                           
         printfn "%s" processStartTime
     tryWith processStartTime (fun x -> ()) () String.Empty () |> deconstructor
     
 let private processEnd() =     
     let processEndTime x = 
-        let processEndTime = errorStr (sprintf"Konec procesu:  %s" <| DateTime.Now.ToString(timeStr)) "Error3"                       
+        let processEndTime = errorStr (sprintf"Konec procesu: %s" <| DateTime.Now.ToString(timeStr)) "Error3"                       
         printfn "%s" processEndTime
     tryWith processEndTime (fun x -> ()) () String.Empty () |> deconstructor
 
@@ -360,22 +361,18 @@ let private filterTimetables diggingResult =
                                                    let latestStartDate =  
                                                        list
                                                        |> List.map (fun item -> 
-                                                                                    try
-                                                                                        let yearOld = Parsing.parseMe(item.Substring(4, 4)) //overovat, jestli se v jsonu neco nezmenilo //113_2022_12_11_2023_12_09.....
-                                                                                        let monthOld = Parsing.parseMe(item.Substring(9, 2))
-                                                                                        let dayOld = Parsing.parseMe(item.Substring(12, 2))
+                                                                              try
+                                                                                  let yearOld = Parsing.parseMe(item.Substring(4, 4)) //overovat, jestli se v jsonu neco nezmenilo //113_2022_12_11_2023_12_09.....
+                                                                                  let monthOld = Parsing.parseMe(item.Substring(9, 2))
+                                                                                  let dayOld = Parsing.parseMe(item.Substring(12, 2))
 
-                                                                                        item, new DateTime(yearOld, monthOld, dayOld) 
-                                                                                    with 
-                                                                                    | _ -> item, new DateTime(2022, 12, 11) //zmenit pri pravidelne zmene JR 
-
-                                                                       ) |> List.maxBy snd                                                        
-                                                   [ fst latestStartDate ] 
-                                                  
+                                                                                  item, new DateTime(yearOld, monthOld, dayOld) 
+                                                                              with 
+                                                                              | _ -> item, startDateOld
+                                                                   ) |> List.maxBy snd                                                        
+                                                   [ fst latestStartDate ]                                                   
                             ) |> List.distinct                              
-        tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor  
-
-
+        tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor 
         
     let myList3 = 
         myList2 |> List.filter (fun item -> not <| String.IsNullOrWhiteSpace(item) && not <| String.IsNullOrEmpty(item))
@@ -403,7 +400,7 @@ let private filterTimetables diggingResult =
                                                            sprintf"%s/%s" pathToDir fileName   
                                                 | false -> let fileName = item.Substring(0, item.Length - 15) //bez 15 znaku s generovanym kodem a priponou pdf dostaneme toto: 113_2022_12_11_2023_12_09 
                                                            sprintf"%s/%s%s" pathToDir fileName ".pdf"  //pdf opet musime pridat
-                                                 
+                                                           
                                              link, path 
                         )
         tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor
