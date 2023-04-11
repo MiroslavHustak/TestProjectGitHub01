@@ -169,38 +169,6 @@ let private pathToJsonList =
          sprintf"%s%s" partialPathJson @"kodisTrainSpesakyARychliky.json"                
     ]
 
-let private pathToJsonList1 =    
-    [
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisMHDTotal.json"
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisMHDBruntal.json"
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisMHDCT.json"
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisMHDFM.json"
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisMHDHavirov.json"
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisMHDKarvina.json"
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisMHDBKrnov.json"
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisMHDNJ.json"
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisMHDOpava.json"
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisMHDOrlova.json"
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisMHDOstrava.json"
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisMHDStudenka.json"
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisMHDTrinec.json"
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisMHDNAD.json"
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisRegionTotal.json"
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisRegion75.json"
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisRegion200.json"
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisRegion300.json"
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisRegion400.json"
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisRegion500.json"
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisRegion600.json"
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisRegion700.json"
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisRegion800.json"
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisRegion900.json"
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisRegionNAD.json"
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisTrainTotal.json"
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisTrainPomaliky.json"
-         @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisTrainSpesakyARychliky.json"                
-    ]
-
 let private downloadAndSaveUpdatedJson() = 
    
     let updateJson x = 
