@@ -399,8 +399,8 @@ let private filterTimetables diggingResult =
 
                                              let path =     
                                                 match item.Contains("_t") with 
-                                                | true  -> let fileName = item.Substring(0, item.Length) //002_2023_03_13_2023 
-                                                           sprintf"%s/%s" pathToDir fileName   //pdf opet musime pridat
+                                                | true  -> let fileName = item.Substring(0, item.Length) //zatim bez generovaneho kodu, sem tam to zkontrolovat
+                                                           sprintf"%s/%s" pathToDir fileName   
                                                 | false -> let fileName = item.Substring(0, item.Length - 15) //bez 15 znaku s generovanym kodem a priponou pdf dostaneme toto: 113_2022_12_11_2023_12_09 
                                                            sprintf"%s/%s%s" pathToDir fileName ".pdf"  //pdf opet musime pridat
                                                  
