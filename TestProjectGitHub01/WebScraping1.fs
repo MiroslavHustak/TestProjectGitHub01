@@ -173,21 +173,23 @@ let private downloadAndSaveUpdatedJson() =
     let updateJson x = 
         let loadAndSaveJsonFiles = 
             use progress = new ProgressBar()
-            jsonLinkList |> List.mapi (fun i item ->                                                
-                                                   progress.Report(float (i/1000))  
-                                                   //updateJson x nezachyti exception v async
-                                                   async  
-                                                       { 
-                                                            //TODO priste zrob Async.Catch
-                                                            try 
-                                                                return! client.GetStringAsync(item) |> Async.AwaitTask 
-                                                            with
-                                                            | ex -> printfn"\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
-                                                                    do Console.ReadKey() |> ignore 
-                                                                    do System.Environment.Exit(1)
-                                                                    return! client.GetStringAsync(String.Empty) |> Async.AwaitTask //whatever of that type
-                                                       } |> Async.RunSynchronously
-                                      )  
+            jsonLinkList
+            |> List.mapi (fun i item ->                                                
+                                      progress.Report(float (i/1000))  
+                                      //updateJson x nezachyti exception v async
+                                      async  
+                                          { 
+                                              //TODO priste zrob Async.Catch
+                                              try 
+                                                  return! client.GetStringAsync(item) |> Async.AwaitTask 
+                                              with
+                                              | ex -> printfn"\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
+                                                      do Console.ReadKey() |> ignore 
+                                                      do System.Environment.Exit(1)
+                                                      return! client.GetStringAsync(String.Empty) |> Async.AwaitTask //whatever of that type
+                                          } |> Async.RunSynchronously
+                        
+                         )  
         //save updated json files
         (pathToJsonList, loadAndSaveJsonFiles)
         ||> List.iteri2 (fun i path json ->                                                                          
@@ -273,7 +275,7 @@ let private filterTimetables diggingResult =
     use progress = new ProgressBar()
     let myList = 
         let myFunction x =
-            diggingResult
+            diggingResult            
             |> Set.toArray 
             |> Array.Parallel.map (fun (item: string) ->         
                                                         let fileName = item.Replace(pathKodisAmazonLink, String.Empty)                                                        
@@ -380,21 +382,21 @@ let private filterTimetables diggingResult =
     let myList4 = 
         let myFunction x = 
             myList3 
-            |> List.map (fun item -> 
-                                    let str = item
-                                    let str =
-                                        match str.Substring(0, 2).Equals("00") with
-                                        | true   -> str.Remove(0, 2)
-                                        | false  -> match str.Substring(0, 1).Equals("0") || str.Substring(0, 1).Equals("_") with
-                                                    | false -> item
-                                                    | true  -> str.Remove(0, 1)
+            |> List.map (fun (item: string) -> 
+                                             let str = item
+                                             let str =
+                                                 match str.Substring(0, 2).Equals("00") with
+                                                 | true   -> str.Remove(0, 2)
+                                                 | false  -> match str.Substring(0, 1).Equals("0") || str.Substring(0, 1).Equals("_") with
+                                                             | false -> item
+                                                             | true  -> str.Remove(0, 1)
                                     
-                                    let link = sprintf"%s%s" pathKodisAmazonLink str
+                                             let link = sprintf"%s%s" pathKodisAmazonLink str
 
-                                    let path = 
-                                        let fileName = item.Substring(0, item.Length - 15) //bez 15 znaku s generovanym kodem a priponou pdf dostaneme toto: 113_2022_12_11_2023_12_09 
-                                        sprintf"%s/%s%s" pathToDir fileName ".pdf"  //pdf opet musime pridat
-                                    link, path 
+                                             let path = 
+                                                 let fileName = item.Substring(0, item.Length - 15) //bez 15 znaku s generovanym kodem a priponou pdf dostaneme toto: 113_2022_12_11_2023_12_09 
+                                                 sprintf"%s/%s%s" pathToDir fileName ".pdf"  //pdf opet musime pridat
+                                             link, path 
                         )
         tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor
     myList4 |> List.sort    
@@ -422,8 +424,8 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
     filterTimetables 
     |> List.iteri (fun i (link, pathToFile) ->  //Array.Parallel.iter vyhazuje chybu, asi nelze parallelni stahovani z danych stranek  
                                              progress.Report(float (i/1000))
-                                             async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously  
-                                             //async { printfn"%s" pathToFile; return! Async.Sleep 0 } |> Async.RunSynchronously   
+                                             //async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously  
+                                             async { printfn"%s" pathToFile; return! Async.Sleep 0 } |> Async.RunSynchronously   
                                              //async {return! Async.Sleep 0 } |> Async.RunSynchronously   
                   )    
     printfn"%c" <| char(32)   
@@ -432,7 +434,7 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
 
 let webscraping1() =
     processStart 
-    >> downloadAndSaveUpdatedJson
+    //>> downloadAndSaveUpdatedJson
     >> digThroughJsonStructure 
     >> filterTimetables 
     >> downloadAndSaveTimetables pathToDir     
