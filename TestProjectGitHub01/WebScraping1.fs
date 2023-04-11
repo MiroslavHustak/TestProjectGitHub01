@@ -348,7 +348,7 @@ let private filterTimetables diggingResult =
             myList1 
             |> splitListByPrefix //splitList1 //splitList 
             |> List.collect (fun list ->  
-                                        match list.Length > 1 with
+                                        match list.Length > 1 with //toto ponechava moznost objeveni se vice JR pro jednu linku a pochopeni logiky (pokud je nejaka), cemu tomu tak je
                                         | false -> list 
                                         | true  -> 
                                                    list
@@ -424,8 +424,8 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
     filterTimetables 
     |> List.iteri (fun i (link, pathToFile) ->  //Array.Parallel.iter vyhazuje chybu, asi nelze parallelni stahovani z danych stranek  
                                              progress.Report(float (i/1000))
-                                             //async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously  
-                                             async { printfn"%s" pathToFile; return! Async.Sleep 0 } |> Async.RunSynchronously   
+                                             async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously  
+                                             //async { printfn"%s" pathToFile; return! Async.Sleep 0 } |> Async.RunSynchronously   
                                              //async {return! Async.Sleep 0 } |> Async.RunSynchronously   
                   )    
     printfn"%c" <| char(32)   
@@ -434,7 +434,7 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
 
 let webscraping1() =
     processStart 
-    //>> downloadAndSaveUpdatedJson
+    >> downloadAndSaveUpdatedJson
     >> digThroughJsonStructure 
     >> filterTimetables 
     >> downloadAndSaveTimetables pathToDir     
