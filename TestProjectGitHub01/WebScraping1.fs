@@ -20,7 +20,8 @@ Console.OutputEncoding  <- System.Text.Encoding.Unicode
 //************************Constants and types**********************************************************************
 
 //tu a tam zkontrolovat json, zdali KODIS nezmenil jeho strukturu 
-let [<Literal>] pathJson = @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisMHDTotal.json" //musi byt forward slash"
+let [<Literal>] partialPathJson =  @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/"
+let [<Literal>] pathJson = @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisMHDTotal.json" //pro type provider musi byt konstanta (nemozu pouzit sprintf partialPathJson) a musi byt forward slash"
 let [<Literal>] pathKodisWeb = @"https://kodisweb-backend.herokuapp.com/"
 let [<Literal>] pathKodisAmazonLink = @"https://kodis-files.s3.eu-central-1.amazonaws.com/"
 let [<Literal>] lineNumberLength = 3 //3 je delka retezce pouze pro linky 001 az 999
@@ -137,6 +138,38 @@ let private jsonLinkList =
     ]
 
 let private pathToJsonList =    
+    [
+         sprintf"%s%s" partialPathJson @"kodisMHDTotal.json"
+         sprintf"%s%s" partialPathJson @"kodisMHDBruntal.json"
+         sprintf"%s%s" partialPathJson @"kodisMHDCT.json"
+         sprintf"%s%s" partialPathJson @"kodisMHDFM.json"
+         sprintf"%s%s" partialPathJson @"kodisMHDHavirov.json"
+         sprintf"%s%s" partialPathJson @"kodisMHDKarvina.json"
+         sprintf"%s%s" partialPathJson @"kodisMHDBKrnov.json"
+         sprintf"%s%s" partialPathJson @"kodisMHDNJ.json"
+         sprintf"%s%s" partialPathJson @"kodisMHDOpava.json"
+         sprintf"%s%s" partialPathJson @"kodisMHDOrlova.json"
+         sprintf"%s%s" partialPathJson @"kodisMHDOstrava.json"
+         sprintf"%s%s" partialPathJson @"kodisMHDStudenka.json"
+         sprintf"%s%s" partialPathJson @"kodisMHDTrinec.json"
+         sprintf"%s%s" partialPathJson @"kodisMHDNAD.json"
+         sprintf"%s%s" partialPathJson @"kodisRegionTotal.json"
+         sprintf"%s%s" partialPathJson @"kodisRegion75.json"
+         sprintf"%s%s" partialPathJson @"kodisRegion200.json"
+         sprintf"%s%s" partialPathJson @"kodisRegion300.json"
+         sprintf"%s%s" partialPathJson @"kodisRegion400.json"
+         sprintf"%s%s" partialPathJson @"kodisRegion500.json"
+         sprintf"%s%s" partialPathJson @"kodisRegion600.json"
+         sprintf"%s%s" partialPathJson @"kodisRegion700.json"
+         sprintf"%s%s" partialPathJson @"kodisRegion800.json"
+         sprintf"%s%s" partialPathJson @"kodisRegion900.json"
+         sprintf"%s%s" partialPathJson @"kodisRegionNAD.json"
+         sprintf"%s%s" partialPathJson @"kodisTrainTotal.json"
+         sprintf"%s%s" partialPathJson @"kodisTrainPomaliky.json"
+         sprintf"%s%s" partialPathJson @"kodisTrainSpesakyARychliky.json"                
+    ]
+
+let private pathToJsonList1 =    
     [
          @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisMHDTotal.json"
          @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisMHDBruntal.json"
@@ -265,6 +298,8 @@ let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
         tryWith myFunction (fun x -> ()) () String.Empty Array.empty |> deconstructor
 
     (Array.append <| kodisAttachments() <| kodisTimetables()) |> Set.ofArray //jen z vyukovych duvodu -> konverzi na Set vyhodime stejne polozky, jinak staci jen |> Array.distinct 
+    //kodisAttachments() |> Set.ofArray //over cas od casu
+    //kodisTimetables() |> Set.ofArray //over cas od casu
 
 let private filterTimetables diggingResult = 
 
@@ -278,7 +313,10 @@ let private filterTimetables diggingResult =
             diggingResult            
             |> Set.toArray 
             |> Array.Parallel.map (fun (item: string) ->         
-                                                        let fileName = item.Replace(pathKodisAmazonLink, String.Empty)                                                        
+                                                        let fileName =                                                            
+                                                            match item.Contains @"timetables/" with
+                                                            | true  -> item.Replace(pathKodisAmazonLink, String.Empty).Replace("timetables/", String.Empty).Replace(".pdf", "_t.pdf")
+                                                            | false -> item.Replace(pathKodisAmazonLink, String.Empty)  
                                                     
                                                         let charList = 
                                                             match fileName |> String.length >= lineNumberLength with  
@@ -302,7 +340,7 @@ let private filterTimetables diggingResult =
                                                             match b rangeS || b rangeR with
                                                             | true  -> sprintf "%s%s" "_" fileNameFullA                                                                       
                                                             | false -> fileNameFullA  
-
+                                                         
                                                         match not (fileNameFull |> String.length >= 25) with //25 -> 113_2022_12_11_2023_12_09......
                                                         | true  -> String.Empty
                                                         | false ->     
@@ -332,7 +370,7 @@ let private filterTimetables diggingResult =
                                                                                 | true  -> String.Empty    
                                                                             with 
                                                                             | _ -> String.Empty  
-                                                    
+                                                   
                                   ) |> Array.toList |> List.distinct 
         tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor
     
@@ -348,33 +386,28 @@ let private filterTimetables diggingResult =
             myList1 
             |> splitListByPrefix //splitList1 //splitList 
             |> List.collect (fun list ->  
-                                        match list.Length > 1 with //toto ponechava moznost objeveni se vice JR pro jednu linku a pochopeni logiky (pokud je nejaka), cemu tomu tak je
+                                        match list.Length > 1 with 
                                         | false -> list 
                                         | true  -> 
-                                                   list
-                                                   |> List.map (fun item ->
-                                                                            try
-                                                                                let yearOld = Parsing.parseMe(item.Substring(4, 4)) //overovat, jestli se v jsonu neco nezmenilo //113_2022_12_11_2023_12_09.....
-                                                                                let monthOld = Parsing.parseMe(item.Substring(9, 2))
-                                                                                let dayOld = Parsing.parseMe(item.Substring(12, 2))
-                                                                                                                                
-                                                                                let a = [ yearOld; monthOld; dayOld ]
-                                                                                let a = 
-                                                                                    match a |> List.contains -1 with
-                                                                                    | true  -> List.Empty 
-                                                                                    | false -> a     
-                                                                                
-                                                                                let dateOld = new DateTime(a |> List.item 0, a |> List.item 1, a |> List.item 2) 
-                                                                                let dateStart = new DateTime(2022, 12, 11) //zmenit pri pravidelne zmene JR                            
-                                                                            
-                                                                                match dateOld |> Fugit.isBeforeOrEqual dateStart with
-                                                                                | false -> item                                                
-                                                                                | true  -> String.Empty    
-                                                                            with 
-                                                                            | _ -> String.Empty 
-                                                                )
-                            ) |> List.distinct
+                                                   let latestStartDate =  
+                                                       list
+                                                       |> List.map (fun item -> 
+                                                                                    try
+                                                                                        let yearOld = Parsing.parseMe(item.Substring(4, 4)) //overovat, jestli se v jsonu neco nezmenilo //113_2022_12_11_2023_12_09.....
+                                                                                        let monthOld = Parsing.parseMe(item.Substring(9, 2))
+                                                                                        let dayOld = Parsing.parseMe(item.Substring(12, 2))
+
+                                                                                        item, new DateTime(yearOld, monthOld, dayOld) 
+                                                                                    with 
+                                                                                    | _ -> item, new DateTime(2022, 12, 11) //zmenit pri pravidelne zmene JR 
+
+                                                                       ) |> List.maxBy snd                                                        
+                                                   [ fst latestStartDate ] 
+                                                  
+                            ) |> List.distinct                              
         tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor  
+
+
         
     let myList3 = 
         myList2 |> List.filter (fun item -> not <| String.IsNullOrWhiteSpace(item) && not <| String.IsNullOrEmpty(item))
@@ -391,11 +424,18 @@ let private filterTimetables diggingResult =
                                                              | false -> item
                                                              | true  -> str.Remove(0, 1)
                                     
-                                             let link = sprintf"%s%s" pathKodisAmazonLink str
+                                             let link = 
+                                                match item.Contains("_t") with 
+                                                | true  -> (sprintf"%s%s%s" pathKodisAmazonLink @"timetables/" str).Replace("_t", String.Empty)
+                                                | false -> sprintf"%s%s" pathKodisAmazonLink str                                                
 
-                                             let path = 
-                                                 let fileName = item.Substring(0, item.Length - 15) //bez 15 znaku s generovanym kodem a priponou pdf dostaneme toto: 113_2022_12_11_2023_12_09 
-                                                 sprintf"%s/%s%s" pathToDir fileName ".pdf"  //pdf opet musime pridat
+                                             let path =     
+                                                match item.Contains("_t") with 
+                                                | true  -> let fileName = item.Substring(0, item.Length) //002_2023_03_13_2023 
+                                                           sprintf"%s/%s" pathToDir fileName   //pdf opet musime pridat
+                                                | false -> let fileName = item.Substring(0, item.Length - 15) //bez 15 znaku s generovanym kodem a priponou pdf dostaneme toto: 113_2022_12_11_2023_12_09 
+                                                           sprintf"%s/%s%s" pathToDir fileName ".pdf"  //pdf opet musime pridat
+                                                 
                                              link, path 
                         )
         tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor
