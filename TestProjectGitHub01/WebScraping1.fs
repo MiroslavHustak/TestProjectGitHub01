@@ -9,6 +9,7 @@ open FSharp.Data
 open Helpers
 open TryWith.TryWith
 open ProgressBarCSharp
+open DiscriminatedUnions
 
 do System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance)
     
@@ -32,6 +33,7 @@ let private regularValidityEnd = new DateTime(2023, 12, 09) //zmenit pri pravide
 let private range = [ '1'; '2'; '3'; '4'; '5'; '6'; '7'; '8'; '9'; '0' ]
 let private rangeS = [ "S1_"; "S2_"; "S3_"; "S4_"; "S5_"; "S6_"; "S7_"; "S8_"; "S9_" ]
 let private rangeR = [ "R1_"; "R2_"; "R3_"; "R4_"; "R5_"; "R6_"; "R7_"; "R8_"; "R9_" ]
+let private rangeX = [ "X1_"; "X2_"; "X3_"; "X4_"; "X5_"; "X6_"; "X7_"; "X8_"; "X9_" ]
 
 type KodisTimetables = JsonProvider<pathJson> 
 
@@ -273,7 +275,7 @@ let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
     //kodisAttachments() |> Set.ofArray //over cas od casu
     //kodisTimetables() |> Set.ofArray //over cas od casu
 
-let private filterTimetables diggingResult = 
+let private filterTimetables param diggingResult = 
 
     //****************prvni filtrace odkazu na neplatne jizdni rady***********************
        
@@ -314,7 +316,7 @@ let private filterTimetables diggingResult =
                                                             | false -> fileName  
                                                          
                                                         let fileNameFull =  
-                                                            match b rangeS || b rangeR with
+                                                            match b rangeS || b rangeR || b rangeX with
                                                             | true  -> sprintf "%s%s" "_" fileNameFullA                                                                       
                                                             | false -> fileNameFullA  
 
@@ -342,8 +344,11 @@ let private filterTimetables diggingResult =
                                                                             try
                                                                                 let dateValidityStart = new DateTime(yearValidityStart, monthValidityStart, dayValidityStart) 
                                                                                 let dateValidityEnd = new DateTime(yearValidityEnd, monthValidityEnd, dayValidityEnd) 
-
-                                                                                let cond = (dateValidityStart |> Fugit.isBeforeOrEqual currentTime) && (dateValidityEnd |> Fugit.isAfter currentTime)
+                                                                                
+                                                                                let cond = 
+                                                                                    match param with //TODO DU
+                                                                                    | CurrentValidity -> dateValidityStart |> Fugit.isBeforeOrEqual currentTime && dateValidityEnd |> Fugit.isAfter currentTime
+                                                                                    | FutureValidity  -> dateValidityStart |> Fugit.isAfter currentTime
 
                                                                                 match cond with
                                                                                 | true  -> fileNameFull
@@ -467,7 +472,7 @@ let webscraping1() =
     processStart 
     >> downloadAndSaveUpdatedJson
     >> digThroughJsonStructure 
-    >> filterTimetables 
-    >> downloadAndSaveTimetables pathToDir     
+    >> filterTimetables CurrentValidity //CurrentValidity //FutureValidity
+    >> downloadAndSaveTimetables pathToDir       
     >> client.Dispose  
     >> processEnd
