@@ -27,7 +27,8 @@ let [<Literal>] pathKodisAmazonLink = @"https://kodis-files.s3.eu-central-1.amaz
 let [<Literal>] lineNumberLength = 3 //3 je delka retezce pouze pro linky 001 az 999
 
 let private pathToDir = @"e:\E\Mirek po osme hodine a o vikendech\KODISTP\" 
-let private startDateOld = new DateTime(2022, 12, 11) //zmenit pri pravidelne zmene JR 
+let private regularValidityStart = new DateTime(2022, 12, 11) //zmenit pri pravidelne zmene JR 
+let private regularValidityEnd = new DateTime(2023, 12, 09) //zmenit pri pravidelne zmene JR 
 let private range = [ '1'; '2'; '3'; '4'; '5'; '6'; '7'; '8'; '9'; '0' ]
 let private rangeS = [ "S1_"; "S2_"; "S3_"; "S4_"; "S5_"; "S6_"; "S7_"; "S8_"; "S9_" ]
 let private rangeR = [ "R1_"; "R2_"; "R3_"; "R4_"; "R5_"; "R6_"; "R7_"; "R8_"; "R9_" ]
@@ -36,6 +37,8 @@ type KodisTimetables = JsonProvider<pathJson>
 
 
 //************************Helpers**********************************************************************
+
+let private xor a b = (a && not b) || (not a && b)
 
 let private errorStr str err = str |> (optionToGenerics err String.Empty)                            
 
@@ -273,16 +276,21 @@ let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
 let private filterTimetables diggingResult = 
 
     //****************prvni filtrace odkazu na neplatne jizdni rady***********************
-
-    let currentTime = Fugit.now() //aby to nebylo v cyklu
+       
+    let currentTime = Fugit.now().AddDays(-1.0)    // new DateTime(2023, 04, 11) 
     
     use progress = new ProgressBar()
     let myList = 
         let myFunction x =
             diggingResult            
             |> Set.toArray 
-            |> Array.Parallel.map (fun (item: string) ->         
-                                                        let fileName =                                                            
+            |> Array.Parallel.map (fun (item: string) -> 
+                                                        //misto pro opravu retezcu, ktere jsou v jsonu v nespravnem formatu
+                                                        let item = match item.Contains(@"S2_2023_04_03_2023_04_3_v") with
+                                                                   | true  -> item.Replace(@"S2_2023_04_03_2023_04_3_v", @"S2_2023_04_03_2023_04_03_v")  
+                                                                   | false -> item     
+
+                                                        let fileName =  
                                                             match item.Contains @"timetables/" with
                                                             | true  -> item.Replace(pathKodisAmazonLink, String.Empty).Replace("timetables/", String.Empty).Replace(".pdf", "_t.pdf")
                                                             | false -> item.Replace(pathKodisAmazonLink, String.Empty)  
@@ -309,34 +317,38 @@ let private filterTimetables diggingResult =
                                                             match b rangeS || b rangeR with
                                                             | true  -> sprintf "%s%s" "_" fileNameFullA                                                                       
                                                             | false -> fileNameFullA  
+
+                                                        let numberOfChar =  
+                                                            match fileNameFull.Contains("_v") || fileNameFull.Contains("_t") with
+                                                            | true  -> 27  //27 -> 113_2022_12_11_2023_12_09_t......   //overovat, jestli se v jsonu nezmenila struktura nazvu                                                                
+                                                            | false -> 25  //25 -> 113_2022_12_11_2023_12_09......
                                                          
-                                                        match not (fileNameFull |> String.length >= 25) with //25 -> 113_2022_12_11_2023_12_09......
+                                                        match not (fileNameFull |> String.length >= numberOfChar) with 
                                                         | true  -> String.Empty
                                                         | false ->     
-                                                                    //overovat, jestli se v jsonu nezmenila struktura nazvu //113_2022_12_11_2023_12_09.....
-                                                                   let yearOld = Parsing.parseMe(fileNameFull.Substring(4, 4)) 
-                                                                   let monthOld = Parsing.parseMe(fileNameFull.Substring(9, 2))
-                                                                   let dayOld = Parsing.parseMe(fileNameFull.Substring(12, 2))
-                                                                   let yearNew = Parsing.parseMe(fileNameFull.Substring(15, 4))
-                                                                   let monthNew = Parsing.parseMe(fileNameFull.Substring(20, 2))
-                                                                   let dayNew = Parsing.parseMe(fileNameFull.Substring(23, 2))
+                                                                   let yearValidityStart = Parsing.parseMe(fileNameFull.Substring(4, 4)) 
+                                                                   let monthValidityStart = Parsing.parseMe(fileNameFull.Substring(9, 2))
+                                                                   let dayValidityStart = Parsing.parseMe(fileNameFull.Substring(12, 2))
+
+                                                                   let yearValidityEnd = Parsing.parseMe(fileNameFull.Substring(15, 4))
+                                                                   let monthValidityEnd = Parsing.parseMe(fileNameFull.Substring(20, 2))
+                                                                   let dayValidityEnd = Parsing.parseMe(fileNameFull.Substring(23, 2))
                                                                                                                                                                   
-                                                                   let a = [ yearOld; monthOld; dayOld; yearNew; monthNew; dayNew ]
+                                                                   let a = [ yearValidityStart; monthValidityStart; dayValidityStart; yearValidityEnd; monthValidityEnd; dayValidityEnd ]
                                                                 
                                                                    match a |> List.contains -1 with
                                                                    | true  -> fileNameFull 
                                                                    | false -> 
                                                                             try
-                                                                                let dateOld = new DateTime(yearOld, monthOld, dayOld) 
-                                                                                let dateNew = new DateTime(yearNew, monthNew, dayNew)                                   
-                                                                                                                                                           
-                                                                                let cond1 = (dateNew |> Fugit.isBefore currentTime)  
-                                                                                let cond2 = (dateOld |> Fugit.isAfter currentTime)  
-                                                                                let cond3 = (dateOld |> Fugit.isBefore currentTime) && (dateNew |> Fugit.isBefore currentTime)                                                                           
-                                                                       
-                                                                                match cond1 || cond2 || cond3 with
-                                                                                | false -> fileNameFull                                                
-                                                                                | true  -> String.Empty    
+                                                                                let dateValidityStart = new DateTime(yearValidityStart, monthValidityStart, dayValidityStart) 
+                                                                                let dateValidityEnd = new DateTime(yearValidityEnd, monthValidityEnd, dayValidityEnd) 
+
+                                                                                let cond = (dateValidityStart |> Fugit.isBeforeOrEqual currentTime) && (dateValidityEnd |> Fugit.isAfter currentTime)
+
+                                                                                match cond with
+                                                                                | true  -> fileNameFull
+                                                                                | false -> String.Empty  
+
                                                                             with 
                                                                             | _ -> String.Empty  
                                                    
@@ -358,19 +370,24 @@ let private filterTimetables diggingResult =
                                         match list.Length > 1 with 
                                         | false -> list 
                                         | true  -> 
-                                                   let latestStartDate =  
+                                                   let latestValidityStart =  
                                                        list
                                                        |> List.map (fun item -> 
                                                                               try
-                                                                                  let yearOld = Parsing.parseMe(item.Substring(4, 4)) //overovat, jestli se v jsonu neco nezmenilo //113_2022_12_11_2023_12_09.....
-                                                                                  let monthOld = Parsing.parseMe(item.Substring(9, 2))
-                                                                                  let dayOld = Parsing.parseMe(item.Substring(12, 2))
+                                                                                  let yearValidityStart = Parsing.parseMe(item.Substring(4, 4)) //overovat, jestli se v jsonu neco nezmenilo //113_2022_12_11_2023_12_09.....
+                                                                                  let monthValidityStart = Parsing.parseMe(item.Substring(9, 2))
+                                                                                  let dayValidityStart = Parsing.parseMe(item.Substring(12, 2))
 
-                                                                                  item, new DateTime(yearOld, monthOld, dayOld) 
+                                                                                  let yearValidityEnd = Parsing.parseMe(item.Substring(15, 4))
+                                                                                  let monthValidityEnd = Parsing.parseMe(item.Substring(20, 2))
+                                                                                  let dayValidityEnd = Parsing.parseMe(item.Substring(23, 2))
+
+                                                                                  item, new DateTime(yearValidityStart, monthValidityStart, dayValidityStart) //pro pripadnou zmenu logiky
+                                                                                  //item, new DateTime(yearValidityEnd, monthValidityEnd, dayValidityEnd) 
                                                                               with 
-                                                                              | _ -> item, startDateOld
+                                                                              | _ -> item, currentTime
                                                                    ) |> List.maxBy snd                                                        
-                                                   [ fst latestStartDate ]                                                   
+                                                   [ fst latestValidityStart ]                                                   
                             ) |> List.distinct                              
         tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor 
         
@@ -380,15 +397,15 @@ let private filterTimetables diggingResult =
     let myList4 = 
         let myFunction x = 
             myList3 
-            |> List.map (fun (item: string) -> 
+            |> List.map (fun (item: string) ->        
                                              let str = item
                                              let str =
                                                  match str.Substring(0, 2).Equals("00") with
                                                  | true   -> str.Remove(0, 2)
                                                  | false  -> match str.Substring(0, 1).Equals("0") || str.Substring(0, 1).Equals("_") with
                                                              | false -> item
-                                                             | true  -> str.Remove(0, 1)
-                                    
+                                                             | true  -> str.Remove(0, 1)                                                                                  
+                                             
                                              let link = 
                                                 match item.Contains("_t") with 
                                                 | true  -> (sprintf"%s%s%s" pathKodisAmazonLink @"timetables/" str).Replace("_t", String.Empty)
@@ -404,7 +421,16 @@ let private filterTimetables diggingResult =
                                              link, path 
                         )
         tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor
-    myList4 |> List.sort    
+
+    myList4 |> List.filter (fun item -> (not <| String.IsNullOrWhiteSpace(fst item) 
+                                         && 
+                                         not <| String.IsNullOrEmpty(fst item)) 
+                                         ||
+                                         (not <| String.IsNullOrWhiteSpace(snd item)
+                                         && 
+                                         not <| String.IsNullOrEmpty(snd item)
+                                         )
+                           ) |> List.sort                                             
         
 let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*string) list) =    
     
