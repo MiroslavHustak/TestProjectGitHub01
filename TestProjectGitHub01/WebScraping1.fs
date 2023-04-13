@@ -27,6 +27,7 @@ let [<Literal>] pathKodisWeb = @"https://kodisweb-backend.herokuapp.com/"
 let [<Literal>] pathKodisAmazonLink = @"https://kodis-files.s3.eu-central-1.amazonaws.com/"
 let [<Literal>] lineNumberLength = 3 //3 je delka retezce pouze pro linky 001 az 999
 
+let private currentTime = Fugit.now().AddDays(-1.0)    // new DateTime(2023, 04, 11)
 let private pathToDir = @"e:\E\Mirek po osme hodine a o vikendech\KODISTP\" 
 let private regularValidityStart = new DateTime(2022, 12, 11) //zmenit pri pravidelne zmene JR 
 let private regularValidityEnd = new DateTime(2023, 12, 09) //zmenit pri pravidelne zmene JR 
@@ -34,6 +35,7 @@ let private range = [ '1'; '2'; '3'; '4'; '5'; '6'; '7'; '8'; '9'; '0' ]
 let private rangeS = [ "S1_"; "S2_"; "S3_"; "S4_"; "S5_"; "S6_"; "S7_"; "S8_"; "S9_" ]
 let private rangeR = [ "R1_"; "R2_"; "R3_"; "R4_"; "R5_"; "R6_"; "R7_"; "R8_"; "R9_" ]
 let private rangeX = [ "X1_"; "X2_"; "X3_"; "X4_"; "X5_"; "X6_"; "X7_"; "X8_"; "X9_" ]
+
 
 type KodisTimetables = JsonProvider<pathJson> 
 
@@ -107,8 +109,8 @@ let private downloadFileTaskAsync (client: Http.HttpClient) (uri: string) (path:
                         do System.Environment.Exit(1)
                         return ()
             }     
-  
-  
+ 
+
 //************************Main code***********************************************************
 
 let private jsonLinkList = 
@@ -278,8 +280,6 @@ let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
 let private filterTimetables param diggingResult = 
 
     //****************prvni filtrace odkazu na neplatne jizdni rady***********************
-       
-    let currentTime = Fugit.now().AddDays(-1.0)    // new DateTime(2023, 04, 11) 
     
     use progress = new ProgressBar()
     let myList = 
@@ -339,16 +339,40 @@ let private filterTimetables param diggingResult =
                                                                    let a = [ yearValidityStart; monthValidityStart; dayValidityStart; yearValidityEnd; monthValidityEnd; dayValidityEnd ]
                                                                 
                                                                    match a |> List.contains -1 with
-                                                                   | true  -> fileNameFull 
+                                                                   | true  -> let cond = 
+                                                                                  match param with 
+                                                                                  | CurrentValidity           -> true //s tim nic nezrobim, nekonzistentni informace v retezci
+                                                                                  | FutureValidity            -> true //s tim nic nezrobim, nekonzistentni informace v retezci
+                                                                                  | ReplacementService        -> fileNameFull.Contains("_v") 
+                                                                                                                 || fileNameFull.Contains("X")
+                                                                                                                 || fileNameFull.Contains("NAD")
+                                                                                  | WithoutReplacementService -> not <| fileNameFull.Contains("_v") 
+                                                                                                                 && not <| fileNameFull.Contains("X")
+                                                                                                                 && not <| fileNameFull.Contains("NAD")
+
+                                                                              match cond with
+                                                                              | true  -> fileNameFull
+                                                                              | false -> String.Empty 
+                                                                              
                                                                    | false -> 
                                                                             try
                                                                                 let dateValidityStart = new DateTime(yearValidityStart, monthValidityStart, dayValidityStart) 
                                                                                 let dateValidityEnd = new DateTime(yearValidityEnd, monthValidityEnd, dayValidityEnd) 
                                                                                 
                                                                                 let cond = 
-                                                                                    match param with //TODO DU
-                                                                                    | CurrentValidity -> dateValidityStart |> Fugit.isBeforeOrEqual currentTime && dateValidityEnd |> Fugit.isAfter currentTime
-                                                                                    | FutureValidity  -> dateValidityStart |> Fugit.isAfter currentTime
+                                                                                    match param with 
+                                                                                    | CurrentValidity           -> dateValidityStart |> Fugit.isBeforeOrEqual currentTime && dateValidityEnd |> Fugit.isAfter currentTime
+                                                                                    | FutureValidity            -> dateValidityStart |> Fugit.isAfter currentTime
+                                                                                    | ReplacementService        -> (dateValidityStart |> Fugit.isBeforeOrEqual currentTime
+                                                                                                                   && dateValidityEnd |> Fugit.isAfter currentTime)
+                                                                                                                   && (fileNameFull.Contains("_v") 
+                                                                                                                   || fileNameFull.Contains("X")
+                                                                                                                   || fileNameFull.Contains("NAD"))
+                                                                                    | WithoutReplacementService -> (dateValidityStart |> Fugit.isBeforeOrEqual currentTime
+                                                                                                                   && dateValidityEnd |> Fugit.isAfter currentTime)
+                                                                                                                   && (not <| fileNameFull.Contains("_v") 
+                                                                                                                   && not <| fileNameFull.Contains("X")
+                                                                                                                   && not <| fileNameFull.Contains("NAD"))
 
                                                                                 match cond with
                                                                                 | true  -> fileNameFull
@@ -387,8 +411,8 @@ let private filterTimetables param diggingResult =
                                                                                   let monthValidityEnd = Parsing.parseMe(item.Substring(20, 2))
                                                                                   let dayValidityEnd = Parsing.parseMe(item.Substring(23, 2))
 
-                                                                                  item, new DateTime(yearValidityStart, monthValidityStart, dayValidityStart) //pro pripadnou zmenu logiky
-                                                                                  //item, new DateTime(yearValidityEnd, monthValidityEnd, dayValidityEnd) 
+                                                                                  item, new DateTime(yearValidityStart, monthValidityStart, dayValidityStart) 
+                                                                                  //item, new DateTime(yearValidityEnd, monthValidityEnd, dayValidityEnd) //pro pripadnou zmenu logiky
                                                                               with 
                                                                               | _ -> item, currentTime
                                                                    ) |> List.maxBy snd                                                        
@@ -433,8 +457,7 @@ let private filterTimetables param diggingResult =
                                          ||
                                          (not <| String.IsNullOrWhiteSpace(snd item)
                                          && 
-                                         not <| String.IsNullOrEmpty(snd item)
-                                         )
+                                         not <| String.IsNullOrEmpty(snd item))                                         
                            ) |> List.sort                                             
         
 let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*string) list) =    
@@ -472,7 +495,7 @@ let webscraping1() =
     processStart 
     >> downloadAndSaveUpdatedJson
     >> digThroughJsonStructure 
-    >> filterTimetables CurrentValidity //CurrentValidity //FutureValidity
+    >> filterTimetables CurrentValidity //CurrentValidity //FutureValidity //ReplacementService //WithoutReplacementService
     >> downloadAndSaveTimetables pathToDir       
     >> client.Dispose  
     >> processEnd

@@ -8,3 +8,5 @@ type Result<'TSuccess,'TFailure> =
 type Validity =
     | CurrentValidity 
     | FutureValidity 
+    | ReplacementService 
+    | WithoutReplacementService 
