@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Auxiliaries\ProgressBarFSharp.fs" />
     <Compile Include="Auxiliaries\PattternBuilders.fs" />
     <Compile Include="Auxiliaries\DiscriminatedUnions.fs" />
     <Compile Include="Auxiliaries\TryWith.fs" />
@@ -30,10 +31,6 @@
     <PackageReference Include="FSharp.Data" Version="6.0.1-beta002" />
     <PackageReference Include="Fugit" Version="0.4.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\ProgressBarCSharp\ProgressBarCSharp.csproj" />
   </ItemGroup>
 
   <ItemGroup>

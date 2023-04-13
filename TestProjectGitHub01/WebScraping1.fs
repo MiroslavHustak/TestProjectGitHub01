@@ -1,5 +1,8 @@
 ﻿module WebScraping1
 
+open System
+open System.Threading
+
 open Fugit
 open System
 open System.IO
@@ -8,7 +11,7 @@ open FSharp.Data
 
 open Helpers
 open TryWith.TryWith
-open ProgressBarCSharp
+open ProgressBarFSharp
 open DiscriminatedUnions
 
 do System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance)
@@ -36,9 +39,7 @@ let private rangeS = [ "S1_"; "S2_"; "S3_"; "S4_"; "S5_"; "S6_"; "S7_"; "S8_"; "
 let private rangeR = [ "R1_"; "R2_"; "R3_"; "R4_"; "R5_"; "R6_"; "R7_"; "R8_"; "R9_" ]
 let private rangeX = [ "X1_"; "X2_"; "X3_"; "X4_"; "X5_"; "X6_"; "X7_"; "X8_"; "X9_" ]
 
-
 type KodisTimetables = JsonProvider<pathJson> 
-
 
 //************************Helpers**********************************************************************
 
@@ -178,13 +179,13 @@ let private pathToJsonList =
     ]
 
 let private downloadAndSaveUpdatedJson() = 
-   
+
     let updateJson x = 
         let loadAndSaveJsonFiles = 
-            use progress = new ProgressBar()
+            let l = jsonLinkList.Length
             jsonLinkList
             |> List.mapi (fun i item ->                                                
-                                      progress.Report(float (i/1000))  
+                                      progressBarContinuous i l 
                                       //updateJson x nezachyti exception v async
                                       async  
                                           { 
@@ -206,6 +207,7 @@ let private downloadAndSaveUpdatedJson() =
                                           streamWriter.WriteLine(json)     
                                           streamWriter.Flush()   
                         ) 
+    printfn "Probiha stahovani a ukladani json souboru"
     tryWith updateJson (fun x -> ()) () String.Empty () |> deconstructor                
 
 let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
@@ -281,12 +283,11 @@ let private filterTimetables param diggingResult =
 
     //****************prvni filtrace odkazu na neplatne jizdni rady***********************
     
-    use progress = new ProgressBar()
     let myList = 
-        let myFunction x =
-            diggingResult            
+        let myFunction x =            
+            diggingResult
             |> Set.toArray 
-            |> Array.Parallel.map (fun (item: string) -> 
+            |> Array.Parallel.map (fun (item: string) ->                                                       
                                                         //misto pro opravu retezcu, ktere jsou v jsonu v nespravnem formatu
                                                         let item = match item.Contains(@"S2_2023_04_03_2023_04_3_v") with
                                                                    | true  -> item.Replace(@"S2_2023_04_03_2023_04_3_v", @"S2_2023_04_03_2023_04_03_v")  
@@ -386,10 +387,11 @@ let private filterTimetables param diggingResult =
     
     let myList1 = 
         myList |> List.filter (fun item -> not <| String.IsNullOrWhiteSpace(item) && not <| String.IsNullOrEmpty(item))    
-        
+    
+    printfn "Dokoncena prvni filtrace odkazu na neplatne jizdni rady"
     
     //****************druha filtrace odkazu na neplatne jizdni rady***********************
-    
+   
     let myList2 = 
         let myFunction x = 
             //list listu se stejnymi linkami s ruznou dobou platnosti JR      
@@ -450,7 +452,9 @@ let private filterTimetables param diggingResult =
                                              link, path 
                         )
         tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor
-
+    
+    printfn "Dokoncena druha filtrace odkazu na neplatne jizdni rady"
+    
     myList4 |> List.filter (fun item -> (not <| String.IsNullOrWhiteSpace(fst item) 
                                          && 
                                          not <| String.IsNullOrEmpty(fst item)) 
@@ -462,6 +466,7 @@ let private filterTimetables param diggingResult =
         
 let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*string) list) =    
     
+        
     let myFileDelete x =   
         let dirInfo = new DirectoryInfo(pathToDir)
                       |> optionToGenerics "Error8" (new DirectoryInfo(pathToDir))                                                               
@@ -472,21 +477,30 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
         dirInfo.EnumerateFiles()
         |> optionToGenerics "Error11" Seq.empty       
         |> Array.ofSeq
-        |> Array.Parallel.iter (fun item -> item.Delete())
-        
+        |> Array.Parallel.iter (fun item -> item.Delete())    
+   
     tryWith myFileDelete (fun x -> ()) () String.Empty () |> deconstructor
+    printfn "Dokonceno mazani starych jizdnich radu"
     
     //************************download pdf souboru, ktere jsou aktualni*******************************************
     
     //tryWith je ve funkci downloadFileTaskAsync
-    use progress = new ProgressBar()  
-    filterTimetables 
-    |> List.iteri (fun i (link, pathToFile) ->  //Array.Parallel.iter vyhazuje chybu, asi nelze parallelni stahovani z danych stranek  
-                                             progress.Report(float (i/1000))
-                                             async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously  
-                                             //async { printfn"%s" pathToFile; return! Async.Sleep 0 } |> Async.RunSynchronously   
-                                             //async {return! Async.Sleep 0 } |> Async.RunSynchronously   
-                  )    
+    printfn "Probiha stahovani prislusnych jizdnich radu" 
+    let longRunningProcess() = 
+        let l = filterTimetables.Length
+        filterTimetables 
+        |> List.iteri (fun i (link, pathToFile) ->  //Array.Parallel.iter vyhazuje chybu, asi nelze parallelni stahovani z danych stranek  
+                                                 progressBarContinuous i l
+                                                 async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously  
+                                                 //async { printfn"%s" pathToFile; return! Async.Sleep 0 } |> Async.RunSynchronously   
+                                                 
+                                                 //async {return! Async.Sleep 10 } |> Async.RunSynchronously   
+                      )    
+   
+    //progressBarImmediate <| longRunningProcess  
+
+    longRunningProcess()
+
     printfn"%c" <| char(32)   
     printfn"%c" <| char(32)  
     printfn"Pocet stazenych jizdnich radu: %i" filterTimetables.Length   
