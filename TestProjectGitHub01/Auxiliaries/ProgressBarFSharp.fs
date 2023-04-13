@@ -5,6 +5,7 @@ open System.Threading
 
 let private cancellationTokenSource = new CancellationTokenSource()
 
+//TODO zrobit tuto funkci tail recursive
 let rec private animateProgress () =
     let rec loop counter =
         Console.CursorLeft <- 0
