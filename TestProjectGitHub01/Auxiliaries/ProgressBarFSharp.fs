@@ -61,9 +61,8 @@ let private updateProgressBar (currentProgress : int) (totalProgress : int) : un
 
         let barWidth = 50 //nastavit delku dle potreby
         let percentComplete = (/) ((*) currentProgress 101) ((++) totalProgress) // :-) //101 proto, ze pri deleni 100 to po zaokrouhleni dalo jen 99%
-        let barFill = (/) ((*) currentProgress barWidth) totalProgress // :-)
-            
-        //let characterToFill = 
+        let barFill = (/) ((*) currentProgress barWidth) totalProgress // :-)            
+      
         let characterToFill = string (Array.item 0 output) //moze byt baj "#"
         let bar = String.replicate barFill characterToFill 
                   |> optionToGenerics "ErrorPB5" String.Empty 
