@@ -207,7 +207,7 @@ let private downloadAndSaveUpdatedJson() =
                                           streamWriter.WriteLine(json)     
                                           streamWriter.Flush()   
                         ) 
-    printfn "Probiha stahovani a ukladani json souboru"
+    printfn "Probiha stahovani a ukladani json souboru do prislusneho adresare"
     tryWith updateJson (fun x -> ()) () String.Empty () |> deconstructor                
 
 let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
@@ -480,26 +480,25 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
         |> Array.Parallel.iter (fun item -> item.Delete())    
    
     tryWith myFileDelete (fun x -> ()) () String.Empty () |> deconstructor
-    printfn "Dokonceno mazani starych jizdnich radu"
+    printfn "Dokonceno mazani starych jizdnich radu v prislusnem adresari"
     
     //************************download pdf souboru, ktere jsou aktualni*******************************************
     
     //tryWith je ve funkci downloadFileTaskAsync
-    printfn "Probiha stahovani prislusnych jizdnich radu" 
-    let longRunningProcess() = 
+    printfn "Probiha stahovani jizdnich radu a jejich ukladani do prislusneho adresare" 
+    let downloadTimetables() = 
         let l = filterTimetables.Length
         filterTimetables 
         |> List.iteri (fun i (link, pathToFile) ->  //Array.Parallel.iter vyhazuje chybu, asi nelze parallelni stahovani z danych stranek  
                                                  progressBarContinuous i l
                                                  async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously  
-                                                 //async { printfn"%s" pathToFile; return! Async.Sleep 0 } |> Async.RunSynchronously   
-                                                 
+                                                 //async { printfn"%s" pathToFile; return! Async.Sleep 0 } |> Async.RunSynchronously
                                                  //async {return! Async.Sleep 10 } |> Async.RunSynchronously   
                       )    
    
-    //progressBarImmediate <| longRunningProcess  
+    //progressBarIndeterminate <| downloadTimetables  
 
-    longRunningProcess()
+    downloadTimetables() //progressBarContinuous
 
     printfn"%c" <| char(32)   
     printfn"%c" <| char(32)  
@@ -513,3 +512,10 @@ let webscraping1() =
     >> downloadAndSaveTimetables pathToDir       
     >> client.Dispose  
     >> processEnd
+
+    //CurrentValidity = JR striktne platne k danemu dni, tj. pokud je napr. na dany den vylukovy JR, stahne se tento JR, ne JR platny dalsi den
+    //FutureValidity = JR platne v budouci dobe, ktere se uz vyskytuji na webu KODISu
+    //ReplacementService = pouze vylukove JR, JR NAD a JR X linek
+    //WithoutReplacementService = JR dlouhodobe platne bez jakykoliv vyluk. Tento vyber neobsahuje ani dlouhodobe nekolikamesicni vyluky, muze se ale hodit v pripade, ze zakladni slozka s JR obsahuje jedno ci dvoudenni vylukove JR. 
+   
+   //vzhledem k nekonzistnosti retezce s udaji o lince a platnosti muze dojit ke stazeni i neceho, co do daneho vyberu nepatri

@@ -3,14 +3,18 @@
 open System
 open System.Threading
 
-let private cancellationTokenSource = new CancellationTokenSource()
+open TryWith.TryWith
 
-//TODO zrobit tuto funkci tail recursive
-let rec private animateProgress () =
+let private cancellationTokenSource = new CancellationTokenSource() 
+                                      |> optionToGenerics "ErrorPB1" (new CancellationTokenSource())  
+
+//TODO overit tuto funkci ohledne tail recursive
+let private animateProgress () = 
+
     let rec loop counter =
         Console.CursorLeft <- 0
         Console.Write("Tezce na tom pracuji " + new string('.', counter % 4)) //neslo to se sprintf
-        System.Threading.Thread.Sleep(100)
+        System.Threading.Thread.Sleep(100) 
 
         match cancellationTokenSource.IsCancellationRequested with
         | true ->
@@ -20,37 +24,53 @@ let rec private animateProgress () =
         | false -> loop (counter + 1)
     loop 0
 
-let progressBarImmediate (longRunningProcess: unit -> unit) =  
-    let progressThread = new Thread(animateProgress)
-    progressThread.Start()
+let progressBarIndeterminate (longRunningProcess: unit -> unit) = 
 
-    let processThread = new Thread(longRunningProcess)
-    processThread.Start()
+    let myFunction x = 
+        let progressThread = new Thread(animateProgress)
+                             |> optionToGenerics "ErrorPB2" (new Thread(animateProgress)) 
+        progressThread.Start() 
 
-    processThread.Join()
-    cancellationTokenSource.Cancel()
-    progressThread.Join()
+        let processThread = new Thread(longRunningProcess) 
+                            |> optionToGenerics "ErrorPB3" (new Thread(longRunningProcess)) 
+        processThread.Start()
+
+        processThread.Join() 
+
+        cancellationTokenSource.Cancel() 
+
+        progressThread.Join()
+
+    tryWith myFunction (fun x -> ()) () String.Empty () |> deconstructor
 
 let private updateProgressBar (currentProgress : int) (totalProgress : int) : unit =
+    
+    let myFunction x = 
+        let bytes = System.Text.Encoding.GetEncoding(437).GetBytes("█") //437 je tzv. Extended ASCII  
+                    |> optionToGenerics "ErrorPB4" Array.empty 
+        let output = System.Text.Encoding.GetEncoding(852).GetChars(bytes) 
+                     |> optionToGenerics "ErrorPB5" Array.empty   
 
-    let bytes = System.Text.Encoding.GetEncoding(437).GetBytes("█");//437 je tzv. Extended ASCII
-    let output = System.Text.Encoding.GetEncoding(852).GetChars(bytes);
+        let barWidth = 50
+        let percentComplete = currentProgress * 100 / totalProgress + 1
+        let barFill = currentProgress * barWidth / totalProgress
+    
+        //let characterToFill = "#"
+        let characterToFill = string (Array.item 0 output)
+        let bar = String.replicate barFill characterToFill 
+                  |> optionToGenerics "ErrorPB5" String.Empty 
+        let remaining = String.replicate (barWidth - barFill - 1) "*" 
+                        |> optionToGenerics "ErrorPB6" String.Empty
+        let progressBar = sprintf "<%s%s> %d%%" bar remaining percentComplete 
 
-    let barWidth = 50
-    let percentComplete = currentProgress * 100 / totalProgress + 1
-    let barFill = currentProgress * barWidth / totalProgress
-    //let characterToFill = "#"
-    let characterToFill = string (Array.item 0 output)
-    let bar = String.replicate barFill characterToFill
-    let remaining = String.replicate (barWidth - barFill - 1) "*"
-    let progressBar = sprintf "<%s%s> %d%%" bar remaining percentComplete
+        match currentProgress = totalProgress with
+        | true  -> printfn "%s\n" progressBar
+        | false -> printf "%s\r" progressBar
 
-    match currentProgress = totalProgress with
-    | true  -> printfn "%s\n" progressBar
-    | false -> printf "%s\r" progressBar
+    tryWith myFunction (fun x -> ()) () String.Empty () |> deconstructor
 
 let progressBarContinuous (currentProgress : int) (totalProgress : int) : unit =
+
     match currentProgress <= totalProgress with
     | true  -> updateProgressBar currentProgress totalProgress
-    | false -> Console.CursorLeft <- 0
-               ()
+    | false -> Console.CursorLeft <- 0             

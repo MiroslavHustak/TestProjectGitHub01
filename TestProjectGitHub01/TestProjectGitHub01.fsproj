@@ -6,11 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Auxiliaries\ProgressBarFSharp.fs" />
     <Compile Include="Auxiliaries\PattternBuilders.fs" />
     <Compile Include="Auxiliaries\DiscriminatedUnions.fs" />
     <Compile Include="Auxiliaries\TryWith.fs" />
     <Compile Include="Auxiliaries\Helpers.fs" />
+    <Compile Include="Auxiliaries\ProgressBarFSharp.fs" />
     <Content Include="JSONFile1.json" />
     <Content Include="HTMLFile1.html" />
     <Compile Include="CodeChallenge.fs" />
