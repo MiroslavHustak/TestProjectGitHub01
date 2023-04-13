@@ -5,10 +5,11 @@ open System.Threading
 
 open TryWith.TryWith
 
+let private (++) a = (+) a 1
+
 let private cancellationTokenSource = new CancellationTokenSource() 
                                       |> optionToGenerics "ErrorPB1" (new CancellationTokenSource())  
 
-//TODO overit tuto funkci ohledne tail recursive
 let private animateProgress () = 
 
     let rec loop counter =
@@ -18,11 +19,18 @@ let private animateProgress () =
 
         match cancellationTokenSource.IsCancellationRequested with
         | true ->
-                Console.CursorLeft <- 0
-                printfn "Nadrel jsem se, ale ukol jsem uspesne dokoncil :-)"
-                ()
-        | false -> loop (counter + 1)
+                  Console.CursorLeft <- 0
+                  printfn "Nadrel jsem se, ale ukol jsem uspesne dokoncil :-)"                
+        | false ->
+                  let c = (++) counter 
+                  loop c
     loop 0
+    (*
+    The given F# function is tail-recursive because the recursive call to loop is the last operation in the function. 
+    The function does not perform any additional operations after the recursive call is made, which means that the function
+    does not need to store any information on the call stack before making the recursive call. 
+    Therefore, the function is tail-recursive and can be optimized by the F# compiler to avoid stack overflow errors.  
+    *)
 
 let progressBarIndeterminate (longRunningProcess: unit -> unit) = 
 
@@ -51,15 +59,15 @@ let private updateProgressBar (currentProgress : int) (totalProgress : int) : un
         let output = System.Text.Encoding.GetEncoding(852).GetChars(bytes) 
                      |> optionToGenerics "ErrorPB5" Array.empty   
 
-        let barWidth = 50
-        let percentComplete = currentProgress * 100 / totalProgress + 1
-        let barFill = currentProgress * barWidth / totalProgress
-    
-        //let characterToFill = "#"
-        let characterToFill = string (Array.item 0 output)
+        let barWidth = 50 //nastavit delku dle potreby
+        let percentComplete = (/) ((*) currentProgress 101) ((++) totalProgress) // :-) //101 proto, ze pri deleni 100 to po zaokrouhleni dalo jen 99%
+        let barFill = (/) ((*) currentProgress barWidth) totalProgress // :-)
+            
+        //let characterToFill = 
+        let characterToFill = string (Array.item 0 output) //moze byt baj "#"
         let bar = String.replicate barFill characterToFill 
                   |> optionToGenerics "ErrorPB5" String.Empty 
-        let remaining = String.replicate (barWidth - barFill - 1) "*" 
+        let remaining = String.replicate (barWidth - (++) barFill) "*" // :-)
                         |> optionToGenerics "ErrorPB6" String.Empty
         let progressBar = sprintf "<%s%s> %d%%" bar remaining percentComplete 
 

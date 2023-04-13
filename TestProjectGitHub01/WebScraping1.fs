@@ -148,34 +148,34 @@ let private jsonLinkList =
 
 let private pathToJsonList =    
     [
-         sprintf"%s%s" partialPathJson @"kodisMHDTotal.json"
-         sprintf"%s%s" partialPathJson @"kodisMHDBruntal.json"
-         sprintf"%s%s" partialPathJson @"kodisMHDCT.json"
-         sprintf"%s%s" partialPathJson @"kodisMHDFM.json"
-         sprintf"%s%s" partialPathJson @"kodisMHDHavirov.json"
-         sprintf"%s%s" partialPathJson @"kodisMHDKarvina.json"
-         sprintf"%s%s" partialPathJson @"kodisMHDBKrnov.json"
-         sprintf"%s%s" partialPathJson @"kodisMHDNJ.json"
-         sprintf"%s%s" partialPathJson @"kodisMHDOpava.json"
-         sprintf"%s%s" partialPathJson @"kodisMHDOrlova.json"
-         sprintf"%s%s" partialPathJson @"kodisMHDOstrava.json"
-         sprintf"%s%s" partialPathJson @"kodisMHDStudenka.json"
-         sprintf"%s%s" partialPathJson @"kodisMHDTrinec.json"
-         sprintf"%s%s" partialPathJson @"kodisMHDNAD.json"
-         sprintf"%s%s" partialPathJson @"kodisRegionTotal.json"
-         sprintf"%s%s" partialPathJson @"kodisRegion75.json"
-         sprintf"%s%s" partialPathJson @"kodisRegion200.json"
-         sprintf"%s%s" partialPathJson @"kodisRegion300.json"
-         sprintf"%s%s" partialPathJson @"kodisRegion400.json"
-         sprintf"%s%s" partialPathJson @"kodisRegion500.json"
-         sprintf"%s%s" partialPathJson @"kodisRegion600.json"
-         sprintf"%s%s" partialPathJson @"kodisRegion700.json"
-         sprintf"%s%s" partialPathJson @"kodisRegion800.json"
-         sprintf"%s%s" partialPathJson @"kodisRegion900.json"
-         sprintf"%s%s" partialPathJson @"kodisRegionNAD.json"
-         sprintf"%s%s" partialPathJson @"kodisTrainTotal.json"
-         sprintf"%s%s" partialPathJson @"kodisTrainPomaliky.json"
-         sprintf"%s%s" partialPathJson @"kodisTrainSpesakyARychliky.json"                
+        sprintf"%s%s" partialPathJson @"kodisMHDTotal.json"
+        sprintf"%s%s" partialPathJson @"kodisMHDBruntal.json"
+        sprintf"%s%s" partialPathJson @"kodisMHDCT.json"
+        sprintf"%s%s" partialPathJson @"kodisMHDFM.json"
+        sprintf"%s%s" partialPathJson @"kodisMHDHavirov.json"
+        sprintf"%s%s" partialPathJson @"kodisMHDKarvina.json"
+        sprintf"%s%s" partialPathJson @"kodisMHDBKrnov.json"
+        sprintf"%s%s" partialPathJson @"kodisMHDNJ.json"
+        sprintf"%s%s" partialPathJson @"kodisMHDOpava.json"
+        sprintf"%s%s" partialPathJson @"kodisMHDOrlova.json"
+        sprintf"%s%s" partialPathJson @"kodisMHDOstrava.json"
+        sprintf"%s%s" partialPathJson @"kodisMHDStudenka.json"
+        sprintf"%s%s" partialPathJson @"kodisMHDTrinec.json"
+        sprintf"%s%s" partialPathJson @"kodisMHDNAD.json"
+        sprintf"%s%s" partialPathJson @"kodisRegionTotal.json"
+        sprintf"%s%s" partialPathJson @"kodisRegion75.json"
+        sprintf"%s%s" partialPathJson @"kodisRegion200.json"
+        sprintf"%s%s" partialPathJson @"kodisRegion300.json"
+        sprintf"%s%s" partialPathJson @"kodisRegion400.json"
+        sprintf"%s%s" partialPathJson @"kodisRegion500.json"
+        sprintf"%s%s" partialPathJson @"kodisRegion600.json"
+        sprintf"%s%s" partialPathJson @"kodisRegion700.json"
+        sprintf"%s%s" partialPathJson @"kodisRegion800.json"
+        sprintf"%s%s" partialPathJson @"kodisRegion900.json"
+        sprintf"%s%s" partialPathJson @"kodisRegionNAD.json"
+        sprintf"%s%s" partialPathJson @"kodisTrainTotal.json"
+        sprintf"%s%s" partialPathJson @"kodisTrainPomaliky.json"
+        sprintf"%s%s" partialPathJson @"kodisTrainSpesakyARychliky.json"                
     ]
 
 let private downloadAndSaveUpdatedJson() = 
@@ -255,14 +255,14 @@ let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
                                                   item.Attachments |> Option.ofObj        
                                                   |> function 
                                                       | Some value -> value |> fn1
-                                                      | None       -> printfn "%s" "Error6"
+                                                      | None       -> printfn "%s" "Error6c"
                                                                       Array.empty                 
 
                                               let fn3 (item: JsonProvider<pathJson>.Root) =  //quli tomuto je nutno Array
                                                   item.Vyluky |> Option.ofObj
                                                   |> function 
                                                       | Some value -> value |> Array.collect fn2 
-                                                      | None       -> printfn "%s" "Error6"
+                                                      | None       -> printfn "%s" "Error6b"
                                                                       Array.empty 
                                               
                                               let kodisJsonSamples = KodisTimetables.Parse(File.ReadAllText pathToJson) |> Option.ofObj 
@@ -270,7 +270,7 @@ let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
                                               kodisJsonSamples 
                                               |> function 
                                                   | Some value -> value |> Array.collect fn3 
-                                                  | None       -> printfn "%s" "Error6"
+                                                  | None       -> printfn "%s" "Error6a"
                                                                   Array.empty                                 
                              ) 
         tryWith myFunction (fun x -> ()) () String.Empty Array.empty |> deconstructor
@@ -489,7 +489,7 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
     let downloadTimetables() = 
         let l = filterTimetables.Length
         filterTimetables 
-        |> List.iteri (fun i (link, pathToFile) ->  //Array.Parallel.iter vyhazuje chybu, asi nelze parallelni stahovani z danych stranek  
+        |> List.iteri (fun i (link, pathToFile) ->  //Array.Parallel.iter tady nelze  
                                                  progressBarContinuous i l
                                                  async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously  
                                                  //async { printfn"%s" pathToFile; return! Async.Sleep 0 } |> Async.RunSynchronously
