@@ -319,7 +319,8 @@ let private filterTimetables param diggingResult =
                                                    
                                                         let fileNameFullA = 
                                                             match a 0 range <> List.empty  with
-                                                            | true  -> match a 1 range <> List.empty with
+                                                            | true  -> 
+                                                                        match a 1 range <> List.empty with
                                                                         | true  -> 
                                                                                    match a 2 range <> List.empty with
                                                                                    | true  -> fileName                                                                     
