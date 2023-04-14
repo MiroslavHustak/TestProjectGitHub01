@@ -42,7 +42,8 @@ module Program =
             readDataFromExcel() 
             |> function
                 | Some value -> value
-                | None       -> do System.Environment.Exit(1)  //simulace reseni situace (muze byt napr. nejaka default hodnota)                                 
+                | None       -> 
+                                do System.Environment.Exit(1)  //simulace reseni situace (muze byt napr. nejaka default hodnota)                                 
                                 new DataTable() //whatever  
 
         readDataFromExcel |> writeIntoCSV @"e:\E\Mirek po osme hodine a o vikendech\" @"LT-15381 az LT-17691 DGSada 03-04-2023" |> ignore

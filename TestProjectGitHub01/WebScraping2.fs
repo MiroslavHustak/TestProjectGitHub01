@@ -40,12 +40,11 @@ let normalScraping() =
         document2.Descendants "a"
         |> Seq.choose (fun x ->
                               x.TryGetAttribute("href")
-                              |> Option.map (fun a -> x.InnerText(), a.Value()
-                                            )
+                              |> Option.map (fun a -> x.InnerText(), a.Value())                                            
                       )
         //|> Seq.truncate 10
         |> Seq.filter (fun (item1, _) -> item1.Contains "War in Ukraine")
-        |> Seq.map (fun (_, item2) -> sprintf"%s%s" "https://www.bbc.com/" item2 )
+        |> Seq.map (fun (_, item2)    -> sprintf"%s%s" "https://www.bbc.com/" item2 )
         |> Seq.toList
 
     printfn "War in Ukraine %A" links 
@@ -65,8 +64,7 @@ let normalScraping() =
     productHTMLElements42 
     |> Seq.iter (fun item ->   
                            let url = HtmlEntity.DeEntitize(item.QuerySelector("a").Attributes["href"].Value)                   
-                           printfn "productHTMLElements %s" url   
-                  
+                           printfn "productHTMLElements %s" url
                 )
  
 

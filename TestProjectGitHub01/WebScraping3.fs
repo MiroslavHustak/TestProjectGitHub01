@@ -38,7 +38,8 @@ let webscrapingFromPage() =
         elements "a" |> List.map (fun item -> 
                                             let href = item.GetAttribute("href")
                                             match href.EndsWith("pdf") with
-                                            | true  -> printfn "%s" href
+                                            | true  -> 
+                                                       printfn "%s" href
                                                        href
                                             | false -> String.Empty
                                  )

@@ -12,7 +12,8 @@ open System.Diagnostics
             let rec loop list acc auxStringToAdd =
                 match list with 
                 | []        -> acc
-                | _ :: tail -> let finalString = (+) acc auxStringToAdd
+                | _ :: tail -> 
+                               let finalString = (+) acc auxStringToAdd
                                loop tail finalString auxStringToAdd //Tail-recursive function calls that have their parameters passed by the pipe operator are not optimized as loops #6984
             loop listRange initialString stringToAdd //Tail-recursive function calls that have their parameters passed by the pipe operator are not optimized as loops #6984   
          

@@ -14,13 +14,15 @@ module TryWith =
             finally
                f2 x
         with
-        | ex -> f3
+        | ex -> 
+                f3
                 Failure (ex.Message, y)  
 
     let deconstructor =          
         function
         | Success x       -> x                                                   
-        | Failure (ex, y) -> printfn"%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" ex
+        | Failure (ex, y) -> 
+                             printfn"%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" ex
                              do Console.ReadKey() |> ignore 
                              do System.Environment.Exit(1) 
                              y    
@@ -30,7 +32,8 @@ module TryWith =
         |> Option.ofObj 
         |> function 
             | Some value -> value  
-            | None       -> printfn"%s" err
+            | None       -> 
+                            printfn"%s" err
                             gen
 
     

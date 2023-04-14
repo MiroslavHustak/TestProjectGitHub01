@@ -7,8 +7,8 @@ open TryWith.TryWith
 
 let private (++) a = (+) a 1
 
-let private cancellationTokenSource = new CancellationTokenSource() 
-                                      |> optionToGenerics "ErrorPB1" (new CancellationTokenSource())  
+let private cancellationTokenSource = 
+    new CancellationTokenSource() |> optionToGenerics "ErrorPB1" (new CancellationTokenSource())  
 
 let private animateProgress () = 
 
@@ -18,7 +18,7 @@ let private animateProgress () =
         System.Threading.Thread.Sleep(100) 
 
         match cancellationTokenSource.IsCancellationRequested with
-        | true ->
+        | true  ->
                   Console.CursorLeft <- 0
                   printfn "Nadrel jsem se, ale ukol jsem uspesne dokoncil :-)"                
         | false ->
@@ -35,18 +35,17 @@ let private animateProgress () =
 let progressBarIndeterminate (longRunningProcess: unit -> unit) = 
 
     let myFunction x = 
-        let progressThread = new Thread(animateProgress)
-                             |> optionToGenerics "ErrorPB2" (new Thread(animateProgress)) 
+        let progressThread = 
+            new Thread(animateProgress) |> optionToGenerics "ErrorPB2" (new Thread(animateProgress)) 
+        
         progressThread.Start() 
 
-        let processThread = new Thread(longRunningProcess) 
-                            |> optionToGenerics "ErrorPB3" (new Thread(longRunningProcess)) 
+        let processThread = 
+            new Thread(longRunningProcess) |> optionToGenerics "ErrorPB3" (new Thread(longRunningProcess)) 
+
         processThread.Start()
-
         processThread.Join() 
-
         cancellationTokenSource.Cancel() 
-
         progressThread.Join()
 
     tryWith myFunction (fun x -> ()) () String.Empty () |> deconstructor
@@ -54,20 +53,19 @@ let progressBarIndeterminate (longRunningProcess: unit -> unit) =
 let private updateProgressBar (currentProgress : int) (totalProgress : int) : unit =
     
     let myFunction x = 
-        let bytes = System.Text.Encoding.GetEncoding(437).GetBytes("█") //437 je tzv. Extended ASCII  
-                    |> optionToGenerics "ErrorPB4" Array.empty 
-        let output = System.Text.Encoding.GetEncoding(852).GetChars(bytes) 
-                     |> optionToGenerics "ErrorPB5" Array.empty   
+        let bytes = //437 je tzv. Extended ASCII  
+            System.Text.Encoding.GetEncoding(437).GetBytes("█") |> optionToGenerics "ErrorPB4" Array.empty 
+                   
+        let output =
+            System.Text.Encoding.GetEncoding(852).GetChars(bytes) |> optionToGenerics "ErrorPB5" Array.empty   
 
         let barWidth = 50 //nastavit delku dle potreby
         let percentComplete = (/) ((*) currentProgress 101) ((++) totalProgress) // :-) //101 proto, ze pri deleni 100 to po zaokrouhleni dalo jen 99%
         let barFill = (/) ((*) currentProgress barWidth) totalProgress // :-)            
       
         let characterToFill = string (Array.item 0 output) //moze byt baj "#"
-        let bar = String.replicate barFill characterToFill 
-                  |> optionToGenerics "ErrorPB5" String.Empty 
-        let remaining = String.replicate (barWidth - (++) barFill) "*" // :-)
-                        |> optionToGenerics "ErrorPB6" String.Empty
+        let bar = String.replicate barFill characterToFill |> optionToGenerics "ErrorPB5" String.Empty 
+        let remaining = String.replicate (barWidth - (++) barFill) "*" |> optionToGenerics "ErrorPB6" String.Empty // :-)
         let progressBar = sprintf "<%s%s> %d%%" bar remaining percentComplete 
 
         match currentProgress = totalProgress with

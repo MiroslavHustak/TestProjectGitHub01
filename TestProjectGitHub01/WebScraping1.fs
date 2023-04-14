@@ -25,7 +25,8 @@ Console.OutputEncoding  <- System.Text.Encoding.Unicode
 
 //tu a tam zkontrolovat json, zdali KODIS nezmenil jeho strukturu 
 let [<Literal>] partialPathJson =  @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/"
-let [<Literal>] pathJson = @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisMHDTotal.json" //pro type provider musi byt konstanta (nemozu pouzit sprintf partialPathJson) a musi byt forward slash"
+//pro type provider musi byt konstanta (nemozu pouzit sprintf partialPathJson) a musi byt forward slash"
+let [<Literal>] pathJson = @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisMHDTotal.json" 
 let [<Literal>] pathKodisWeb = @"https://kodisweb-backend.herokuapp.com/"
 let [<Literal>] pathKodisAmazonLink = @"https://kodis-files.s3.eu-central-1.amazonaws.com/"
 let [<Literal>] lineNumberLength = 3 //3 je delka retezce pouze pro linky 001 az 999
@@ -104,7 +105,8 @@ let private downloadFileTaskAsync (client: Http.HttpClient) (uri: string) (path:
                     use fileStream = new FileStream(path, FileMode.CreateNew) //|> (optionToGenerics "Error9" (new FileStream(path, FileMode.CreateNew))) //nelze, vytvari to dalsi stream a uklada to znovu                                
                     return! stream.CopyToAsync(fileStream) |> Async.AwaitTask 
                 with
-                | ex -> printfn"\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
+                | ex -> 
+                        printfn"\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
                         do Console.ReadKey() |> ignore 
                         do client.Dispose()
                         do System.Environment.Exit(1)
@@ -193,7 +195,8 @@ let private downloadAndSaveUpdatedJson() =
                                               try 
                                                   return! client.GetStringAsync(item) |> Async.AwaitTask 
                                               with
-                                              | ex -> printfn"\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
+                                              | ex -> 
+                                                      printfn"\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
                                                       do Console.ReadKey() |> ignore 
                                                       do System.Environment.Exit(1)
                                                       return! client.GetStringAsync(String.Empty) |> Async.AwaitTask //whatever of that type
@@ -224,7 +227,8 @@ let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
                                               kodisJsonSamples 
                                               |> function 
                                                   | Some value -> value |> Array.map (fun item -> item.Timetable) //quli tomuto je nutno Array
-                                                  | None       -> printfn "%s" "Error5"
+                                                  | None       -> 
+                                                                  printfn "%s" "Error5"
                                                                   Array.empty    
                              ) 
         tryWith myFunction (fun x -> ()) () String.Empty Array.empty |> deconstructor
@@ -255,14 +259,16 @@ let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
                                                   item.Attachments |> Option.ofObj        
                                                   |> function 
                                                       | Some value -> value |> fn1
-                                                      | None       -> printfn "%s" "Error6c"
+                                                      | None       -> 
+                                                                      printfn "%s" "Error6c"
                                                                       Array.empty                 
 
                                               let fn3 (item: JsonProvider<pathJson>.Root) =  //quli tomuto je nutno Array
                                                   item.Vyluky |> Option.ofObj
                                                   |> function 
                                                       | Some value -> value |> Array.collect fn2 
-                                                      | None       -> printfn "%s" "Error6b"
+                                                      | None       ->
+                                                                      printfn "%s" "Error6b"
                                                                       Array.empty 
                                               
                                               let kodisJsonSamples = KodisTimetables.Parse(File.ReadAllText pathToJson) |> Option.ofObj 
@@ -270,7 +276,8 @@ let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
                                               kodisJsonSamples 
                                               |> function 
                                                   | Some value -> value |> Array.collect fn3 
-                                                  | None       -> printfn "%s" "Error6a"
+                                                  | None       -> 
+                                                                  printfn "%s" "Error6a"
                                                                   Array.empty                                 
                              ) 
         tryWith myFunction (fun x -> ()) () String.Empty Array.empty |> deconstructor
@@ -301,7 +308,8 @@ let private filterTimetables param diggingResult =
                                                         let charList = 
                                                             match fileName |> String.length >= lineNumberLength with  
                                                             | true  -> fileName.ToCharArray() |> Array.toList |> List.take lineNumberLength
-                                                            | false -> printfn "Error11"
+                                                            | false -> 
+                                                                       printfn "Error11"
                                                                        List.empty
                                              
                                                         let a i range = range |> List.filter (fun item -> (charList |> List.item i = item)) 
@@ -344,10 +352,12 @@ let private filterTimetables param diggingResult =
                                                                                   match param with 
                                                                                   | CurrentValidity           -> true //s tim nic nezrobim, nekonzistentni informace v retezci
                                                                                   | FutureValidity            -> true //s tim nic nezrobim, nekonzistentni informace v retezci
-                                                                                  | ReplacementService        -> fileNameFull.Contains("_v") 
+                                                                                  | ReplacementService        -> 
+                                                                                                                 fileNameFull.Contains("_v") 
                                                                                                                  || fileNameFull.Contains("X")
                                                                                                                  || fileNameFull.Contains("NAD")
-                                                                                  | WithoutReplacementService -> not <| fileNameFull.Contains("_v") 
+                                                                                  | WithoutReplacementService -> 
+                                                                                                                 not <| fileNameFull.Contains("_v") 
                                                                                                                  && not <| fileNameFull.Contains("X")
                                                                                                                  && not <| fileNameFull.Contains("NAD")
 
@@ -364,12 +374,14 @@ let private filterTimetables param diggingResult =
                                                                                     match param with 
                                                                                     | CurrentValidity           -> dateValidityStart |> Fugit.isBeforeOrEqual currentTime && dateValidityEnd |> Fugit.isAfter currentTime
                                                                                     | FutureValidity            -> dateValidityStart |> Fugit.isAfter currentTime
-                                                                                    | ReplacementService        -> (dateValidityStart |> Fugit.isBeforeOrEqual currentTime
+                                                                                    | ReplacementService        -> 
+                                                                                                                   (dateValidityStart |> Fugit.isBeforeOrEqual currentTime
                                                                                                                    && dateValidityEnd |> Fugit.isAfter currentTime)
                                                                                                                    && (fileNameFull.Contains("_v") 
                                                                                                                    || fileNameFull.Contains("X")
                                                                                                                    || fileNameFull.Contains("NAD"))
-                                                                                    | WithoutReplacementService -> (dateValidityStart |> Fugit.isBeforeOrEqual currentTime
+                                                                                    | WithoutReplacementService ->
+                                                                                                                   (dateValidityStart |> Fugit.isBeforeOrEqual currentTime
                                                                                                                    && dateValidityEnd |> Fugit.isAfter currentTime)
                                                                                                                    && (not <| fileNameFull.Contains("_v") 
                                                                                                                    && not <| fileNameFull.Contains("X")
@@ -444,9 +456,11 @@ let private filterTimetables param diggingResult =
 
                                              let path =     
                                                 match item.Contains("_t") with 
-                                                | true  -> let fileName = item.Substring(0, item.Length) //zatim bez generovaneho kodu, sem tam to zkontrolovat
+                                                | true  -> 
+                                                           let fileName = item.Substring(0, item.Length) //zatim bez generovaneho kodu, sem tam to zkontrolovat
                                                            sprintf"%s/%s" pathToDir fileName   
-                                                | false -> let fileName = item.Substring(0, item.Length - 15) //bez 15 znaku s generovanym kodem a priponou pdf dostaneme toto: 113_2022_12_11_2023_12_09 
+                                                | false -> 
+                                                           let fileName = item.Substring(0, item.Length - 15) //bez 15 znaku s generovanym kodem a priponou pdf dostaneme toto: 113_2022_12_11_2023_12_09 
                                                            sprintf"%s/%s%s" pathToDir fileName ".pdf"  //pdf opet musime pridat
                                                            
                                              link, path 
@@ -455,7 +469,8 @@ let private filterTimetables param diggingResult =
     
     printfn "Dokoncena druha filtrace odkazu na neplatne jizdni rady"
     
-    myList4 |> List.filter (fun item -> (not <| String.IsNullOrWhiteSpace(fst item) 
+    myList4 |> List.filter (fun item -> 
+                                         (not <| String.IsNullOrWhiteSpace(fst item) 
                                          && 
                                          not <| String.IsNullOrEmpty(fst item)) 
                                          ||
@@ -468,8 +483,7 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
     
         
     let myFileDelete x =   
-        let dirInfo = new DirectoryInfo(pathToDir)
-                      |> optionToGenerics "Error8" (new DirectoryInfo(pathToDir))                                                               
+        let dirInfo = new DirectoryInfo(pathToDir) |> optionToGenerics "Error8" (new DirectoryInfo(pathToDir))                                                               
         
         //failwith "Testovani funkce tryWith"
 

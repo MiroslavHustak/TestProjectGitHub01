@@ -28,11 +28,14 @@ let readDataFromExcel x =
             let excelReaderXlsF stream = ExcelReaderFactory.CreateBinaryReader(stream) //pouze pro rozsireni programu o vyber excel souboru         
   
             function 
-            | ".xlsx" -> let myStream = stream |> excelReaderXlsxF  
+            | ".xlsx" -> 
+                         let myStream = stream |> excelReaderXlsxF  
                          myStream |> Option.ofObj
-            | ".xls"  -> let myStream = stream |> excelReaderXlsF 
+            | ".xls"  -> 
+                         let myStream = stream |> excelReaderXlsF 
                          myStream |> Option.ofObj
-            | _       -> let myStream = None  
+            | _       -> 
+                         let myStream = None  
                          myStream 
     
         //TODO try with
@@ -110,7 +113,8 @@ let writeIntoCSV (pathCSV: string) (nameOfCVSFile: string) (dt: DataTable) = //p
               |> Option.ofObj  
               |> function
                  | Some value -> value
-                 | None       -> do System.Environment.Exit(1)  //simulace reseni situace (muze byt napr. nejaka default hodnota)                                
+                 | None       -> 
+                                 do System.Environment.Exit(1)  //simulace reseni situace (muze byt napr. nejaka default hodnota)                                
                                  new StreamWriter(String.Empty) //whatever
 
     //TODO try with
@@ -121,7 +125,8 @@ let writeIntoCSV (pathCSV: string) (nameOfCVSFile: string) (dt: DataTable) = //p
                          |> Option.ofObj    
                          |> function
                              | Some value -> value
-                             | None       -> do System.Environment.Exit(1)  //simulace reseni situace (muze byt napr. nejaka default hodnota)                                
+                             | None       -> 
+                                             do System.Environment.Exit(1)  //simulace reseni situace (muze byt napr. nejaka default hodnota)                                
                                              Seq.empty //whatever
         columnNames |> Seq.fold (fun acc item -> (+) acc (sprintf "%s%s" item ";")) String.Empty //TODO try with (Seq.fold)
    
