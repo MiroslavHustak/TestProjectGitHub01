@@ -350,22 +350,23 @@ let private filterTimetables param diggingResult =
                                                                    let a = [ yearValidityStart; monthValidityStart; dayValidityStart; yearValidityEnd; monthValidityEnd; dayValidityEnd ]
                                                                 
                                                                    match a |> List.contains -1 with
-                                                                   | true  -> let cond = 
-                                                                                  match param with 
-                                                                                  | CurrentValidity           -> true //s tim nic nezrobim, nekonzistentni informace v retezci
-                                                                                  | FutureValidity            -> true //s tim nic nezrobim, nekonzistentni informace v retezci
-                                                                                  | ReplacementService        -> 
-                                                                                                                 fileNameFull.Contains("_v") 
-                                                                                                                 || fileNameFull.Contains("X")
-                                                                                                                 || fileNameFull.Contains("NAD")
-                                                                                  | WithoutReplacementService -> 
-                                                                                                                 not <| fileNameFull.Contains("_v") 
-                                                                                                                 && not <| fileNameFull.Contains("X")
-                                                                                                                 && not <| fileNameFull.Contains("NAD")
+                                                                   | true  -> 
+                                                                            let cond = 
+                                                                                match param with 
+                                                                                | CurrentValidity           -> true //s tim nic nezrobim, nekonzistentni informace v retezci
+                                                                                | FutureValidity            -> true //s tim nic nezrobim, nekonzistentni informace v retezci
+                                                                                | ReplacementService        -> 
+                                                                                                               fileNameFull.Contains("_v") 
+                                                                                                               || fileNameFull.Contains("X")
+                                                                                                               || fileNameFull.Contains("NAD")
+                                                                                | WithoutReplacementService -> 
+                                                                                                               not <| fileNameFull.Contains("_v") 
+                                                                                                               && not <| fileNameFull.Contains("X")
+                                                                                                               && not <| fileNameFull.Contains("NAD")
 
-                                                                              match cond with
-                                                                              | true  -> fileNameFull
-                                                                              | false -> String.Empty 
+                                                                            match cond with
+                                                                            | true  -> fileNameFull
+                                                                            | false -> String.Empty 
                                                                               
                                                                    | false -> 
                                                                             try
