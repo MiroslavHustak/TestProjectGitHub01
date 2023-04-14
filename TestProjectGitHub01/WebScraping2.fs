@@ -23,7 +23,7 @@ let normalScraping() =
        
     productHTMLElements1
     |> List.iter (fun item ->
-                            let querySelector (tag: string) = (item.Descendants tag) |> Seq.head
+                            let querySelector (tag: string) = (item.Descendants (string tag)) |> Seq.head
                                                                          
                             let url = (querySelector "a").AttributeValue "href"    
                             let image = (querySelector "img").AttributeValue "src" 
@@ -31,7 +31,7 @@ let normalScraping() =
                             let price = (querySelector "span").InnerText()
                         
                             printfn "productHTMLElements1 %s%s%s%s" url image name price    
-                )
+                 )
 
     let url2 = "https://www.bbc.com/news" 
     let document2 = FSharp.Data.HtmlDocument.Load(url2)
@@ -40,7 +40,7 @@ let normalScraping() =
         document2.Descendants "a"
         |> Seq.choose (fun x ->
                               x.TryGetAttribute("href")
-                              |> Option.map (fun a -> x.InnerText(), a.Value())                                            
+                              |> Option.map (fun a -> string <| x.InnerText(), string <| a.Value())                                            
                       )
         //|> Seq.truncate 10
         |> Seq.filter (fun (item1, _) -> item1.Contains "War in Ukraine")
@@ -63,7 +63,7 @@ let normalScraping() =
   
     productHTMLElements42 
     |> Seq.iter (fun item ->   
-                           let url = HtmlEntity.DeEntitize(item.QuerySelector("a").Attributes["href"].Value)                   
+                           let url = string <| HtmlEntity.DeEntitize(item.QuerySelector("a").Attributes["href"].Value)                   
                            printfn "productHTMLElements %s" url
                 )
  

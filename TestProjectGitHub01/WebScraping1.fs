@@ -31,7 +31,7 @@ let [<Literal>] pathKodisWeb = @"https://kodisweb-backend.herokuapp.com/"
 let [<Literal>] pathKodisAmazonLink = @"https://kodis-files.s3.eu-central-1.amazonaws.com/"
 let [<Literal>] lineNumberLength = 3 //3 je delka retezce pouze pro linky 001 az 999
 
-let private currentTime = Fugit.now().AddDays(-1.0)    // new DateTime(2023, 04, 11)
+let private currentTime = Fugit.now().AddDays(-1.0)   // new DateTime(2023, 04, 11)
 let private pathToDir = @"e:\E\Mirek po osme hodine a o vikendech\KODISTP\" 
 let private regularValidityStart = new DateTime(2022, 12, 11) //zmenit pri pravidelne zmene JR 
 let private regularValidityEnd = new DateTime(2023, 12, 09) //zmenit pri pravidelne zmene JR 
@@ -294,11 +294,13 @@ let private filterTimetables param diggingResult =
         let myFunction x =            
             diggingResult
             |> Set.toArray 
-            |> Array.Parallel.map (fun (item: string) ->                                                       
+            |> Array.Parallel.map (fun (item: string) ->   
+                                                        let item = string item
                                                         //misto pro opravu retezcu, ktere jsou v jsonu v nespravnem formatu
-                                                        let item = match item.Contains(@"S2_2023_04_03_2023_04_3_v") with
-                                                                   | true  -> item.Replace(@"S2_2023_04_03_2023_04_3_v", @"S2_2023_04_03_2023_04_03_v")  
-                                                                   | false -> item     
+                                                        let item = 
+                                                            match item.Contains(@"S2_2023_04_03_2023_04_3_v") with
+                                                            | true  -> item.Replace(@"S2_2023_04_03_2023_04_3_v", @"S2_2023_04_03_2023_04_03_v")  
+                                                            | false -> item     
 
                                                         let fileName =  
                                                             match item.Contains @"timetables/" with
@@ -416,6 +418,7 @@ let private filterTimetables param diggingResult =
                                                    let latestValidityStart =  
                                                        list
                                                        |> List.map (fun item -> 
+                                                                              let item = string item                                                                              
                                                                               try
                                                                                   let yearValidityStart = Parsing.parseMe(item.Substring(4, 4)) //overovat, jestli se v jsonu neco nezmenilo //113_2022_12_11_2023_12_09.....
                                                                                   let monthValidityStart = Parsing.parseMe(item.Substring(9, 2))
@@ -440,7 +443,8 @@ let private filterTimetables param diggingResult =
     let myList4 = 
         let myFunction x = 
             myList3 
-            |> List.map (fun (item: string) ->        
+            |> List.map (fun (item: string) ->     
+                                             let item = string item   
                                              let str = item
                                              let str =
                                                  match str.Substring(0, 2).Equals("00") with
