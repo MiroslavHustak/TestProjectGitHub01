@@ -320,7 +320,8 @@ let private filterTimetables param diggingResult =
                                                         let fileNameFullA = 
                                                             match a 0 range <> List.empty  with
                                                             | true  -> match a 1 range <> List.empty with
-                                                                        | true  -> match a 2 range <> List.empty with
+                                                                        | true  -> 
+                                                                                   match a 2 range <> List.empty with
                                                                                    | true  -> fileName                                                                     
                                                                                    | false -> sprintf "%s%s" "0" fileName                    
                                                                         | false -> sprintf "%s%s" "00" fileName //pocet "0" zavisi na delce retezce cisla linky
