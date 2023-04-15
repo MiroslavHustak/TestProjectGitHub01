@@ -203,15 +203,24 @@ let private downloadAndSaveUpdatedJson() =
                                           } |> Async.RunSynchronously
                         
                          )  
+
         //save updated json files
-        (pathToJsonList, loadAndSaveJsonFiles)
-        ||> List.iteri2 (fun i path json ->                                                                          
-                                          use streamWriter = new StreamWriter(Path.GetFullPath(path))                   
-                                          streamWriter.WriteLine(json)     
-                                          streamWriter.Flush()   
-                        ) 
+        match (<>) pathToJsonList.Length loadAndSaveJsonFiles.Length with
+        | true  -> 
+                  printfn"\nZase se nekdo vrtal do listu s odkazy a cestami. Je nutna jejich kontrola. Zmackni cokoliv pro ukonceni programu." 
+                  do Console.ReadKey() |> ignore 
+                  do System.Environment.Exit(1)
+        | false ->
+                  (pathToJsonList, loadAndSaveJsonFiles)
+                  ||> List.iteri2 (fun i path json ->                                                                          
+                                                    use streamWriter = new StreamWriter(Path.GetFullPath(path))                   
+                                                    streamWriter.WriteLine(json)     
+                                                    streamWriter.Flush()   
+                                  ) 
+
     printfn "Probiha stahovani a ukladani json souboru do prislusneho adresare"
-    tryWith updateJson (fun x -> ()) () String.Empty () |> deconstructor                
+    tryWith updateJson (fun x -> ()) () String.Empty () |> deconstructor    
+    printfn "Dokonceno stahovani a ukladani json souboru do prislusneho adresare"
 
 let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
     
@@ -523,6 +532,7 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
 
     printfn"%c" <| char(32)   
     printfn"%c" <| char(32)  
+    printfn "Dokonceno stahovani jizdnich radu a jejich ukladani do prislusneho adresare" 
     printfn"Pocet stazenych jizdnich radu: %i" filterTimetables.Length   
 
 let webscraping1() =
