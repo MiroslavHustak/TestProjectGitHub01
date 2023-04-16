@@ -44,30 +44,30 @@ type KodisTimetables = JsonProvider<pathJson>
 
 //************************Helpers**********************************************************************
 
-let private xor a b = (a && not b) || (not a && b)
+let private xor a b = (a && not b) || (not a && b) //P
 
-let private errorStr str err = str |> (optionToGenerics err String.Empty)                            
+let private errorStr str err = str |> (optionToGenerics err String.Empty) //AP                            
 
-let private timeStr = errorStr "HH:mm:ss" "Error1"                     
+let private timeStr = errorStr "HH:mm:ss" "Error1" //AP                    
     
-let private processStart() =     
+let private processStart() =    //I 
     let processStartTime x = 
         let processStartTime = errorStr (sprintf"Zacatek procesu: %s" <| DateTime.Now.ToString(timeStr)) "Error2"                           
         printfn "%s" processStartTime
     tryWith processStartTime (fun x -> ()) () String.Empty () |> deconstructor
     
-let private processEnd() =     
+let private processEnd() =    //I 
     let processEndTime x = 
         let processEndTime = errorStr (sprintf"Konec procesu: %s" <| DateTime.Now.ToString(timeStr)) "Error3"                       
         printfn "%s" processEndTime
     tryWith processEndTime (fun x -> ()) () String.Empty () |> deconstructor
 
-let private client = 
+let private client =  //I 
     let myClient x = new System.Net.Http.HttpClient() |> (optionToGenerics "Error4" (new System.Net.Http.HttpClient()))         
     tryWith myClient (fun x -> ()) () String.Empty (new System.Net.Http.HttpClient()) |> deconstructor
 
-let private splitList list = 
-    let mySplitting x =
+let private splitList list = //I deconstructor
+    let mySplitting x = //P
         let folder (a: string, b: string) (cur, acc) =
             let cond = a.Substring(0, lineNumberLength) = b.Substring(0, lineNumberLength) 
             match a with
@@ -82,8 +82,8 @@ let private splitList list =
     splitListByPrefix will group together all elements that have the same prefix, regardless of whether they are adjacent in the input list or not.
     *)
 
-let private splitListByPrefix (list: string list) : string list list =
-    let mySplitting x = 
+let private splitListByPrefix (list: string list) : string list list = //I deconstructor
+    let mySplitting x = //P
         let prefix = (fun (x: string) -> x.Substring(0, lineNumberLength))
         let groups = list |> List.groupBy prefix  
         let filteredGroups = groups |> List.filter (fun (k, _) -> k.Substring(0, lineNumberLength) = k.Substring(0, lineNumberLength))
@@ -92,10 +92,10 @@ let private splitListByPrefix (list: string list) : string list list =
     tryWith mySplitting (fun x -> ()) () String.Empty [ List.empty ] |> deconstructor
 
 //ekvivalent splitListByPrefix za predpokladu existence teto podminky shodnosti k.Substring(0, lineNumberLength) = k.Substring(0, lineNumberLength)   
-let private splitList1 (list: string list) : string list list =
+let private splitList1 (list: string list) : string list list = //P
     list |> List.groupBy (fun (item: string) -> item.Substring(0, lineNumberLength)) |> List.map (fun (key, group) -> group) 
     
-let private downloadFileTaskAsync (client: Http.HttpClient) (uri: string) (path: string) =    
+let private downloadFileTaskAsync (client: Http.HttpClient) (uri: string) (path: string) =   //I 
     //muj custom made tryWith nezachyti exception u async
         async
             {   
@@ -116,7 +116,7 @@ let private downloadFileTaskAsync (client: Http.HttpClient) (uri: string) (path:
 
 //************************Main code***********************************************************
 
-let private jsonLinkList = 
+let private jsonLinkList = //P
     [
         sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Bruntál&group_in%5B1%5D=MHD%20Český%20Těšín&group_in%5B2%5D=MHD%20Frýdek-Místek&group_in%5B3%5D=MHD%20Havířov&group_in%5B4%5D=MHD%20Karviná&group_in%5B5%5D=MHD%20Krnov&group_in%5B6%5D=MHD%20Nový%20Jičín&group_in%5B7%5D=MHD%20Opava&group_in%5B8%5D=MHD%20Orlová&group_in%5B9%5D=MHD%20Ostrava&group_in%5B10%5D=MHD%20Studénka&group_in%5B11%5D=MHD%20Třinec&group_in%5B12%5D=NAD%20MHD&_sort=numeric_label"
         sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Bruntál&_sort=numeric_label"
@@ -148,7 +148,7 @@ let private jsonLinkList =
         sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=R8-R61&_sort=numeric_label"         
     ]
 
-let private pathToJsonList =    
+let private pathToJsonList =  //P  
     [
         sprintf"%s%s" partialPathJson @"kodisMHDTotal.json"
         sprintf"%s%s" partialPathJson @"kodisMHDBruntal.json"
@@ -182,8 +182,8 @@ let private pathToJsonList =
 
 let private downloadAndSaveUpdatedJson() = 
 
-    let updateJson x = 
-        let loadAndSaveJsonFiles = 
+    let updateJson x = //I
+        let loadAndSaveJsonFiles = //I
             let l = jsonLinkList.Length
             jsonLinkList
             |> List.mapi (fun i item ->                                                
@@ -224,13 +224,13 @@ let private downloadAndSaveUpdatedJson() =
 
 let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
     
-    let kodisTimetables() = 
+    let kodisTimetables() = //I
 
-        let myFunction x = 
+        let myFunction x = //I
             pathToJsonList 
             |> Array.ofList 
             |> Array.collect (fun pathToJson ->   
-                                              let kodisJsonSamples = KodisTimetables.Parse(File.ReadAllText pathToJson) |> Option.ofObj
+                                              let kodisJsonSamples = KodisTimetables.Parse(File.ReadAllText pathToJson) |> Option.ofObj //I
                                               //let kodisJsonSamples = kodisJsonSamples.GetSamples() |> Option.ofObj  //v pripade jen jednoho json               
                 
                                               kodisJsonSamples 
@@ -242,7 +242,7 @@ let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
                              ) 
         tryWith myFunction (fun x -> ()) () String.Empty Array.empty |> deconstructor
 
-    let kodisAttachments() = 
+    let kodisAttachments() = //I
 
         (*
         //ponechavam pro pochopeni struktury u json type provider (pri pouziti option se to tahne az k susedovi)
@@ -256,15 +256,15 @@ let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
                                                   )   
         *)  
 
-        let myFunction x = 
+        let myFunction x = //I
             pathToJsonList
             |> Array.ofList 
             |> Array.collect (fun pathToJson ->
-                                              let fn1 (value: JsonProvider<pathJson>.Attachment array) =
+                                              let fn1 (value: JsonProvider<pathJson>.Attachment array) = //AP
                                                   value //Option je v errorStr 
                                                   |> Array.Parallel.map (fun item -> errorStr item.Url "Error7")
 
-                                              let fn2 (item: JsonProvider<pathJson>.Vyluky) =  //quli tomuto je nutno Array      
+                                              let fn2 (item: JsonProvider<pathJson>.Vyluky) =  //quli tomuto je nutno Array //AP    
                                                   item.Attachments |> Option.ofObj        
                                                   |> function 
                                                       | Some value -> value |> fn1
@@ -272,7 +272,7 @@ let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
                                                                       printfn "%s" "Error6c"
                                                                       Array.empty                 
 
-                                              let fn3 (item: JsonProvider<pathJson>.Root) =  //quli tomuto je nutno Array
+                                              let fn3 (item: JsonProvider<pathJson>.Root) =  //quli tomuto je nutno Array //AP
                                                   item.Vyluky |> Option.ofObj
                                                   |> function 
                                                       | Some value -> value |> Array.collect fn2 
@@ -280,7 +280,7 @@ let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
                                                                       printfn "%s" "Error6b"
                                                                       Array.empty 
                                               
-                                              let kodisJsonSamples = KodisTimetables.Parse(File.ReadAllText pathToJson) |> Option.ofObj 
+                                              let kodisJsonSamples = KodisTimetables.Parse(File.ReadAllText pathToJson) |> Option.ofObj //I
                                               
                                               kodisJsonSamples 
                                               |> function 
@@ -295,12 +295,12 @@ let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
     //kodisAttachments() |> Set.ofArray //over cas od casu
     //kodisTimetables() |> Set.ofArray //over cas od casu
 
-let private filterTimetables param diggingResult = 
+let private filterTimetables param diggingResult = //I
 
     //****************prvni filtrace odkazu na neplatne jizdni rady***********************
     
     let myList = 
-        let myFunction x =            
+        let myFunction x =  //AP          
             diggingResult
             |> Set.toArray 
             |> Array.Parallel.map (fun (item: string) ->   
@@ -411,15 +411,15 @@ let private filterTimetables param diggingResult =
                                   ) |> Array.toList |> List.distinct 
         tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor
     
-    let myList1 = 
+    let myList1 = //P
         myList |> List.filter (fun item -> not <| String.IsNullOrWhiteSpace(item) && not <| String.IsNullOrEmpty(item))    
     
     printfn "Dokoncena prvni filtrace odkazu na neplatne jizdni rady"
     
     //****************druha filtrace odkazu na neplatne jizdni rady***********************
    
-    let myList2 = 
-        let myFunction x = 
+    let myList2 = //I
+        let myFunction x = //P
             //list listu se stejnymi linkami s ruznou dobou platnosti JR      
             myList1 
             |> splitListByPrefix //splitList1 //splitList 
@@ -449,11 +449,11 @@ let private filterTimetables param diggingResult =
                             ) |> List.distinct                              
         tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor 
         
-    let myList3 = 
+    let myList3 = //P
         myList2 |> List.filter (fun item -> not <| String.IsNullOrWhiteSpace(item) && not <| String.IsNullOrEmpty(item))
 
-    let myList4 = 
-        let myFunction x = 
+    let myList4 = //I
+        let myFunction x = //P
             myList3 
             |> List.map (fun (item: string) ->     
                                              let item = string item   
@@ -495,10 +495,9 @@ let private filterTimetables param diggingResult =
                                          not <| String.IsNullOrEmpty(snd item))                                         
                            ) |> List.sort                                             
         
-let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*string) list) =    
-    
-        
-    let myFileDelete x =   
+let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*string) list) = //I 
+
+    let myFileDelete x = //I  
         let dirInfo = new DirectoryInfo(pathToDir) |> optionToGenerics "Error8" (new DirectoryInfo(pathToDir))                                                               
         
         //failwith "Testovani funkce tryWith"
@@ -516,7 +515,8 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
     
     //tryWith je ve funkci downloadFileTaskAsync
     printfn "Probiha stahovani jizdnich radu a jejich ukladani do prislusneho adresare" 
-    let downloadTimetables() = 
+
+    let downloadTimetables() = //I
         let l = filterTimetables.Length
         filterTimetables 
         |> List.iteri (fun i (link, pathToFile) ->  //Array.Parallel.iter tady nelze  
@@ -535,7 +535,7 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
     printfn "Dokonceno stahovani jizdnich radu a jejich ukladani do prislusneho adresare" 
     printfn"Pocet stazenych jizdnich radu: %i" filterTimetables.Length   
 
-let webscraping1() =
+let webscraping1() = //I
     processStart 
     >> downloadAndSaveUpdatedJson
     >> digThroughJsonStructure 
