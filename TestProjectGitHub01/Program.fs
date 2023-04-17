@@ -57,7 +57,7 @@ let main argv =
         printfn "4 = JR dlouhodobe platne bez jakykoliv vyluk. Mohou se hodit v pripade,"
         printfn "%4ckdy zakladni varianta obsahuje jedno ci dvoudenni vylukove JR." <| char(32)
         printfn "%c" <| char(32) 
-        printfn "Jakakoliv jina klavesa = ZAKLADNI VARIANTA, tj. JR strikne platne dnesni den, tj. pokud je napr. na dnesni"
+        printfn "Jakakoliv jina klavesa = ZAKLADNI VARIANTA, tj. JR strikne platne dnesni den, tj. pokud je napr. pro dnesni"
         printfn "den platny pouze jednodenni vylukovy JR, stahne se tento JR, ne JR platny dalsi den.\r"
         printfn "%c" <| char(32) 
         printfn "%c" <| char(32) 
@@ -79,6 +79,7 @@ let main argv =
         printfn "%c" <| char(32)   
         printfn "Stiskni cokoliv pro ukonceni aplikace."
         Console.ReadKey() |> ignore
+
     tryWith myWebscraping1 (fun x -> ()) () String.Empty () |> deconstructor
 
     //*****************************WebScraping2******************************
