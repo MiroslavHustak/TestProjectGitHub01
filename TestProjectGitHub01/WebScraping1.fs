@@ -106,7 +106,7 @@ let private downloadFileTaskAsync (client: Http.HttpClient) (uri: string) (path:
                     return! stream.CopyToAsync(fileStream) |> Async.AwaitTask 
                 with
                 | ex -> 
-                        printfn"\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
+                        printfn "\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
                         do Console.ReadKey() |> ignore 
                         do client.Dispose()
                         do System.Environment.Exit(1)
@@ -118,66 +118,66 @@ let private downloadFileTaskAsync (client: Http.HttpClient) (uri: string) (path:
 
 let private jsonLinkList = //P
     [
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Bruntál&group_in%5B1%5D=MHD%20Český%20Těšín&group_in%5B2%5D=MHD%20Frýdek-Místek&group_in%5B3%5D=MHD%20Havířov&group_in%5B4%5D=MHD%20Karviná&group_in%5B5%5D=MHD%20Krnov&group_in%5B6%5D=MHD%20Nový%20Jičín&group_in%5B7%5D=MHD%20Opava&group_in%5B8%5D=MHD%20Orlová&group_in%5B9%5D=MHD%20Ostrava&group_in%5B10%5D=MHD%20Studénka&group_in%5B11%5D=MHD%20Třinec&group_in%5B12%5D=NAD%20MHD&_sort=numeric_label"
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Bruntál&_sort=numeric_label"
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Český%20Těšín&_sort=numeric_label"
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Frýdek-Místek&_sort=numeric_label"
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Havířov&_sort=numeric_label"
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Karviná&_sort=numeric_label"
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Krnov&_sort=numeric_label"
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Nový%20Jičín&_sort=numeric_label"
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Opava&_sort=numeric_label"
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Orlová&_sort=numeric_label"
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Ostrava&_sort=numeric_label"
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Studénka&_sort=numeric_label"
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Třinec&_sort=numeric_label"
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=NAD%20MHD&_sort=numeric_label"
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=75&group_in%5B1%5D=232-293&group_in%5B2%5D=331-392&group_in%5B3%5D=440-465&group_in%5B4%5D=531-583&group_in%5B5%5D=613-699&group_in%5B6%5D=731-788&group_in%5B7%5D=811-885&group_in%5B8%5D=901-990&group_in%5B9%5D=NAD&_sort=numeric_label"
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=75&_sort=numeric_label"
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=232-293&_sort=numeric_label"
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=331-392&_sort=numeric_label"
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=440-465&_sort=numeric_label"
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=531-583&_sort=numeric_label"
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=613-699&_sort=numeric_label"
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=731-788&_sort=numeric_label"
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=811-885&_sort=numeric_label"
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=901-990&_sort=numeric_label"
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=NAD&_sort=numeric_label"
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=S1-S34&group_in%5B1%5D=R8-R61&_sort=numeric_label"
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=S1-S34&_sort=numeric_label"
-        sprintf"%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=R8-R61&_sort=numeric_label"         
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Bruntál&group_in%5B1%5D=MHD%20Český%20Těšín&group_in%5B2%5D=MHD%20Frýdek-Místek&group_in%5B3%5D=MHD%20Havířov&group_in%5B4%5D=MHD%20Karviná&group_in%5B5%5D=MHD%20Krnov&group_in%5B6%5D=MHD%20Nový%20Jičín&group_in%5B7%5D=MHD%20Opava&group_in%5B8%5D=MHD%20Orlová&group_in%5B9%5D=MHD%20Ostrava&group_in%5B10%5D=MHD%20Studénka&group_in%5B11%5D=MHD%20Třinec&group_in%5B12%5D=NAD%20MHD&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Bruntál&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Český%20Těšín&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Frýdek-Místek&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Havířov&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Karviná&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Krnov&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Nový%20Jičín&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Opava&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Orlová&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Ostrava&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Studénka&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Třinec&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=NAD%20MHD&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=75&group_in%5B1%5D=232-293&group_in%5B2%5D=331-392&group_in%5B3%5D=440-465&group_in%5B4%5D=531-583&group_in%5B5%5D=613-699&group_in%5B6%5D=731-788&group_in%5B7%5D=811-885&group_in%5B8%5D=901-990&group_in%5B9%5D=NAD&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=75&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=232-293&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=331-392&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=440-465&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=531-583&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=613-699&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=731-788&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=811-885&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=901-990&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=NAD&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=S1-S34&group_in%5B1%5D=R8-R61&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=S1-S34&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=R8-R61&_sort=numeric_label"         
     ]
 
 let private pathToJsonList =  //P  
     [
-        sprintf"%s%s" partialPathJson @"kodisMHDTotal.json"
-        sprintf"%s%s" partialPathJson @"kodisMHDBruntal.json"
-        sprintf"%s%s" partialPathJson @"kodisMHDCT.json"
-        sprintf"%s%s" partialPathJson @"kodisMHDFM.json"
-        sprintf"%s%s" partialPathJson @"kodisMHDHavirov.json"
-        sprintf"%s%s" partialPathJson @"kodisMHDKarvina.json"
-        sprintf"%s%s" partialPathJson @"kodisMHDBKrnov.json"
-        sprintf"%s%s" partialPathJson @"kodisMHDNJ.json"
-        sprintf"%s%s" partialPathJson @"kodisMHDOpava.json"
-        sprintf"%s%s" partialPathJson @"kodisMHDOrlova.json"
-        sprintf"%s%s" partialPathJson @"kodisMHDOstrava.json"
-        sprintf"%s%s" partialPathJson @"kodisMHDStudenka.json"
-        sprintf"%s%s" partialPathJson @"kodisMHDTrinec.json"
-        sprintf"%s%s" partialPathJson @"kodisMHDNAD.json"
-        sprintf"%s%s" partialPathJson @"kodisRegionTotal.json"
-        sprintf"%s%s" partialPathJson @"kodisRegion75.json"
-        sprintf"%s%s" partialPathJson @"kodisRegion200.json"
-        sprintf"%s%s" partialPathJson @"kodisRegion300.json"
-        sprintf"%s%s" partialPathJson @"kodisRegion400.json"
-        sprintf"%s%s" partialPathJson @"kodisRegion500.json"
-        sprintf"%s%s" partialPathJson @"kodisRegion600.json"
-        sprintf"%s%s" partialPathJson @"kodisRegion700.json"
-        sprintf"%s%s" partialPathJson @"kodisRegion800.json"
-        sprintf"%s%s" partialPathJson @"kodisRegion900.json"
-        sprintf"%s%s" partialPathJson @"kodisRegionNAD.json"
-        sprintf"%s%s" partialPathJson @"kodisTrainTotal.json"
-        sprintf"%s%s" partialPathJson @"kodisTrainPomaliky.json"
-        sprintf"%s%s" partialPathJson @"kodisTrainSpesakyARychliky.json"                
+        sprintf "%s%s" partialPathJson @"kodisMHDTotal.json"
+        sprintf "%s%s" partialPathJson @"kodisMHDBruntal.json"
+        sprintf "%s%s" partialPathJson @"kodisMHDCT.json"
+        sprintf "%s%s" partialPathJson @"kodisMHDFM.json"
+        sprintf "%s%s" partialPathJson @"kodisMHDHavirov.json"
+        sprintf "%s%s" partialPathJson @"kodisMHDKarvina.json"
+        sprintf "%s%s" partialPathJson @"kodisMHDBKrnov.json"
+        sprintf "%s%s" partialPathJson @"kodisMHDNJ.json"
+        sprintf "%s%s" partialPathJson @"kodisMHDOpava.json"
+        sprintf "%s%s" partialPathJson @"kodisMHDOrlova.json"
+        sprintf "%s%s" partialPathJson @"kodisMHDOstrava.json"
+        sprintf "%s%s" partialPathJson @"kodisMHDStudenka.json"
+        sprintf "%s%s" partialPathJson @"kodisMHDTrinec.json"
+        sprintf "%s%s" partialPathJson @"kodisMHDNAD.json"
+        sprintf "%s%s" partialPathJson @"kodisRegionTotal.json"
+        sprintf "%s%s" partialPathJson @"kodisRegion75.json"
+        sprintf "%s%s" partialPathJson @"kodisRegion200.json"
+        sprintf "%s%s" partialPathJson @"kodisRegion300.json"
+        sprintf "%s%s" partialPathJson @"kodisRegion400.json"
+        sprintf "%s%s" partialPathJson @"kodisRegion500.json"
+        sprintf "%s%s" partialPathJson @"kodisRegion600.json"
+        sprintf "%s%s" partialPathJson @"kodisRegion700.json"
+        sprintf "%s%s" partialPathJson @"kodisRegion800.json"
+        sprintf "%s%s" partialPathJson @"kodisRegion900.json"
+        sprintf "%s%s" partialPathJson @"kodisRegionNAD.json"
+        sprintf "%s%s" partialPathJson @"kodisTrainTotal.json"
+        sprintf "%s%s" partialPathJson @"kodisTrainPomaliky.json"
+        sprintf "%s%s" partialPathJson @"kodisTrainSpesakyARychliky.json"                
     ]
 
 let private downloadAndSaveUpdatedJson() = 
@@ -196,7 +196,7 @@ let private downloadAndSaveUpdatedJson() =
                                                   return! client.GetStringAsync(item) |> Async.AwaitTask 
                                               with
                                               | ex -> 
-                                                      printfn"\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
+                                                      printfn "\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
                                                       do Console.ReadKey() |> ignore 
                                                       do System.Environment.Exit(1)
                                                       return! client.GetStringAsync(String.Empty) |> Async.AwaitTask //whatever of that type
@@ -207,7 +207,7 @@ let private downloadAndSaveUpdatedJson() =
         //save updated json files
         match (<>) pathToJsonList.Length loadAndSaveJsonFiles.Length with
         | true  -> 
-                  printfn"\nZase se nekdo vrtal do listu s odkazy a cestami. Je nutna jejich kontrola. Zmackni cokoliv pro ukonceni programu." 
+                  printfn "\nZase se nekdo vrtal do listu s odkazy a cestami. Je nutna jejich kontrola. Zmackni cokoliv pro ukonceni programu." 
                   do Console.ReadKey() |> ignore 
                   do System.Environment.Exit(1)
         | false ->
@@ -467,17 +467,17 @@ let private filterTimetables param diggingResult = //I
                                              
                                              let link = 
                                                 match item.Contains("_t") with 
-                                                | true  -> (sprintf"%s%s%s" pathKodisAmazonLink @"timetables/" str).Replace("_t", String.Empty)
-                                                | false -> sprintf"%s%s" pathKodisAmazonLink str                                                
+                                                | true  -> (sprintf "%s%s%s" pathKodisAmazonLink @"timetables/" str).Replace("_t", String.Empty)
+                                                | false -> sprintf "%s%s" pathKodisAmazonLink str                                                
 
                                              let path =     
                                                 match item.Contains("_t") with 
                                                 | true  -> 
                                                            let fileName = item.Substring(0, item.Length) //zatim bez generovaneho kodu, sem tam to zkontrolovat
-                                                           sprintf"%s/%s" pathToDir fileName   
+                                                           sprintf "%s/%s" pathToDir fileName   
                                                 | false -> 
                                                            let fileName = item.Substring(0, item.Length - 15) //bez 15 znaku s generovanym kodem a priponou pdf dostaneme toto: 113_2022_12_11_2023_12_09 
-                                                           sprintf"%s/%s%s" pathToDir fileName ".pdf"  //pdf opet musime pridat
+                                                           sprintf "%s/%s%s" pathToDir fileName ".pdf"  //pdf opet musime pridat
                                                            
                                              link, path 
                         )
@@ -521,8 +521,8 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
         filterTimetables 
         |> List.iteri (fun i (link, pathToFile) ->  //Array.Parallel.iter tady nelze  
                                                  progressBarContinuous i l
-                                                 //async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously  
-                                                 async { printfn"%s" pathToFile; return! Async.Sleep 0 } |> Async.RunSynchronously
+                                                 async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously  
+                                                 //async { printfn"%s" pathToFile; return! Async.Sleep 0 } |> Async.RunSynchronously
                                                  //async {return! Async.Sleep 10 } |> Async.RunSynchronously   
                       )    
    
@@ -530,14 +530,14 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
 
     downloadTimetables() //progressBarContinuous
 
-    printfn"%c" <| char(32)   
-    printfn"%c" <| char(32)  
+    printfn "%c" <| char(32)   
+    printfn "%c" <| char(32)  
     printfn "Dokonceno stahovani jizdnich radu a jejich ukladani do prislusneho adresare" 
-    printfn"Pocet stazenych jizdnich radu: %i" filterTimetables.Length   
+    printfn "Pocet stazenych jizdnich radu: %i" filterTimetables.Length   
 
 let webscraping1 = //I
     processStart 
-    //>> downloadAndSaveUpdatedJson
+    >> downloadAndSaveUpdatedJson
     >> digThroughJsonStructure 
     >> filterTimetables CurrentValidity //CurrentValidity //FutureValidity //ReplacementService //WithoutReplacementService
     >> downloadAndSaveTimetables pathToDir       
