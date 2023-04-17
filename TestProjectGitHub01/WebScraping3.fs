@@ -35,14 +35,15 @@ let webscrapingFromPage() =
     waitFor linksShown
 
     let result = 
-        elements "a" |> List.map (fun item -> 
-                                            let href = string <| item.GetAttribute("href")
-                                            match href.EndsWith("pdf") with
-                                            | true  -> 
-                                                       printfn "%s" href
-                                                       href
-                                            | false -> String.Empty
-                                 )
+        elements "a" 
+        |> List.map (fun item -> 
+                                let href = string <| item.GetAttribute("href")
+                                match href.EndsWith("pdf") with
+                                | true  -> 
+                                            printfn "%s" href
+                                            href
+                                | false -> String.Empty
+                    )
 
     let filteredResult = result |> Set.ofList //vyhodime pripadne totozne polozky
     

@@ -18,9 +18,6 @@ module Program =
     Console.ForegroundColor <- ConsoleColor.White 
     Console.InputEncoding   <- System.Text.Encoding.Unicode
     Console.OutputEncoding  <- System.Text.Encoding.Unicode
-
-    //let str = @"https://kodis-files.s3.eu-central-1.amazonaws.com/801_2023_04_03_2023_06_11_v_582dde9c0b.pdf"
-
     
     //*****************************WebScraping1******************************
     do webscraping1() ()

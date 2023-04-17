@@ -51,13 +51,13 @@ let private errorStr str err = str |> (optionToGenerics err String.Empty) //AP
 let private timeStr = errorStr "HH:mm:ss" "Error1" //AP                    
     
 let private processStart() =    //I 
-    let processStartTime x = 
+    let processStartTime x =    //AP
         let processStartTime = errorStr (sprintf"Zacatek procesu: %s" <| DateTime.Now.ToString(timeStr)) "Error2"                           
         printfn "%s" processStartTime
     tryWith processStartTime (fun x -> ()) () String.Empty () |> deconstructor
     
 let private processEnd() =    //I 
-    let processEndTime x = 
+    let processEndTime x =    //AP
         let processEndTime = errorStr (sprintf"Konec procesu: %s" <| DateTime.Now.ToString(timeStr)) "Error3"                       
         printfn "%s" processEndTime
     tryWith processEndTime (fun x -> ()) () String.Empty () |> deconstructor
@@ -66,7 +66,7 @@ let private client =  //I
     let myClient x = new System.Net.Http.HttpClient() |> (optionToGenerics "Error4" (new System.Net.Http.HttpClient()))         
     tryWith myClient (fun x -> ()) () String.Empty (new System.Net.Http.HttpClient()) |> deconstructor
 
-let private splitList list = //I deconstructor
+let private splitList list = //I 
     let mySplitting x = //P
         let folder (a: string, b: string) (cur, acc) =
             let cond = a.Substring(0, lineNumberLength) = b.Substring(0, lineNumberLength) 
@@ -82,7 +82,7 @@ let private splitList list = //I deconstructor
     splitListByPrefix will group together all elements that have the same prefix, regardless of whether they are adjacent in the input list or not.
     *)
 
-let private splitListByPrefix (list: string list) : string list list = //I deconstructor
+let private splitListByPrefix (list: string list) : string list list = //I 
     let mySplitting x = //P
         let prefix = (fun (x: string) -> x.Substring(0, lineNumberLength))
         let groups = list |> List.groupBy prefix  
