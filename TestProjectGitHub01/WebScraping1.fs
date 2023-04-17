@@ -24,15 +24,19 @@ Console.OutputEncoding  <- System.Text.Encoding.Unicode
 //************************Constants and types**********************************************************************
 
 //tu a tam zkontrolovat json, zdali KODIS nezmenil jeho strukturu 
-let [<Literal>] partialPathJson =  @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/"
 //pro type provider musi byt konstanta (nemozu pouzit sprintf partialPathJson) a musi byt forward slash"
-let [<Literal>] pathJson = @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisMHDTotal.json" 
+let [<Literal>] pathJson = @"KODISJson/kodisMHDTotal.json" //v hl. adresari projektu
+//let [<Literal>] pathJson = @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisMHDTotal.json" 
+
+let [<Literal>] partialPathJson = @"KODISJson/" //v binu
+//let [<Literal>] partialPathJson =  @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/"
+
 let [<Literal>] pathKodisWeb = @"https://kodisweb-backend.herokuapp.com/"
 let [<Literal>] pathKodisAmazonLink = @"https://kodis-files.s3.eu-central-1.amazonaws.com/"
 let [<Literal>] lineNumberLength = 3 //3 je delka retezce pouze pro linky 001 az 999
 
 let private currentTime = Fugit.now().AddDays(-1.0)   // new DateTime(2023, 04, 11)
-let private pathToDir = @"e:\E\Mirek po osme hodine a o vikendech\KODISTP\" 
+//let private pathToDir = @"e:\E\Mirek po osme hodine a o vikendech\KODISTP\" 
 let private regularValidityStart = new DateTime(2022, 12, 11) //zmenit pri pravidelne zmene JR 
 let private regularValidityEnd = new DateTime(2023, 12, 09) //zmenit pri pravidelne zmene JR 
 let private range = [ '1'; '2'; '3'; '4'; '5'; '6'; '7'; '8'; '9'; '0' ]
@@ -218,9 +222,12 @@ let private downloadAndSaveUpdatedJson() =
                                                     streamWriter.Flush()   
                                   ) 
 
-    printfn "Probiha stahovani a ukladani json souboru do prislusneho adresare"
+    printfn "Probiha stahovani a ukladani json souboru do prislusneho adresare."    
+
     tryWith updateJson (fun x -> ()) () String.Empty () |> deconstructor    
-    printfn "Dokonceno stahovani a ukladani json souboru do prislusneho adresare"
+
+    printfn "Dokonceno stahovani a ukladani json souboru do prislusneho adresare."
+    printfn "Probiha filtrace odkazu na neplatne jizdni rady."
 
 let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
     
@@ -295,9 +302,9 @@ let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
     //kodisAttachments() |> Set.ofArray //over cas od casu
     //kodisTimetables() |> Set.ofArray //over cas od casu
 
-let private filterTimetables param diggingResult = //I
+let private filterTimetables param pathToDir diggingResult = //I
 
-    //****************prvni filtrace odkazu na neplatne jizdni rady***********************
+    //****************prvni filtrace odkazu na neplatne jizdni rady***********************   
     
     let myList = 
         let myFunction x =  //AP          
@@ -412,9 +419,7 @@ let private filterTimetables param diggingResult = //I
         tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor
     
     let myList1 = //P
-        myList |> List.filter (fun item -> not <| String.IsNullOrWhiteSpace(item) && not <| String.IsNullOrEmpty(item))    
-    
-    printfn "Dokoncena prvni filtrace odkazu na neplatne jizdni rady"
+        myList |> List.filter (fun item -> not <| String.IsNullOrWhiteSpace(item) && not <| String.IsNullOrEmpty(item))     
     
     //****************druha filtrace odkazu na neplatne jizdni rady***********************
    
@@ -451,7 +456,7 @@ let private filterTimetables param diggingResult = //I
         
     let myList3 = //P
         myList2 |> List.filter (fun item -> not <| String.IsNullOrWhiteSpace(item) && not <| String.IsNullOrEmpty(item))
-
+  
     let myList4 = //I
         let myFunction x = //P
             myList3 
@@ -483,7 +488,7 @@ let private filterTimetables param diggingResult = //I
                         )
         tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor
     
-    printfn "Dokoncena druha filtrace odkazu na neplatne jizdni rady"
+    printfn "Dokoncena filtrace odkazu na neplatne jizdni rady."
     
     myList4 |> List.filter (fun item -> 
                                          (not <| String.IsNullOrWhiteSpace(fst item) 
@@ -509,12 +514,12 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
         |> Array.Parallel.iter (fun item -> item.Delete())    
    
     tryWith myFileDelete (fun x -> ()) () String.Empty () |> deconstructor
-    printfn "Dokonceno mazani starych jizdnich radu v prislusnem adresari"
+    printfn "Provedeno mazani starych jizdnich radu v prislusnem adresari."
     
     //************************download pdf souboru, ktere jsou aktualni*******************************************
     
     //tryWith je ve funkci downloadFileTaskAsync
-    printfn "Probiha stahovani jizdnich radu a jejich ukladani do prislusneho adresare" 
+    printfn "Probiha stahovani jizdnich radu a jejich ukladani do prislusneho adresare." 
 
     let downloadTimetables() = //I
         let l = filterTimetables.Length
@@ -532,21 +537,21 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
 
     printfn "%c" <| char(32)   
     printfn "%c" <| char(32)  
-    printfn "Dokonceno stahovani jizdnich radu a jejich ukladani do prislusneho adresare" 
+    printfn "\nDokonceno stahovani jizdnich radu a jejich ukladani do prislusneho adresare." 
     printfn "Pocet stazenych jizdnich radu: %i" filterTimetables.Length   
 
-let webscraping1 = //I
-    processStart 
-    >> downloadAndSaveUpdatedJson
-    >> digThroughJsonStructure 
-    >> filterTimetables CurrentValidity //CurrentValidity //FutureValidity //ReplacementService //WithoutReplacementService
-    >> downloadAndSaveTimetables pathToDir       
-    >> client.Dispose  
-    >> processEnd
+let webscraping1 pathToDir variant = //I
+    processStart()
+    downloadAndSaveUpdatedJson()   
+    digThroughJsonStructure()
+    |> filterTimetables variant pathToDir //variant = //CurrentValidity //FutureValidity //ReplacementService //WithoutReplacementService
+    |> downloadAndSaveTimetables pathToDir       
+    |> client.Dispose  
+    |> processEnd
 
     //CurrentValidity = JR striktne platne k danemu dni, tj. pokud je napr. na dany den vylukovy JR, stahne se tento JR, ne JR platny dalsi den
     //FutureValidity = JR platne v budouci dobe, ktere se uz vyskytuji na webu KODISu
     //ReplacementService = pouze vylukove JR, JR NAD a JR X linek
     //WithoutReplacementService = JR dlouhodobe platne bez jakykoliv vyluk. Tento vyber neobsahuje ani dlouhodobe nekolikamesicni vyluky, muze se ale hodit v pripade, ze zakladni slozka s JR obsahuje jedno ci dvoudenni vylukove JR. 
    
-   //vzhledem k nekonzistnosti retezce s udaji o lince a platnosti muze dojit ke stazeni i neceho, co do daneho vyberu nepatri
+    //zhledem k nekonzistnosti retezce s udaji o lince a platnosti muze dojit ke stazeni i neceho, co do daneho vyberu nepatri

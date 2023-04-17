@@ -1,17 +1,21 @@
-﻿namespace TestProject
+﻿//namespace TestProject
 
 open System
+open System.Data
+open System.Threading
 
 open Csv
-open System.Data
-
 open WebScraping1
 open WebScraping2
 open WebScraping3
 open CodeChallenge
+open TryWith.TryWith
+open DiscriminatedUnions
+open BrowserDialogWindow
 
-module Program = 
-
+[<EntryPoint; STAThread>]
+let main argv =
+    
     do System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance)
 
     Console.BackgroundColor <- ConsoleColor.Blue 
@@ -20,8 +24,63 @@ module Program =
     Console.OutputEncoding  <- System.Text.Encoding.Unicode
     
     //*****************************WebScraping1******************************
-    do webscraping1 ()
-    do Console.ReadKey() |> ignore
+
+    let myWebscraping1 x = 
+        printfn "Hromadne stahovani jizdnich radu ODIS z webu https://www.kodis.cz"
+        printfn "*****************************************************************"
+        printfn "Vyber si adresar pro ulozeni jizdnich radu. Ve vybranem adresari bude vymazan jeho soucasny obsah!!!"
+        printfn "Precti si pozorne vyse uvedene a bud stiskni cokoliv pro vybrani adresare anebo krizkem ukonci aplikaci."
+        Console.ReadKey() |> ignore
+    
+        let pathToFolder = 
+            let (str, value) = openFolderBrowserDialog()
+            match value with
+            | false                           -> str       
+            | true when (<>) str String.Empty -> 
+                                                Console.Clear()
+                                                printfn"%s%s" "\nNo jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" str
+                                                do Console.ReadKey() |> ignore 
+                                                do System.Environment.Exit(1)  
+                                                String.Empty
+            | _                               -> 
+                                                Console.Clear()
+                                                printfn "\nNebyl vybran adresar. Zmackni cokoliv pro ukonceni programu. \n"
+                                                do Console.ReadKey() |> ignore 
+                                                do System.Environment.Exit(1) 
+                                                String.Empty  
+   
+        Console.Clear()
+       
+        printfn "Sqele! Adresar byl vybran. Nyni zadej cislici plus ENTER pro vyber varianty."
+        printfn "2 = JR platne v budouci dobe, ktere se uz vyskytuji na webu KODISu."
+        printfn "3 = Pouze vylukove JR, JR NAD a JR X linek."
+        printfn "4 = JR dlouhodobe platne bez jakykoliv vyluk. Mohou se hodit v pripade,"
+        printfn "%4ckdy zakladni varianta obsahuje jedno ci dvoudenni vylukove JR." <| char(32)
+        printfn "%c" <| char(32) 
+        printfn "Jakakoliv jina klavesa = ZAKLADNI VARIANTA, tj. JR strikne platne dnesni den, tj. pokud je napr. na dnesni"
+        printfn "den platny pouze jednodenni vylukovy JR, stahne se tento JR, ne JR platny dalsi den.\r"
+        printfn "%c" <| char(32) 
+        printfn "%c" <| char(32) 
+        printfn "Staci stisknout ENTER pro zakladni variantu."
+
+        let variant = 
+            Console.ReadLine()
+            |> function 
+                | "2" -> FutureValidity
+                | "3" -> ReplacementService
+                | "4" -> WithoutReplacementService
+                | _   -> CurrentValidity
+               
+        Console.Clear()
+        webscraping1 pathToFolder variant 
+        
+        printfn "%c" <| char(32)  
+        printfn "Udaje KODISu maji nekonzistentni retezec, mohlo dojit ke stazeni i neceho, co do daneho vyberu nepatri."
+        printfn "%c" <| char(32)   
+        printfn "Stiskni cokoliv pro ukonceni aplikace."
+        Console.ReadKey() |> ignore
+    tryWith myWebscraping1 (fun x -> ()) () String.Empty () |> deconstructor
+
     //*****************************WebScraping2******************************
     //normalScraping()
 
@@ -50,3 +109,5 @@ module Program =
     //example()
 
     //****************************************************************************************
+
+    0 // return an integer exit code

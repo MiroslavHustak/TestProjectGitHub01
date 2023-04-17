@@ -1,7 +1,30 @@
 ﻿namespace Helpers
 
 open System
+open System.IO
 open System.Diagnostics
+
+open TryWith.TryWith
+
+    module CopyingFiles =  
+    
+       let copyFiles source destination =
+                                                                
+          let perform x =                                    
+              let sourceFilepath =
+                  Path.GetFullPath(source)
+                  |> optionToGenerics "Chyba při čtení cesty k souboru" String.Empty 
+
+              let destinFilepath =
+                  Path.GetFullPath(destination) 
+                  |> optionToGenerics "Chyba při čtení cesty k souboru" String.Empty 
+                
+              let fInfodat: FileInfo = new FileInfo(sourceFilepath)  
+              match fInfodat.Exists with 
+              | true  -> File.Copy(sourceFilepath, destinFilepath, true)             
+              | false -> failwith (sprintf "Soubor %s nenalezen" source)
+
+          perform ()   
        
     module MyString = 
         //priklad pouziti: getString(8, "0")//tuple a compiled nazev velkym kvuli DLL pro C#
