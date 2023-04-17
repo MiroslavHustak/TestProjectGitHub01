@@ -20,7 +20,7 @@ module Program =
     Console.OutputEncoding  <- System.Text.Encoding.Unicode
     
     //*****************************WebScraping1******************************
-    do webscraping1() ()
+    do webscraping1 ()
     do Console.ReadKey() |> ignore
     //*****************************WebScraping2******************************
     //normalScraping()

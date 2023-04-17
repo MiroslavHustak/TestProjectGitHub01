@@ -521,8 +521,8 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
         filterTimetables 
         |> List.iteri (fun i (link, pathToFile) ->  //Array.Parallel.iter tady nelze  
                                                  progressBarContinuous i l
-                                                 async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously  
-                                                 //async { printfn"%s" pathToFile; return! Async.Sleep 0 } |> Async.RunSynchronously
+                                                 //async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously  
+                                                 async { printfn"%s" pathToFile; return! Async.Sleep 0 } |> Async.RunSynchronously
                                                  //async {return! Async.Sleep 10 } |> Async.RunSynchronously   
                       )    
    
@@ -535,9 +535,9 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
     printfn "Dokonceno stahovani jizdnich radu a jejich ukladani do prislusneho adresare" 
     printfn"Pocet stazenych jizdnich radu: %i" filterTimetables.Length   
 
-let webscraping1() = //I
+let webscraping1 = //I
     processStart 
-    >> downloadAndSaveUpdatedJson
+    //>> downloadAndSaveUpdatedJson
     >> digThroughJsonStructure 
     >> filterTimetables CurrentValidity //CurrentValidity //FutureValidity //ReplacementService //WithoutReplacementService
     >> downloadAndSaveTimetables pathToDir       
