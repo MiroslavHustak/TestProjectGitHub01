@@ -43,6 +43,9 @@ let private range = [ '1'; '2'; '3'; '4'; '5'; '6'; '7'; '8'; '9'; '0' ]
 let private rangeS = [ "S1_"; "S2_"; "S3_"; "S4_"; "S5_"; "S6_"; "S7_"; "S8_"; "S9_" ]
 let private rangeR = [ "R1_"; "R2_"; "R3_"; "R4_"; "R5_"; "R6_"; "R7_"; "R8_"; "R9_" ]
 let private rangeX = [ "X1_"; "X2_"; "X3_"; "X4_"; "X5_"; "X6_"; "X7_"; "X8_"; "X9_" ]
+let private rangeN1 = [ "NAD_1_"; "NAD_2_"; "NAD_3_"; "NAD_4_"; "NAD_5_"; "NAD_6_"; "NAD_7_"; "NAD_8_"; "NAD_9_" ]
+let private rangeN2 = [ "NAD_10_"; "NAD_11_"; "NAD_12_"; "NAD_13_"; "NAD_14_"; "NAD_15_"; "NAD_16_"; "NAD_17_"; "NAD_18_"; "NAD_19_" ]
+//TODO jestli bude cas, pridelat NAD vlakovych linek
 
 type KodisTimetables = JsonProvider<pathJson> 
 
@@ -335,22 +338,25 @@ let private filterTimetables param pathToDir diggingResult = //I
                                                         let b range = range |> List.contains (fileName.Substring(0, 3))
                                                    
                                                         let fileNameFullA = 
-                                                            match a 0 range <> List.empty  with
-                                                            | true  -> 
-                                                                        match a 1 range <> List.empty with
+                                                            match fileName.Contains("NAD") with 
+                                                            | false -> 
+                                                                        match a 0 range <> List.empty  with
                                                                         | true  -> 
-                                                                                   match a 2 range <> List.empty with
-                                                                                   | true  -> fileName                                                                     
-                                                                                   | false -> sprintf "%s%s" "0" fileName                    
-                                                                        | false -> sprintf "%s%s" "00" fileName //pocet "0" zavisi na delce retezce cisla linky
-                                                            | false -> fileName  
+                                                                                    match a 1 range <> List.empty with
+                                                                                    | true  -> 
+                                                                                               match a 2 range <> List.empty with
+                                                                                               | true  -> fileName                                                                     
+                                                                                               | false -> sprintf "%s%s" "0" fileName                    
+                                                                                    | false -> sprintf "%s%s" "00" fileName //pocet "0" zavisi na delce retezce cisla linky
+                                                                        | false -> fileName 
+                                                             | true -> fileName
                                                          
                                                         let fileNameFull =  
                                                             match b rangeS || b rangeR || b rangeX with
                                                             | true  -> sprintf "%s%s" "_" fileNameFullA                                                                       
                                                             | false -> fileNameFullA  
 
-                                                        let numberOfChar =  
+                                                        let numberOfChar =  //vyhovuje i pro NAD
                                                             match fileNameFull.Contains("_v") || fileNameFull.Contains("_t") with
                                                             | true  -> 27  //27 -> 113_2022_12_11_2023_12_09_t......   //overovat, jestli se v jsonu nezmenila struktura nazvu                                                                
                                                             | false -> 25  //25 -> 113_2022_12_11_2023_12_09......
@@ -358,63 +364,88 @@ let private filterTimetables param pathToDir diggingResult = //I
                                                         match not (fileNameFull |> String.length >= numberOfChar) with 
                                                         | true  -> String.Empty
                                                         | false ->     
-                                                                   let yearValidityStart = Parsing.parseMe(fileNameFull.Substring(4, 4)) 
-                                                                   let monthValidityStart = Parsing.parseMe(fileNameFull.Substring(9, 2))
-                                                                   let dayValidityStart = Parsing.parseMe(fileNameFull.Substring(12, 2))
+                                                                   let yearValidityStart x = Parsing.parseMe(fileNameFull.Substring(4 + x, 4)) 
+                                                                   let monthValidityStart x = Parsing.parseMe(fileNameFull.Substring(9 + x, 2))
+                                                                   let dayValidityStart x = Parsing.parseMe(fileNameFull.Substring(12 + x, 2))
 
-                                                                   let yearValidityEnd = Parsing.parseMe(fileNameFull.Substring(15, 4))
-                                                                   let monthValidityEnd = Parsing.parseMe(fileNameFull.Substring(20, 2))
-                                                                   let dayValidityEnd = Parsing.parseMe(fileNameFull.Substring(23, 2))
+                                                                   let yearValidityEnd x = Parsing.parseMe(fileNameFull.Substring(15 + x, 4))
+                                                                   let monthValidityEnd x = Parsing.parseMe(fileNameFull.Substring(20 + x, 2))
+                                                                   let dayValidityEnd x = Parsing.parseMe(fileNameFull.Substring(23 + x, 2))
                                                                                                                                                                   
-                                                                   let a = [ yearValidityStart; monthValidityStart; dayValidityStart; yearValidityEnd; monthValidityEnd; dayValidityEnd ]
-                                                                
-                                                                   match a |> List.contains -1 with
-                                                                   | true  -> 
-                                                                            let cond = 
-                                                                                match param with 
-                                                                                | CurrentValidity           -> true //s tim nic nezrobim, nekonzistentni informace v retezci
-                                                                                | FutureValidity            -> true //s tim nic nezrobim, nekonzistentni informace v retezci
-                                                                                | ReplacementService        -> 
-                                                                                                               fileNameFull.Contains("_v") 
-                                                                                                               || fileNameFull.Contains("X")
-                                                                                                               || fileNameFull.Contains("NAD")
-                                                                                | WithoutReplacementService -> 
-                                                                                                               not <| fileNameFull.Contains("_v") 
-                                                                                                               && not <| fileNameFull.Contains("X")
-                                                                                                               && not <| fileNameFull.Contains("NAD")
+                                                                   let a x =
+                                                                       [ 
+                                                                           yearValidityStart x
+                                                                           monthValidityStart x
+                                                                           dayValidityStart x
+                                                                           yearValidityEnd x
+                                                                           monthValidityEnd x
+                                                                           dayValidityEnd x
+                                                                       ]
+                                                                   
+                                                                   let result x = 
 
-                                                                            match cond with
-                                                                            | true  -> fileNameFull
-                                                                            | false -> String.Empty 
-                                                                              
-                                                                   | false -> 
-                                                                            try
-                                                                                let dateValidityStart = new DateTime(yearValidityStart, monthValidityStart, dayValidityStart) 
-                                                                                let dateValidityEnd = new DateTime(yearValidityEnd, monthValidityEnd, dayValidityEnd) 
-                                                                                
+                                                                       match (a x) |> List.contains -1 with
+                                                                       | true  -> 
                                                                                 let cond = 
                                                                                     match param with 
-                                                                                    | CurrentValidity           -> dateValidityStart |> Fugit.isBeforeOrEqual currentTime && dateValidityEnd |> Fugit.isAfter currentTime
-                                                                                    | FutureValidity            -> dateValidityStart |> Fugit.isAfter currentTime
+                                                                                    | CurrentValidity           -> true //s tim nic nezrobim, nekonzistentni informace v retezci
+                                                                                    | FutureValidity            -> true //s tim nic nezrobim, nekonzistentni informace v retezci
                                                                                     | ReplacementService        -> 
-                                                                                                                   (dateValidityStart |> Fugit.isBeforeOrEqual currentTime
-                                                                                                                   && dateValidityEnd |> Fugit.isAfter currentTime)
-                                                                                                                   && (fileNameFull.Contains("_v") 
+                                                                                                                   fileNameFull.Contains("_v") 
                                                                                                                    || fileNameFull.Contains("X")
-                                                                                                                   || fileNameFull.Contains("NAD"))
-                                                                                    | WithoutReplacementService ->
-                                                                                                                   (dateValidityStart |> Fugit.isBeforeOrEqual currentTime
-                                                                                                                   && dateValidityEnd |> Fugit.isAfter currentTime)
-                                                                                                                   && (not <| fileNameFull.Contains("_v") 
+                                                                                                                   || fileNameFull.Contains("NAD")
+                                                                                    | WithoutReplacementService -> 
+                                                                                                                   not <| fileNameFull.Contains("_v") 
                                                                                                                    && not <| fileNameFull.Contains("X")
-                                                                                                                   && not <| fileNameFull.Contains("NAD"))
+                                                                                                                   && not <| fileNameFull.Contains("NAD")
 
                                                                                 match cond with
                                                                                 | true  -> fileNameFull
-                                                                                | false -> String.Empty  
+                                                                                | false -> String.Empty 
+                                                                              
+                                                                       | false -> 
+                                                                                try                                                                                  
+                                                                                    let dateValidityStart x = new DateTime(yearValidityStart x, monthValidityStart x, dayValidityStart x) 
+                                                                                    let dateValidityEnd x = new DateTime(yearValidityEnd x, monthValidityEnd x, dayValidityEnd x) 
+                                                                                
+                                                                                    let cond = 
+                                                                                        match param with 
+                                                                                        | CurrentValidity           -> dateValidityStart x |> Fugit.isBeforeOrEqual currentTime && dateValidityEnd x |> Fugit.isAfter currentTime
+                                                                                        | FutureValidity            -> dateValidityStart x |> Fugit.isAfter currentTime
+                                                                                        | ReplacementService        -> 
+                                                                                                                       (dateValidityStart x |> Fugit.isBeforeOrEqual currentTime
+                                                                                                                       && dateValidityEnd x |> Fugit.isAfter currentTime)
+                                                                                                                       && (fileNameFull.Contains("_v") 
+                                                                                                                       || fileNameFull.Contains("X")
+                                                                                                                       || fileNameFull.Contains("NAD"))
+                                                                                        | WithoutReplacementService ->
+                                                                                                                       (dateValidityStart x |> Fugit.isBeforeOrEqual currentTime
+                                                                                                                       && dateValidityEnd x |> Fugit.isAfter currentTime)
+                                                                                                                       && (not <| fileNameFull.Contains("_v") 
+                                                                                                                       && not <| fileNameFull.Contains("X")
+                                                                                                                       && not <| fileNameFull.Contains("NAD"))
+                                                                                
+                                                                                    match cond with
+                                                                                    | true  -> fileNameFull
+                                                                                    | false -> String.Empty                                                                                
+                                                                               
+                                                                                with 
+                                                                                | _ -> String.Empty  
 
-                                                                            with 
-                                                                            | _ -> String.Empty  
+                                                                   let condNAD (rangeN: string list) =                                                                     
+                                                                       rangeN |> List.tryFind (fun item -> fileNameFull.Contains(item))                                                                                    
+                                                                       |> function 
+                                                                           | Some _ -> true
+                                                                           | None   -> false  
+                                                                               
+                                                                   let condNAD = xor (condNAD rangeN1) (condNAD rangeN2) 
+                                                                                
+                                                                   let x = 
+                                                                       match fileNameFull.Contains("NAD") && condNAD = true with
+                                                                       | true  -> 2 
+                                                                       | false -> 0 
+
+                                                                   result x
                                                    
                                   ) |> Array.toList |> List.distinct 
         tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor
@@ -426,7 +457,8 @@ let private filterTimetables param pathToDir diggingResult = //I
    
     let myList2 = //I
         let myFunction x = //P
-            //list listu se stejnymi linkami s ruznou dobou platnosti JR      
+            //list listu se stejnymi linkami s ruznou dobou platnosti JR  
+            //NAD to uz nevezme, da se predpokladat, ze vetsinou nebudou 
             myList1 
             |> splitListByPrefix //splitList1 //splitList 
             |> List.collect (fun list ->  
@@ -438,15 +470,28 @@ let private filterTimetables param pathToDir diggingResult = //I
                                                        |> List.map (fun item -> 
                                                                               let item = string item                                                                              
                                                                               try
-                                                                                  let yearValidityStart = Parsing.parseMe(item.Substring(4, 4)) //overovat, jestli se v jsonu neco nezmenilo //113_2022_12_11_2023_12_09.....
-                                                                                  let monthValidityStart = Parsing.parseMe(item.Substring(9, 2))
-                                                                                  let dayValidityStart = Parsing.parseMe(item.Substring(12, 2))
+                                                                                  let condNAD (rangeN: string list) =                                                                     
+                                                                                      rangeN |> List.tryFind (fun item1 -> item.Contains(item1))                                                                                    
+                                                                                      |> function 
+                                                                                          | Some _ -> true
+                                                                                          | None   -> false  
+                                                                                              
+                                                                                  let condNAD = xor (condNAD rangeN1) (condNAD rangeN2) 
+                                                                                               
+                                                                                  let x = 
+                                                                                      match item.Contains("NAD") && condNAD = true with
+                                                                                      | true  -> 2 
+                                                                                      | false -> 0 
+                                                                                  
+                                                                                  let yearValidityStart x = Parsing.parseMe(item.Substring(4 + x, 4)) //overovat, jestli se v jsonu neco nezmenilo //113_2022_12_11_2023_12_09.....
+                                                                                  let monthValidityStart x = Parsing.parseMe(item.Substring(9 + x, 2))
+                                                                                  let dayValidityStart x = Parsing.parseMe(item.Substring(12 + x, 2))
 
-                                                                                  let yearValidityEnd = Parsing.parseMe(item.Substring(15, 4))
-                                                                                  let monthValidityEnd = Parsing.parseMe(item.Substring(20, 2))
-                                                                                  let dayValidityEnd = Parsing.parseMe(item.Substring(23, 2))
+                                                                                  let yearValidityEnd x = Parsing.parseMe(item.Substring(15 + x, 4))
+                                                                                  let monthValidityEnd x = Parsing.parseMe(item.Substring(20 + x, 2))
+                                                                                  let dayValidityEnd x = Parsing.parseMe(item.Substring(23 + x, 2))
 
-                                                                                  item, new DateTime(yearValidityStart, monthValidityStart, dayValidityStart) 
+                                                                                  item, new DateTime(yearValidityStart x, monthValidityStart x, dayValidityStart x) 
                                                                                   //item, new DateTime(yearValidityEnd, monthValidityEnd, dayValidityEnd) //pro pripadnou zmenu logiky
                                                                               with 
                                                                               | _ -> item, currentTime
@@ -555,4 +600,4 @@ let webscraping1 pathToDir variant = //I
     //ReplacementService = pouze vylukove JR, JR NAD a JR X linek
     //WithoutReplacementService = JR dlouhodobe platne bez jakykoliv vyluk. Tento vyber neobsahuje ani dlouhodobe nekolikamesicni vyluky, muze se ale hodit v pripade, ze zakladni slozka s JR obsahuje jedno ci dvoudenni vylukove JR. 
    
-    //zhledem k nekonzistnosti retezce s udaji o lince a platnosti muze dojit ke stazeni i neceho, co do daneho vyberu nepatri
+    //Vzhledem k nekonzistnosti retezce s udaji o lince a platnosti muze dojit ke stazeni i neceho, co do daneho vyberu nepatri
