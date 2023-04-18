@@ -253,14 +253,15 @@ let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
 
         (*
         //ponechavam pro pochopeni struktury u json type provider (pri pouziti option se to tahne az k susedovi)
-        let kodisAttachments() = kodisJsonSamples                              
-                                 |> Array.collect (fun item ->                                            
-                                                             item.Vyluky 
-                                                             |> Array.collect (fun item ->                                                 
-                                                                                         item.Attachments
-                                                                                         |> Array.Parallel.map (fun item -> item.Url )
-                                                                               ) 
-                                                  )   
+        let kodisAttachments() = 
+            kodisJsonSamples                              
+            |> Array.collect (fun item ->                                            
+                                        item.Vyluky 
+                                        |> Array.collect (fun item ->                                                 
+                                                                    item.Attachments
+                                                                    |> Array.Parallel.map (fun item -> item.Url)
+                                                         ) 
+                             )   
         *)  
 
         let myFunction x = //I
