@@ -188,7 +188,7 @@ let private downloadAndSaveUpdatedJson() =
 
     let updateJson x = //I
         let loadAndSaveJsonFiles = //I
-            let l = jsonLinkList.Length
+            let l = jsonLinkList |> List.length
             jsonLinkList
             |> List.mapi (fun i item ->                                                
                                       progressBarContinuous i l 
@@ -209,7 +209,7 @@ let private downloadAndSaveUpdatedJson() =
                          )  
 
         //save updated json files
-        match (<>) pathToJsonList.Length loadAndSaveJsonFiles.Length with
+        match (<>) (pathToJsonList |> List.length) (loadAndSaveJsonFiles |> List.length) with
         | true  -> 
                   printfn "\nZase se nekdo vrtal do listu s odkazy a cestami. Je nutna jejich kontrola. Zmackni cokoliv pro ukonceni programu." 
                   do Console.ReadKey() |> ignore 
@@ -430,7 +430,7 @@ let private filterTimetables param pathToDir diggingResult = //I
             myList1 
             |> splitListByPrefix //splitList1 //splitList 
             |> List.collect (fun list ->  
-                                        match list.Length > 1 with 
+                                        match (>) (list |> List.length) 1 with 
                                         | false -> list 
                                         | true  -> 
                                                    let latestValidityStart =  
@@ -523,7 +523,7 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
     printfn "Probiha stahovani jizdnich radu a jejich ukladani do prislusneho adresare." 
 
     let downloadTimetables() = //I
-        let l = filterTimetables.Length
+        let l = filterTimetables |> List.length
         filterTimetables 
         |> List.iteri (fun i (link, pathToFile) ->  //Array.Parallel.iter tady nelze  
                                                  progressBarContinuous i l
@@ -539,7 +539,7 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
     printfn "%c" <| char(32)   
     printfn "%c" <| char(32)  
     printfn "\nDokonceno stahovani jizdnich radu a jejich ukladani do prislusneho adresare." 
-    printfn "Pocet stazenych jizdnich radu: %i" filterTimetables.Length   
+    printfn "Pocet stazenych jizdnich radu: %i" (filterTimetables |> List.length)  
 
 let webscraping1 pathToDir variant = //I
     processStart()
