@@ -7,7 +7,7 @@ open DiscriminatedUnions
 
 module TryWith =
 
-    let tryWith f1 f2 f3 x y = //x se ne vzdy pouziva, ale z duvodu jednotnosti ponechano 
+    let tryWith f1 f2 f3 x y = 
         try
             try          
                f1 x |> Success
@@ -27,12 +27,12 @@ module TryWith =
                              do System.Environment.Exit(1) 
                              y    
                               
-    let optionToGenerics err (gen: 'a) value = 
+    let inline optionToSRTP err (srtp: ^a) value = 
         value
         |> Option.ofObj 
         |> function 
             | Some value -> value  
             | None       -> 
                             printfn"%s" err
-                            gen
+                            srtp
 

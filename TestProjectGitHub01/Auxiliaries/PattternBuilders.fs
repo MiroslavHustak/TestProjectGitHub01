@@ -7,7 +7,7 @@ module PattternBuilders =
         | false -> ()
         | true  -> nextFunc() 
 
-    type private MyPatternBuilder = MyPatternBuilder with            
+    type private MyBuilder = MyBuilder with            
         member _.Bind(condition, nextFunc) = (>>=) <| condition <| nextFunc 
         member _.Return x = x
    *)
@@ -18,6 +18,6 @@ module PattternBuilders =
         | true  -> nextFunc()  
     
     [<Struct>]
-    type MyPatternBuilder = MyPatternBuilder with    
+    type MyBuilder = MyBuilder with    
         member _.Bind(condition, nextFunc) = (>>=) <| condition <| nextFunc
         member _.Return x = x

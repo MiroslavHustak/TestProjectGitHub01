@@ -54,7 +54,7 @@ type KodisTimetables = JsonProvider<pathJson>
 
 let private xor a b = (a && not b) || (not a && b) //P
 
-let private errorStr str err = str |> (optionToGenerics err String.Empty) //AP                            
+let private errorStr str err = str |> (optionToSRTP err String.Empty) //AP                            
 
 let private timeStr = errorStr "HH:mm:ss" "Error1" //AP                    
     
@@ -71,7 +71,7 @@ let private processEnd() =    //I
     tryWith processEndTime (fun x -> ()) () String.Empty () |> deconstructor
 
 let private client =  //I 
-    let myClient x = new System.Net.Http.HttpClient() |> (optionToGenerics "Error4" (new System.Net.Http.HttpClient()))         
+    let myClient x = new System.Net.Http.HttpClient() |> (optionToSRTP "Error4" (new System.Net.Http.HttpClient()))         
     tryWith myClient (fun x -> ()) () String.Empty (new System.Net.Http.HttpClient()) |> deconstructor
 
 let private splitList list = //I 
@@ -339,7 +339,7 @@ let private filterTimetables param pathToDir diggingResult = //I
                                                         let b range = range |> List.contains (fileName.Substring(0, 3))
 
                                                         let fileNameFullA = 
-                                                            MyPatternBuilder
+                                                            MyBuilder
                                                                 {
                                                                     let!_ = not <| fileName.Contains("NAD"), fileName 
                                                                     let!_ = (<>) (a 0 range) List.empty, fileName 
@@ -546,13 +546,13 @@ let private filterTimetables param pathToDir diggingResult = //I
 let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*string) list) = //I 
 
     let myFileDelete x = //I  
-        let dirInfo = new DirectoryInfo(pathToDir) |> optionToGenerics "Error8" (new DirectoryInfo(pathToDir))                                                               
+        let dirInfo = new DirectoryInfo(pathToDir) |> optionToSRTP "Error8" (new DirectoryInfo(pathToDir))                                                               
         
         //failwith "Testovani funkce tryWith"
 
         //smazeme stare soubory v adresari  
         dirInfo.EnumerateFiles()
-        |> optionToGenerics "Error11" Seq.empty       
+        |> optionToSRTP "Error11" Seq.empty       
         |> Array.ofSeq
         |> Array.Parallel.iter (fun item -> item.Delete())    
    

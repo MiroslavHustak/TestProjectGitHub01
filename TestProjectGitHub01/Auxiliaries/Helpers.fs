@@ -13,11 +13,11 @@ open TryWith.TryWith
           let perform x =                                    
               let sourceFilepath =
                   Path.GetFullPath(source)
-                  |> optionToGenerics "Chyba při čtení cesty k souboru" String.Empty 
+                  |> optionToSRTP "Chyba při čtení cesty k souboru" String.Empty 
 
               let destinFilepath =
                   Path.GetFullPath(destination) 
-                  |> optionToGenerics "Chyba při čtení cesty k souboru" String.Empty 
+                  |> optionToSRTP "Chyba při čtení cesty k souboru" String.Empty 
                 
               let fInfodat: FileInfo = new FileInfo(sourceFilepath)  
               match fInfodat.Exists with 
