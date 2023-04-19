@@ -13,6 +13,7 @@ open Helpers
 open TryWith.TryWith
 open ProgressBarFSharp
 open DiscriminatedUnions
+open PatternBuilders.PattternBuilders
 
 do System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance)
     
@@ -336,20 +337,17 @@ let private filterTimetables param pathToDir diggingResult = //I
                                              
                                                         let a i range = range |> List.filter (fun item -> (charList |> List.item i = item)) 
                                                         let b range = range |> List.contains (fileName.Substring(0, 3))
-                                                   
+
                                                         let fileNameFullA = 
-                                                            match fileName.Contains("NAD") with 
-                                                            | false -> 
-                                                                        match a 0 range <> List.empty  with
-                                                                        | true  -> 
-                                                                                    match a 1 range <> List.empty with
-                                                                                    | true  -> 
-                                                                                               match a 2 range <> List.empty with
-                                                                                               | true  -> fileName                                                                     
-                                                                                               | false -> sprintf "%s%s" "0" fileName                    
-                                                                                    | false -> sprintf "%s%s" "00" fileName //pocet "0" zavisi na delce retezce cisla linky
-                                                                        | false -> fileName 
-                                                             | true -> fileName
+                                                            MyPatternBuilder
+                                                                {
+                                                                    let!_ = not <| fileName.Contains("NAD"), fileName 
+                                                                    let!_ = (<>) (a 0 range) List.empty, fileName 
+                                                                    let!_ = (<>) (a 1 range) List.empty, sprintf "%s%s" "00" fileName //pocet "0" zavisi na delce retezce cisla linky 
+                                                                    let!_ = (<>) (a 2 range) List.empty, sprintf "%s%s" "0" fileName 
+
+                                                                    return fileName
+                                                                }                                                            
                                                          
                                                         let fileNameFull =  
                                                             match b rangeS || b rangeR || b rangeX with
@@ -536,13 +534,13 @@ let private filterTimetables param pathToDir diggingResult = //I
     printfn "Dokoncena filtrace odkazu na neplatne jizdni rady."
     
     myList4 |> List.filter (fun item -> 
-                                         (not <| String.IsNullOrWhiteSpace(fst item) 
-                                         && 
-                                         not <| String.IsNullOrEmpty(fst item)) 
-                                         ||
-                                         (not <| String.IsNullOrWhiteSpace(snd item)
-                                         && 
-                                         not <| String.IsNullOrEmpty(snd item))                                         
+                                      (not <| String.IsNullOrWhiteSpace(fst item) 
+                                      && 
+                                      not <| String.IsNullOrEmpty(fst item)) 
+                                      ||
+                                      (not <| String.IsNullOrWhiteSpace(snd item)
+                                      && 
+                                      not <| String.IsNullOrEmpty(snd item))                                         
                            ) |> List.sort                                             
         
 let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*string) list) = //I 
