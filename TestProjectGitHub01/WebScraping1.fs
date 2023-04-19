@@ -458,7 +458,6 @@ let private filterTimetables param pathToDir diggingResult = //I
     let myList2 = //I
         let myFunction x = //P
             //list listu se stejnymi linkami s ruznou dobou platnosti JR  
-            //NAD to uz nevezme, da se predpokladat, ze vetsinou nebudou 
             myList1 
             |> splitListByPrefix //splitList1 //splitList 
             |> List.collect (fun list ->  
