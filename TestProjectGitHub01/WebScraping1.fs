@@ -491,7 +491,7 @@ let private filterTimetables param pathToDir diggingResult = //I
                                                                                   let dayValidityEnd x = Parsing.parseMe(item.Substring(23 + x, 2))
 
                                                                                   item, new DateTime(yearValidityStart x, monthValidityStart x, dayValidityStart x) 
-                                                                                  //item, new DateTime(yearValidityEnd, monthValidityEnd, dayValidityEnd) //pro pripadnou zmenu logiky
+                                                                                  //item, new DateTime(yearValidityEnd x, monthValidityEnd x, dayValidityEnd x) //pro pripadnou zmenu logiky
                                                                               with 
                                                                               | _ -> item, currentTime
                                                                    ) |> List.maxBy snd                                                        

@@ -29,7 +29,7 @@ let main argv =
         printfn "Hromadne stahovani jizdnich radu ODIS z webu https://www.kodis.cz"
         printfn "*****************************************************************"
         printfn "Vyber si adresar pro ulozeni jizdnich radu. Ve vybranem adresari bude vymazan jeho soucasny obsah!!!"
-        printfn "Precti si pozorne vyse uvedene a bud stiskni cokoliv pro vybrani adresare anebo krizkem ukonci aplikaci."
+        printfn "Precti si pozorne vyse uvedene a bud stiskni ENTER pro vybrani adresare anebo krizkem ukonci aplikaci."
         Console.ReadKey() |> ignore
     
         let pathToFolder = 
