@@ -53,7 +53,7 @@ let main argv =
        
         printfn "Sqele! Adresar byl vybran. Nyni zadej cislici plus ENTER pro vyber varianty."
         printfn "2 = JR platne v budouci dobe, ktere se uz vyskytuji na webu KODISu."
-        printfn "3 = Pouze vylukove JR, JR NAD a JR X linek."
+        printfn "3 = Pouze aktualni vylukove JR, JR NAD a JR X linek."
         printfn "4 = JR dlouhodobe platne bez jakykoliv vyluk. Mohou se hodit v pripade,"
         printfn "%4ckdy zakladni varianta obsahuje jedno ci dvoudenni vylukove JR." <| char(32)
         printfn "%c" <| char(32) 
