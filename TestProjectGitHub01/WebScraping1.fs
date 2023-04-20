@@ -1,12 +1,10 @@
 ﻿module WebScraping1
 
 open System
-open System.Threading
-
-open Fugit
-open System
 open System.IO
 open System.Net
+
+open Fugit
 open FSharp.Data
 
 open Helpers
