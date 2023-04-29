@@ -12,6 +12,7 @@ open TryWith.TryWith
 open ProgressBarFSharp
 open DiscriminatedUnions
 open PatternBuilders.PattternBuilders
+open System.Net.Http
 
 do System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance)
     
@@ -102,24 +103,27 @@ let private splitList1 (list: string list) : string list list = //P
     list |> List.groupBy (fun (item: string) -> item.Substring(0, lineNumberLength)) |> List.map (fun (key, group) -> group) 
     
 let private downloadFileTaskAsync (client: Http.HttpClient) (uri: string) (path: string) =   //I 
-    //muj custom made tryWith nezachyti exception u async
+    
+        let errMsg ex = 
+            printfn "\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
+            do Console.ReadKey() |> ignore 
+            do client.Dispose()
+            do System.Environment.Exit(1)
+
         async
             {   
-                //TODO priste zrob Async.Catch
-                try 
+                //TODO vyzkusaj Async.Catch
+                try //muj custom made tryWith nezachyti exception u async
                     let! stream = client.GetStreamAsync(uri) |> Async.AwaitTask                             
                     use fileStream = new FileStream(path, FileMode.CreateNew) //|> (optionToGenerics "Error9" (new FileStream(path, FileMode.CreateNew))) //nelze, vytvari to dalsi stream a uklada to znovu                                
                     return! stream.CopyToAsync(fileStream) |> Async.AwaitTask 
-                with
-                | ex -> 
-                        printfn "\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
-                        do Console.ReadKey() |> ignore 
-                        do client.Dispose()
-                        do System.Environment.Exit(1)
-                        return ()
+                with 
+                | :? AggregateException as ex -> 
+                                                 printfn "\n%s%s" "Jizdni rad s timto odkazem se nepodarilo stahnout: \n" uri
+                                                 return()                                              
+                | ex                          -> errMsg ex; return()                                
             }     
  
-
 //************************Main code***********************************************************
 
 let private jsonLinkList = //P
@@ -301,7 +305,10 @@ let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
                              ) 
         tryWith myFunction (fun x -> ()) () String.Empty Array.empty |> deconstructor
 
-    (Array.append <| kodisAttachments() <| kodisTimetables()) |> Set.ofArray //jen z vyukovych duvodu -> konverzi na Set vyhodime stejne polozky, jinak staci jen |> Array.distinct 
+    //TODO pokud se AE objevi v json, pridat logiku zde 
+    let kodisTimetablesWithAE() = Array.append <| kodisTimetables() <| [| @"https://kodis-files.s3.eu-central-1.amazonaws.com/AE_2023_05_01_2023_12_09_799a001f47.pdf" |]
+
+    (Array.append <| kodisAttachments() <| kodisTimetablesWithAE()) |> Set.ofArray //jen z vyukovych duvodu -> konverzi na Set vyhodime stejne polozky, jinak staci jen |> Array.distinct 
     //kodisAttachments() |> Set.ofArray //over cas od casu
     //kodisTimetables() |> Set.ofArray //over cas od casu
 
@@ -348,7 +355,7 @@ let private filterTimetables param pathToDir diggingResult = //I
                                                                 }                                                            
                                                          
                                                         let fileNameFull =  
-                                                            match b rangeS || b rangeR || b rangeX with
+                                                            match b rangeS || b rangeR || b rangeX || fileNameFullA.Contains("AE_") with
                                                             | true  -> sprintf "%s%s" "_" fileNameFullA                                                                       
                                                             | false -> fileNameFullA  
 
@@ -579,7 +586,7 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
     printfn "%c" <| char(32)   
     printfn "%c" <| char(32)  
     printfn "\nDokonceno stahovani jizdnich radu a jejich ukladani do prislusneho adresare." 
-    printfn "Pocet stazenych jizdnich radu: %i" (filterTimetables |> List.length)  
+    printfn "Pocet jizdnich radu, ktere se aplikace pokousela stahnout: %i" (filterTimetables |> List.length)  
 
 let webscraping1 pathToDir variant = //I
     processStart()

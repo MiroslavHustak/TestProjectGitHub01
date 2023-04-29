@@ -75,7 +75,8 @@ let main argv =
         webscraping1 pathToFolder variant 
         
         printfn "%c" <| char(32)  
-        printfn "Udaje KODISu maji nekonzistentni retezec, mohlo dojit ke stazeni i neceho, co do daneho vyberu nepatri."
+        printfn "Udaje KODISu nemaji konzistentni retezec, proto mohlo dojit ke stazeni i neceho, co do daneho vyberu nepatri."
+        printfn "A naopak, JR bez spravneho retezce s udaji o platnosti (napr. NAD bez dalsich udaju) stazeny nebudou."
         printfn "%c" <| char(32)   
         printfn "Stiskni cokoliv pro ukonceni aplikace."
         Console.ReadKey() |> ignore
