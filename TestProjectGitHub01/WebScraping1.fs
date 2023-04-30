@@ -121,7 +121,9 @@ let private downloadFileTaskAsync (client: Http.HttpClient) (uri: string) (path:
                 | :? AggregateException as ex -> 
                                                  printfn "\n%s%s" "Jizdni rad s timto odkazem se nepodarilo stahnout: \n" uri
                                                  return()                                              
-                | ex                          -> errMsg ex; return()                                
+                | ex                          -> 
+                                                 errMsg ex
+                                                 return()                                
             }     
  
 //************************Main code***********************************************************
