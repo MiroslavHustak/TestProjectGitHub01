@@ -544,9 +544,7 @@ let private filterTimetables param pathToDir diggingResult = //I
                                                            
                                              link, path 
                         )
-        tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor
-    
-    printfn "Dokoncena filtrace odkazu na neplatne jizdni rady."
+        tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor   
     
     myList4 |> List.filter (fun item -> 
                                       (not <| String.IsNullOrWhiteSpace(fst item) 
@@ -558,26 +556,49 @@ let private filterTimetables param pathToDir diggingResult = //I
                                       not <| String.IsNullOrEmpty(snd item))                                         
                            ) |> List.sort                                             
         
-let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*string) list) = //I 
+let private deleteFilesAndFolders pathToDir = //I 
 
     let myFileDelete x = //I  
-        let dirInfo = new DirectoryInfo(pathToDir) |> optionToSRTP "Error8" (new DirectoryInfo(pathToDir))                                                               
-        
-        //failwith "Testovani funkce tryWith"
 
-        //smazeme stare soubory v adresari  
+        let dirInfo = new DirectoryInfo(pathToDir) |> optionToSRTP "Error8" (new DirectoryInfo(pathToDir))   
+
+        //smazeme vsechny soubory v korenu vybraneho adresare  
         dirInfo.EnumerateFiles()
-        |> optionToSRTP "Error11" Seq.empty       
+        |> optionToSRTP "Error11f" Seq.empty       
         |> Array.ofSeq
         |> Array.Parallel.iter (fun item -> item.Delete())    
-   
+        
+        //smazeme vsechny adresare ve vybranem adresari 
+        dirInfo.EnumerateDirectories()
+        |> optionToSRTP "Error11d" Seq.empty       
+        |> Array.ofSeq
+        |> Array.Parallel.iter (fun item -> item.Delete(true))    
+           
     tryWith myFileDelete (fun x -> ()) () String.Empty () |> deconstructor
-    printfn "Provedeno mazani starych jizdnich radu v prislusnem adresari."
-    
+
+    printfn "Dokoncena filtrace odkazu na neplatne jizdni rady."
+    printfn "Provedeno mazani uplne vseho ve vybranem adresari."
+   
+    [
+        sprintf"%s\%s"pathToDir "KODIS_aktualni_vcetne_vyluk"
+        sprintf"%s\%s"pathToDir "KODIS_pouze_budouci_platnost"
+        sprintf"%s\%s"pathToDir "KODIS_pouze_vyluky"
+        sprintf"%s\%s"pathToDir "KODIS_kompletni_bez_vyluk" 
+    ]  
+
+let private createFolders dirList = //I 
+
+   let myFolderCreation x = //I  
+       dirList |> List.iter (fun dir -> Directory.CreateDirectory(dir) |> ignore)  
+              
+   tryWith myFolderCreation (fun x -> ()) () String.Empty () |> deconstructor   
+
+let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*string) list) = //I 
+            
     //************************download pdf souboru, ktere jsou aktualni*******************************************
     
     //tryWith je ve funkci downloadFileTaskAsync
-    printfn "Probiha stahovani jizdnich radu a jejich ukladani do prislusneho adresare." 
+    printfn "Probiha stahovani prislusnych jizdnich radu a jejich ukladani do [%s]." pathToDir 
 
     let downloadTimetables() = //I
         let l = filterTimetables |> List.length
@@ -586,26 +607,42 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
                                                  progressBarContinuous i l
                                                  async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously  
                                                  //async { printfn"%s" pathToFile; return! Async.Sleep 0 } |> Async.RunSynchronously
-                                                 //async {return! Async.Sleep 10 } |> Async.RunSynchronously   
                       )    
    
     //progressBarIndeterminate <| downloadTimetables  
 
     downloadTimetables() //progressBarContinuous
+    
+    printfn "Dokonceno stahovani jizdnich radu a jejich ukladani do [%s]." pathToDir
+    //printfn "Pocet jizdnich radu, ktere se aplikace pokousela stahnout: %i" (filterTimetables |> List.length)  
+    //printfn "%c" <| char(32)  
 
-    printfn "%c" <| char(32)   
-    printfn "%c" <| char(32)  
-    printfn "\nDokonceno stahovani jizdnich radu a jejich ukladani do prislusneho adresare." 
-    printfn "Pocet jizdnich radu, ktere se aplikace pokousela stahnout: %i" (filterTimetables |> List.length)  
+let webscraping1 pathToDir variant = //I       
 
-let webscraping1 pathToDir variant = //I
-    processStart()
-    downloadAndSaveUpdatedJson()   
-    digThroughJsonStructure()
-    |> filterTimetables variant pathToDir //variant = //CurrentValidity //FutureValidity //ReplacementService //WithoutReplacementService
-    |> downloadAndSaveTimetables pathToDir       
-    |> client.Dispose  
-    |> processEnd
+    match variant |> List.length with
+    | 1 -> 
+           processStart()
+           downloadAndSaveUpdatedJson()
+           let dirList = deleteFilesAndFolders pathToDir
+           digThroughJsonStructure()
+           |> filterTimetables (variant |> List.head) pathToDir //variant = //CurrentValidity //FutureValidity //ReplacementService //WithoutReplacementService
+           |> downloadAndSaveTimetables pathToDir       
+           |> client.Dispose  
+           |> processEnd
+    | _ -> 
+           processStart()
+           downloadAndSaveUpdatedJson()
+           let dirList = deleteFilesAndFolders pathToDir
+           createFolders dirList
+           (variant, dirList)
+           ||> List.iter2 (fun variant dir ->                                             
+                                            digThroughJsonStructure()
+                                            |> filterTimetables variant dir 
+                                            |> downloadAndSaveTimetables dir   
+                          )
+           |> client.Dispose 
+           |> processEnd 
+    
 
     //CurrentValidity = JR striktne platne k danemu dni, tj. pokud je napr. na dany den vylukovy JR, stahne se tento JR, ne JR platny dalsi den
     //FutureValidity = JR platne v budouci dobe, ktere se uz vyskytuji na webu KODISu

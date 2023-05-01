@@ -53,22 +53,25 @@ let progressBarIndeterminate (longRunningProcess: unit -> unit) =
 let private updateProgressBar (currentProgress : int) (totalProgress : int) : unit =
     
     let myFunction x = 
+
         let bytes = //437 je tzv. Extended ASCII  
             System.Text.Encoding.GetEncoding(437).GetBytes("█") |> optionToSRTP "ErrorPB4" Array.empty 
                    
         let output =
             System.Text.Encoding.GetEncoding(852).GetChars(bytes) |> optionToSRTP "ErrorPB5" Array.empty   
+        
+        let progressBar = 
+            let barWidth = 50 //nastavit delku dle potreby            
+            let percentComplete = (/) ((*) currentProgress 101) ((++) totalProgress) // :-) //101 proto, ze pri deleni 100 to po zaokrouhleni dalo jen 99%                    
+            let barFill = (/) ((*) currentProgress barWidth) totalProgress // :-)  
+               
+            let characterToFill = string (Array.item 0 output) //moze byt baj "#"
+            let bar = String.replicate barFill characterToFill |> optionToSRTP "ErrorPB5" String.Empty 
+            let remaining = String.replicate (barWidth - (++) barFill) "*" |> optionToSRTP "ErrorPB6" String.Empty // :-)
+              
+            sprintf "<%s%s> %d%%" bar remaining percentComplete 
 
-        let barWidth = 50 //nastavit delku dle potreby
-        let percentComplete = (/) ((*) currentProgress 101) ((++) totalProgress) // :-) //101 proto, ze pri deleni 100 to po zaokrouhleni dalo jen 99%
-        let barFill = (/) ((*) currentProgress barWidth) totalProgress // :-)            
-      
-        let characterToFill = string (Array.item 0 output) //moze byt baj "#"
-        let bar = String.replicate barFill characterToFill |> optionToSRTP "ErrorPB5" String.Empty 
-        let remaining = String.replicate (barWidth - (++) barFill) "*" |> optionToSRTP "ErrorPB6" String.Empty // :-)
-        let progressBar = sprintf "<%s%s> %d%%" bar remaining percentComplete 
-
-        match currentProgress = totalProgress with
+        match (=) currentProgress totalProgress with
         | true  -> printfn "%s\n" progressBar
         | false -> printf "%s\r" progressBar
 
@@ -76,6 +79,7 @@ let private updateProgressBar (currentProgress : int) (totalProgress : int) : un
 
 let progressBarContinuous (currentProgress : int) (totalProgress : int) : unit =
 
-    match currentProgress <= totalProgress with
+    match currentProgress < (totalProgress - 1) with
     | true  -> updateProgressBar currentProgress totalProgress
-    | false -> Console.CursorLeft <- 0             
+    | false -> Console.Write("\r" + new string(' ', Console.WindowWidth - 1) + "\r")
+               Console.CursorLeft <- 0             

@@ -52,31 +52,34 @@ let main argv =
         Console.Clear()
        
         printfn "Sqele! Adresar byl vybran. Nyni zadej cislici plus ENTER pro vyber varianty."
+        printfn "1 = ZAKLADNI VARIANTA, tj. JR strikne platne dnesni den, tj. pokud je napr. pro dnesni"
+        printfn "%4cden platny pouze jednodenni vylukovy JR, stahne se tento JR, ne JR platny dalsi den." <| char(32)
         printfn "2 = JR platne v budouci dobe, ktere se uz vyskytuji na webu KODISu."
         printfn "3 = Pouze aktualni vylukove JR, JR NAD a JR X linek."
         printfn "4 = JR dlouhodobe platne bez jakykoliv vyluk. Mohou se hodit v pripade,"
         printfn "%4ckdy zakladni varianta obsahuje jedno ci dvoudenni vylukove JR." <| char(32)
         printfn "%c" <| char(32) 
-        printfn "Jakakoliv jina klavesa = ZAKLADNI VARIANTA, tj. JR strikne platne dnesni den, tj. pokud je napr. pro dnesni"
-        printfn "den platny pouze jednodenni vylukovy JR, stahne se tento JR, ne JR platny dalsi den.\r"
+        printfn "Jakakoliv jina klavesa = stahne se vsechno vyse uvedene najednou.\r"        
         printfn "%c" <| char(32) 
         printfn "%c" <| char(32) 
-        printfn "Staci stisknout ENTER pro zakladni variantu."
+        printfn "Staci stisknout ENTER pro stahnuti vsech variant najednou."
 
         let variant = 
             Console.ReadLine()
             |> function 
-                | "2" -> FutureValidity
-                | "3" -> ReplacementService
-                | "4" -> WithoutReplacementService
-                | _   -> CurrentValidity
+                | "1" -> [ CurrentValidity ]
+                | "2" -> [ FutureValidity ]  
+                | "3" -> [ ReplacementService ]
+                | "4" -> [ WithoutReplacementService ]
+                | _   -> [ CurrentValidity; FutureValidity; ReplacementService; WithoutReplacementService ]
                
         Console.Clear()
         webscraping1 pathToFolder variant 
         
         printfn "%c" <| char(32)  
         printfn "Udaje KODISu nemaji konzistentni retezec, proto mohlo dojit ke stazeni i neceho, co do daneho vyberu nepatri."
-        printfn "A naopak, JR bez spravneho retezce s udaji o platnosti (napr. NAD bez dalsich udaju) stazeny nebudou."
+        printfn "JR s chybejicimi udaji o platnosti (napr. NAD bez dalsich udaju) nebyly stazeny."
+        printfn "JR s chybnymi udaji o platnosti mohou, ale nemuseji byt stazeny (zalezi na rozsahu chyby)."
         printfn "%c" <| char(32)   
         printfn "Stiskni cokoliv pro ukonceni aplikace."
         Console.ReadKey() |> ignore
