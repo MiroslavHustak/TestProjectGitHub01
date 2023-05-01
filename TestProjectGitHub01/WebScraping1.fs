@@ -35,7 +35,7 @@ let [<Literal>] pathKodisWeb = @"https://kodisweb-backend.herokuapp.com/"
 let [<Literal>] pathKodisAmazonLink = @"https://kodis-files.s3.eu-central-1.amazonaws.com/"
 let [<Literal>] lineNumberLength = 3 //3 je delka retezce pouze pro linky 001 az 999
 
-let private currentTime = Fugit.now().AddDays(-1.0)   // new DateTime(2023, 04, 11)
+let private currentTime = Fugit.now()//.AddDays(-1.0)   // new DateTime(2023, 04, 11)
 //let private pathToDir = @"e:\E\Mirek po osme hodine a o vikendech\KODISTP\" 
 let private regularValidityStart = new DateTime(2022, 12, 11) //zmenit pri pravidelne zmene JR 
 let private regularValidityEnd = new DateTime(2023, 12, 09) //zmenit pri pravidelne zmene JR 
@@ -415,18 +415,29 @@ let private filterTimetables param pathToDir diggingResult = //I
                                                                                 
                                                                                     let cond = 
                                                                                         match param with 
-                                                                                        | CurrentValidity           -> dateValidityStart x |> Fugit.isBeforeOrEqual currentTime && dateValidityEnd x |> Fugit.isAfter currentTime
+                                                                                        | CurrentValidity           -> 
+                                                                                                                       (dateValidityStart x |> Fugit.isBeforeOrEqual currentTime 
+                                                                                                                       && 
+                                                                                                                       dateValidityEnd x |> Fugit.isAfter currentTime)
+                                                                                                                       ||
+                                                                                                                       ((dateValidityStart x).Equals(currentTime) 
+                                                                                                                       && 
+                                                                                                                       (dateValidityEnd x).Equals(currentTime))
+
                                                                                         | FutureValidity            -> dateValidityStart x |> Fugit.isAfter currentTime
+
                                                                                         | ReplacementService        -> 
                                                                                                                        (dateValidityStart x |> Fugit.isBeforeOrEqual currentTime
                                                                                                                        && dateValidityEnd x |> Fugit.isAfter currentTime)
                                                                                                                        && (fileNameFull.Contains("_v") 
                                                                                                                        || fileNameFull.Contains("X")
                                                                                                                        || fileNameFull.Contains("NAD"))
+
                                                                                         | WithoutReplacementService ->
                                                                                                                        (dateValidityStart x |> Fugit.isBeforeOrEqual currentTime
                                                                                                                        && dateValidityEnd x |> Fugit.isAfter currentTime)
-                                                                                                                       && (not <| fileNameFull.Contains("_v") 
+                                                                                                                       &&
+                                                                                                                       (not <| fileNameFull.Contains("_v") 
                                                                                                                        && not <| fileNameFull.Contains("X")
                                                                                                                        && not <| fileNameFull.Contains("NAD"))
                                                                                 
