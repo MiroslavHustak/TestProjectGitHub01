@@ -12,7 +12,6 @@ open TryWith.TryWith
 open ProgressBarFSharp
 open DiscriminatedUnions
 open PatternBuilders.PattternBuilders
-open System.Net.Http
 
 do System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance)
     
@@ -26,17 +25,14 @@ Console.OutputEncoding  <- System.Text.Encoding.Unicode
 //tu a tam zkontrolovat json, zdali KODIS nezmenil jeho strukturu 
 //pro type provider musi byt konstanta (nemozu pouzit sprintf partialPathJson) a musi byt forward slash"
 let [<Literal>] pathJson = @"KODISJson/kodisMHDTotal.json" //v hl. adresari projektu
-//let [<Literal>] pathJson = @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/kodisMHDTotal.json" 
 
 let [<Literal>] partialPathJson = @"KODISJson/" //v binu
-//let [<Literal>] partialPathJson =  @"e:/E/Mirek po osme hodine a o vikendech/KODISJson/"
 
 let [<Literal>] pathKodisWeb = @"https://kodisweb-backend.herokuapp.com/"
 let [<Literal>] pathKodisAmazonLink = @"https://kodis-files.s3.eu-central-1.amazonaws.com/"
 let [<Literal>] lineNumberLength = 3 //3 je delka retezce pouze pro linky 001 az 999
 
 let private currentTime = Fugit.now()//.AddDays(-1.0)   // new DateTime(2023, 04, 11)
-//let private pathToDir = @"e:\E\Mirek po osme hodine a o vikendech\KODISTP\" 
 let private regularValidityStart = new DateTime(2022, 12, 11) //zmenit pri pravidelne zmene JR 
 let private regularValidityEnd = new DateTime(2023, 12, 09) //zmenit pri pravidelne zmene JR 
 let private range = [ '1'; '2'; '3'; '4'; '5'; '6'; '7'; '8'; '9'; '0' ]

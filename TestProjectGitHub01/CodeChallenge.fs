@@ -2,6 +2,8 @@
 
 open System
 
+open PatternBuilders.PattternBuilders
+
 //code challenge assignment
 let codeChallenge() = 
 
@@ -38,22 +40,23 @@ let codeChallenge() =
                               | ')' -> -1  
                               | _   ->  0
                    ) 
+
     let depthBrackets3 = result3 |> Seq.scan (+) 0 |> Seq.max
     printfn "Depth3 = %i" depthBrackets1
 
     //muj pokus o reseni, sice funguje, ale toho kodu.......
     let result77 =         
         strSeq
-        |> Seq.mapi (fun i item ->                             
-                                 match i < (strSeq |> Seq.length) - 1 with 
-                                 | true  -> 
-                                          match (item = '(' && strSeq |> Seq.item (i + 1) <> ')') || (item = ')' && strSeq |> Seq.item (i + 1) = '(') with
-                                          | true  -> item
-                                          | false -> '0'
-                                 | false -> '0'
+        |> Seq.mapi (fun i item ->  
+                                 MyBuilderCC
+                                    {
+                                        let!_ = i < (strSeq |> Seq.length) - 1 
+                                        let!_ = (item = '(' && strSeq |> Seq.item (i + 1) <> ')') || (item = ')' && strSeq |> Seq.item (i + 1) = '(')
+                                        return item
+                                    }                                 
                     ) 
      
-    let depthBrackets = result77 |> Seq.filter (fun x -> x <> '0')
+    let depthBrackets = result77 |> Seq.filter (fun x -> (<>) x '0')
 
     printfn "Depth = %i" (depthBrackets |> Seq.length)
 
