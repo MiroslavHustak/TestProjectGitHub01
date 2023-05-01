@@ -558,7 +558,7 @@ let private filterTimetables param pathToDir diggingResult = //I
         
 let private deleteFilesAndFolders pathToDir = //I 
 
-    let myFileDelete x = //I  
+    let myDeleteFunction x = //I  
 
         let dirInfo = new DirectoryInfo(pathToDir) |> optionToSRTP "Error8" (new DirectoryInfo(pathToDir))   
 
@@ -574,7 +574,7 @@ let private deleteFilesAndFolders pathToDir = //I
         |> Array.ofSeq
         |> Array.Parallel.iter (fun item -> item.Delete(true))    
            
-    tryWith myFileDelete (fun x -> ()) () String.Empty () |> deconstructor
+    tryWith myDeleteFunction (fun x -> ()) () String.Empty () |> deconstructor
 
     printfn "Dokoncena filtrace odkazu na neplatne jizdni rady."
     printfn "Provedeno mazani uplne vseho ve vybranem adresari."
@@ -619,20 +619,18 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
 
 let webscraping1 pathToDir variant = //I       
 
+    processStart()
+    downloadAndSaveUpdatedJson()
+
+    let dirList = deleteFilesAndFolders pathToDir
+
     match variant |> List.length with
-    | 1 -> 
-           processStart()
-           downloadAndSaveUpdatedJson()
-           let dirList = deleteFilesAndFolders pathToDir
+    | 1 ->            
            digThroughJsonStructure()
            |> filterTimetables (variant |> List.head) pathToDir //variant = //CurrentValidity //FutureValidity //ReplacementService //WithoutReplacementService
            |> downloadAndSaveTimetables pathToDir       
-           |> client.Dispose  
-           |> processEnd
-    | _ -> 
-           processStart()
-           downloadAndSaveUpdatedJson()
-           let dirList = deleteFilesAndFolders pathToDir
+          
+    | _ ->            
            createFolders dirList
            (variant, dirList)
            ||> List.iter2 (fun variant dir ->                                             
@@ -640,8 +638,9 @@ let webscraping1 pathToDir variant = //I
                                             |> filterTimetables variant dir 
                                             |> downloadAndSaveTimetables dir   
                           )
-           |> client.Dispose 
-           |> processEnd 
+
+    |> client.Dispose 
+    |> processEnd 
     
 
     //CurrentValidity = JR striktne platne k danemu dni, tj. pokud je napr. na dany den vylukovy JR, stahne se tento JR, ne JR platny dalsi den
