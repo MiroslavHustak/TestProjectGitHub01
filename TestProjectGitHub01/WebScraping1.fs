@@ -523,7 +523,8 @@ let private filterTimetables param pathToDir diggingResult = //I
                                              let str =
                                                  match str.Substring(0, 2).Equals("00") with
                                                  | true   -> str.Remove(0, 2)
-                                                 | false  -> match str.Substring(0, 1).Equals("0") || str.Substring(0, 1).Equals("_") with
+                                                 | false  ->
+                                                             match str.Substring(0, 1).Equals("0") || str.Substring(0, 1).Equals("_") with
                                                              | false -> item
                                                              | true  -> str.Remove(0, 1)                                                                                  
                                              
