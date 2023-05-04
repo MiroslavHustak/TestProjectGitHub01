@@ -12,6 +12,7 @@ open TryWith.TryWith
 open ProgressBarFSharp
 open DiscriminatedUnions
 open PatternBuilders.PattternBuilders
+open System.Threading.Tasks
 
 do System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance)
     
@@ -546,33 +547,43 @@ let private filterTimetables param pathToDir diggingResult = //I
                         )
         tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor   
     
-    myList4 |> List.filter (fun item -> 
-                                      (not <| String.IsNullOrWhiteSpace(fst item) 
-                                      && 
-                                      not <| String.IsNullOrEmpty(fst item)) 
-                                      ||
-                                      (not <| String.IsNullOrWhiteSpace(snd item)
-                                      && 
-                                      not <| String.IsNullOrEmpty(snd item))                                         
-                           ) |> List.sort                                             
+    myList4 
+    |> List.filter (fun item -> 
+                              (not <| String.IsNullOrWhiteSpace(fst item) 
+                              && 
+                              not <| String.IsNullOrEmpty(fst item)) 
+                              ||
+                              (not <| String.IsNullOrWhiteSpace(snd item)
+                              && 
+                              not <| String.IsNullOrEmpty(snd item))                                         
+                   ) |> List.sort                                             
         
 let private deleteFilesAndFolders pathToDir = //I 
 
     let myDeleteFunction x = //I  
 
-        let dirInfo = new DirectoryInfo(pathToDir) |> optionToSRTP "Error8" (new DirectoryInfo(pathToDir))   
-
+        //rozdil mezi Directory a DirectoryInfo viz Unique_Identifier_And_Metadata_File_Creator.sln -> MainLogicDG.fs
+        let dirInfo = new DirectoryInfo(pathToDir) |> optionToSRTP "Error8" (new DirectoryInfo(pathToDir)) 
+             
         //smazeme vsechny soubory v korenu vybraneho adresare  
-        dirInfo.EnumerateFiles()
-        |> optionToSRTP "Error11f" Seq.empty       
-        |> Array.ofSeq
-        |> Array.Parallel.iter (fun item -> item.Delete())    
-        
+        let task1 = 
+            Task.Factory.StartNew (fun () ->
+                                           dirInfo.EnumerateFiles()
+                                           |> optionToSRTP "Error11f" Seq.empty       
+                                           |> Array.ofSeq
+                                           |> Array.Parallel.iter (fun item -> item.Delete())
+                                  )
+      
         //smazeme vsechny adresare ve vybranem adresari 
-        dirInfo.EnumerateDirectories()
-        |> optionToSRTP "Error11d" Seq.empty       
-        |> Array.ofSeq
-        |> Array.Parallel.iter (fun item -> item.Delete(true))    
+        let task2 = 
+            Task.Factory.StartNew (fun () ->
+                                           dirInfo.EnumerateDirectories()
+                                           |> optionToSRTP "Error11d" Seq.empty       
+                                           |> Array.ofSeq
+                                           |> Array.Parallel.iter (fun item -> item.Delete(true))
+                                  )   
+
+        Task.WaitAll( [| task1; task2 |])
            
     tryWith myDeleteFunction (fun x -> ()) () String.Empty () |> deconstructor
 
@@ -580,10 +591,10 @@ let private deleteFilesAndFolders pathToDir = //I
     printfn "Provedeno mazani uplne vseho ve vybranem adresari."
    
     [
-        sprintf"%s\%s"pathToDir "KODIS_aktualni_vcetne_vyluk"
-        sprintf"%s\%s"pathToDir "KODIS_pouze_budouci_platnost"
-        sprintf"%s\%s"pathToDir "KODIS_pouze_vyluky"
-        sprintf"%s\%s"pathToDir "KODIS_kompletni_bez_vyluk" 
+        sprintf"%s\%s"pathToDir "JR_ODIS_aktualni_vcetne_vyluk"
+        sprintf"%s\%s"pathToDir "JR_ODIS_pouze_budouci_platnost"
+        sprintf"%s\%s"pathToDir "JR_ODIS_pouze_vyluky"
+        sprintf"%s\%s"pathToDir "JR_ODIS_kompletni_bez_vyluk" 
     ]  
 
 let private createFolders dirList = //I 
@@ -617,7 +628,17 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
     //printfn "Pocet jizdnich radu, ktere se aplikace pokousela stahnout: %i" (filterTimetables |> List.length)  
     //printfn "%c" <| char(32)  
 
-let webscraping1 pathToDir variant = //I       
+let webscraping1 pathToDir (variant: Validity list) = //I  
+    
+    let x variant dir = 
+        match dir |> Directory.Exists with 
+        | false -> 
+                   printfn "Adresar [%s] neexistuje, prislusne JR do nej urceny nemohly byt stazeny." dir
+                   printfn "Pravdepodobne nekdo dany adresar v prubehu prace tohoto programu smazal."                                                    
+        | true  ->
+                   digThroughJsonStructure()
+                   |> filterTimetables variant dir 
+                   |> downloadAndSaveTimetables dir   
 
     processStart()
     downloadAndSaveUpdatedJson()
@@ -625,23 +646,14 @@ let webscraping1 pathToDir variant = //I
     let dirList = deleteFilesAndFolders pathToDir
 
     match variant |> List.length with
-    | 1 ->            
-           digThroughJsonStructure()
-           |> filterTimetables (variant |> List.head) pathToDir //variant = //CurrentValidity //FutureValidity //ReplacementService //WithoutReplacementService
-           |> downloadAndSaveTimetables pathToDir       
-          
+    | 1 -> x (variant |> List.head) pathToDir              
     | _ ->            
            createFolders dirList
            (variant, dirList)
-           ||> List.iter2 (fun variant dir ->                                             
-                                            digThroughJsonStructure()
-                                            |> filterTimetables variant dir 
-                                            |> downloadAndSaveTimetables dir   
-                          )
-
+           ||> List.iter2 (fun variant dir -> x variant dir)                    
+    
     |> client.Dispose 
     |> processEnd 
-    
 
     //CurrentValidity = JR striktne platne k danemu dni, tj. pokud je napr. na dany den vylukovy JR, stahne se tento JR, ne JR platny dalsi den
     //FutureValidity = JR platne v budouci dobe, ktere se uz vyskytuji na webu KODISu
