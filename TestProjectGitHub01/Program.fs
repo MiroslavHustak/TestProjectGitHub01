@@ -26,8 +26,9 @@ let main argv =
     //*****************************WebScraping1******************************
 
     let myWebscraping1 x = 
-        printfn "Hromadne stahovani jizdnich radu ODIS z webu https://www.kodis.cz"
-        printfn "*****************************************************************"
+        printfn "Hromadne stahovani jizdnich radu ODIS z webu https://www.kodis.cz"           
+        printfn "Datum posledni aktualizace json souboru s odkazy na JR: 05-05-2023" 
+        printfn "********************************************************************"
         printfn "Vyber si adresar pro ulozeni jizdnich radu. Ve vybranem adresari bude vymazan jeho soucasny obsah!!!"
         printfn "Precti si pozorne vyse uvedene a bud stiskni ENTER pro vybrani adresare anebo krizkem ukonci aplikaci."
         Console.ReadKey() |> ignore
@@ -79,7 +80,7 @@ let main argv =
         printfn "%c" <| char(32)  
         printfn "Udaje KODISu nemaji konzistentni retezec, proto mohlo dojit ke stazeni i neceho, co do daneho vyberu nepatri."
         printfn "JR s chybejicimi udaji o platnosti (napr. NAD bez dalsich udaju) nebyly stazeny."
-        printfn "JR s chybnymi udaji o platnosti mohou, ale nemuseji byt stazeny (zalezi na rozsahu chyby)."
+        printfn "JR s chybnymi udaji o platnosti pravdepodobne nebyly stazeny (zalezi na druhu chyby)."
         printfn "%c" <| char(32)   
         printfn "Stiskni cokoliv pro ukonceni aplikace."
         Console.ReadKey() |> ignore

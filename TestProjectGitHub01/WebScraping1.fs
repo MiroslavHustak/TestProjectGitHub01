@@ -40,6 +40,7 @@ let private range = [ '1'; '2'; '3'; '4'; '5'; '6'; '7'; '8'; '9'; '0' ]
 let private rangeS = [ "S1_"; "S2_"; "S3_"; "S4_"; "S5_"; "S6_"; "S7_"; "S8_"; "S9_" ]
 let private rangeR = [ "R1_"; "R2_"; "R3_"; "R4_"; "R5_"; "R6_"; "R7_"; "R8_"; "R9_" ]
 let private rangeX = [ "X1_"; "X2_"; "X3_"; "X4_"; "X5_"; "X6_"; "X7_"; "X8_"; "X9_" ]
+let private rangeA = [ "AE_" ] //ponechan prostor pro pripadne cislovani AE
 let private rangeN1 = [ "NAD_1_"; "NAD_2_"; "NAD_3_"; "NAD_4_"; "NAD_5_"; "NAD_6_"; "NAD_7_"; "NAD_8_"; "NAD_9_" ]
 let private rangeN2 = [ "NAD_10_"; "NAD_11_"; "NAD_12_"; "NAD_13_"; "NAD_14_"; "NAD_15_"; "NAD_16_"; "NAD_17_"; "NAD_18_"; "NAD_19_" ]
 //TODO jestli bude cas, pridelat NAD vlakovych linek
@@ -128,6 +129,7 @@ let private downloadFileTaskAsync (client: Http.HttpClient) (uri: string) (path:
 let private jsonLinkList = //P
     [
         sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Bruntál&group_in%5B1%5D=MHD%20Český%20Těšín&group_in%5B2%5D=MHD%20Frýdek-Místek&group_in%5B3%5D=MHD%20Havířov&group_in%5B4%5D=MHD%20Karviná&group_in%5B5%5D=MHD%20Krnov&group_in%5B6%5D=MHD%20Nový%20Jičín&group_in%5B7%5D=MHD%20Opava&group_in%5B8%5D=MHD%20Orlová&group_in%5B9%5D=MHD%20Ostrava&group_in%5B10%5D=MHD%20Studénka&group_in%5B11%5D=MHD%20Třinec&group_in%5B12%5D=NAD%20MHD&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=12&group_in%5B0%5D=MHD%20Bruntál&group_in%5B1%5D=MHD%20Český%20Těšín&group_in%5B2%5D=MHD%20Frýdek-Místek&group_in%5B3%5D=MHD%20Havířov&group_in%5B4%5D=MHD%20Karviná&group_in%5B5%5D=MHD%20Krnov&group_in%5B6%5D=MHD%20Nový%20Jičín&group_in%5B7%5D=MHD%20Opava&group_in%5B8%5D=MHD%20Orlová&group_in%5B9%5D=MHD%20Ostrava&group_in%5B10%5D=MHD%20Studénka&group_in%5B11%5D=MHD%20Třinec&group_in%5B12%5D=NAD%20MHD&_sort=numeric_label"
         sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Bruntál&_sort=numeric_label"
         sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Český%20Těšín&_sort=numeric_label"
         sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Frýdek-Místek&_sort=numeric_label"
@@ -153,13 +155,16 @@ let private jsonLinkList = //P
         sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=901-990&_sort=numeric_label"
         sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=NAD&_sort=numeric_label"
         sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=S1-S34&group_in%5B1%5D=R8-R61&_sort=numeric_label"
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=12&group_in%5B0%5D=S1-S34&group_in%5B1%5D=R8-R61&_sort=numeric_label"
         sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=S1-S34&_sort=numeric_label"
-        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=R8-R61&_sort=numeric_label"         
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=R8-R61&_sort=numeric_label"   
+        sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=NAD&_sort=numeric_label"     
     ]
 
 let private pathToJsonList =  //P  
     [
         sprintf "%s%s" partialPathJson @"kodisMHDTotal.json"
+        sprintf "%s%s" partialPathJson @"kodisMHDTotal1.json"
         sprintf "%s%s" partialPathJson @"kodisMHDBruntal.json"
         sprintf "%s%s" partialPathJson @"kodisMHDCT.json"
         sprintf "%s%s" partialPathJson @"kodisMHDFM.json"
@@ -185,8 +190,10 @@ let private pathToJsonList =  //P
         sprintf "%s%s" partialPathJson @"kodisRegion900.json"
         sprintf "%s%s" partialPathJson @"kodisRegionNAD.json"
         sprintf "%s%s" partialPathJson @"kodisTrainTotal.json"
+        sprintf "%s%s" partialPathJson @"kodisTrainTotal1.json"
         sprintf "%s%s" partialPathJson @"kodisTrainPomaliky.json"
-        sprintf "%s%s" partialPathJson @"kodisTrainSpesakyARychliky.json"                
+        sprintf "%s%s" partialPathJson @"kodisTrainSpesakyARychliky.json"   
+        sprintf "%s%s" partialPathJson @"kodisNAD.json"
     ]
 
 let private downloadAndSaveUpdatedJson() = 
@@ -302,12 +309,9 @@ let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
                                                                   printfn "%s" "Error6a"
                                                                   Array.empty                                 
                              ) 
-        tryWith myFunction (fun x -> ()) () String.Empty Array.empty |> deconstructor
+        tryWith myFunction (fun x -> ()) () String.Empty Array.empty |> deconstructor          
 
-    //TODO pokud se AE objevi v json, pridat logiku zde 
-    let kodisTimetablesWithAE() = Array.append <| kodisTimetables() <| [| @"https://kodis-files.s3.eu-central-1.amazonaws.com/AE_2023_05_01_2023_12_09_799a001f47.pdf" |]
-
-    (Array.append <| kodisAttachments() <| kodisTimetablesWithAE()) |> Set.ofArray //jen z vyukovych duvodu -> konverzi na Set vyhodime stejne polozky, jinak staci jen |> Array.distinct 
+    (Array.append <| kodisAttachments() <| kodisTimetables()) |> Set.ofArray //jen z vyukovych duvodu -> konverzi na Set vyhodime stejne polozky, jinak staci jen |> Array.distinct 
     //kodisAttachments() |> Set.ofArray //over cas od casu
     //kodisTimetables() |> Set.ofArray //over cas od casu
 
@@ -321,11 +325,16 @@ let private filterTimetables param pathToDir diggingResult = //I
             |> Set.toArray 
             |> Array.Parallel.map (fun (item: string) ->   
                                                         let item = string item
-                                                        //misto pro opravu retezcu, ktere jsou v jsonu v nespravnem formatu
+
+                                                        //misto pro opravu retezcu v PDF, ktere jsou v jsonu v nespravnem formatu - 
                                                         let item = 
                                                             match item.Contains(@"S2_2023_04_03_2023_04_3_v") with
                                                             | true  -> item.Replace(@"S2_2023_04_03_2023_04_3_v", @"S2_2023_04_03_2023_04_03_v")  
-                                                            | false -> item     
+                                                            | false -> item        
+                                                        //konec opravy retezcu 
+
+                                                        //s chybnymi udaji v datech uz nic nenadelam, bez komplikovanych reseni..., tohle selekce vyradi jako neplatne (v JR je 2023_12_31)
+                                                        //https://kodis-files.s3.eu-central-1.amazonaws.com/NAD_2022_12_11_2023_03_31_v_1a2f33dafa.pdf
 
                                                         let fileName =  
                                                             match item.Contains @"timetables/" with
@@ -354,7 +363,7 @@ let private filterTimetables param pathToDir diggingResult = //I
                                                                 }                                                            
                                                          
                                                         let fileNameFull =  
-                                                            match b rangeS || b rangeR || b rangeX || fileNameFullA.Contains("AE_") with
+                                                            match b rangeS || b rangeR || b rangeX || b rangeA with
                                                             | true  -> sprintf "%s%s" "_" fileNameFullA                                                                       
                                                             | false -> fileNameFullA  
 
@@ -415,7 +424,7 @@ let private filterTimetables param pathToDir diggingResult = //I
                                                                                         | CurrentValidity           -> 
                                                                                                                        (dateValidityStart x |> Fugit.isBeforeOrEqual currentTime 
                                                                                                                        && 
-                                                                                                                       dateValidityEnd x |> Fugit.isAfter currentTime)
+                                                                                                                       dateValidityEnd x |> Fugit.isAfterOrEqual currentTime)
                                                                                                                        ||
                                                                                                                        ((dateValidityStart x).Equals(currentTime) 
                                                                                                                        && 
@@ -425,14 +434,17 @@ let private filterTimetables param pathToDir diggingResult = //I
 
                                                                                         | ReplacementService        -> 
                                                                                                                        (dateValidityStart x |> Fugit.isBeforeOrEqual currentTime
-                                                                                                                       && dateValidityEnd x |> Fugit.isAfter currentTime)
-                                                                                                                       && (fileNameFull.Contains("_v") 
+                                                                                                                       && 
+                                                                                                                       dateValidityEnd x |> Fugit.isAfterOrEqual currentTime)
+                                                                                                                       &&
+                                                                                                                       (fileNameFull.Contains("_v") 
                                                                                                                        || fileNameFull.Contains("X")
                                                                                                                        || fileNameFull.Contains("NAD"))
 
                                                                                         | WithoutReplacementService ->
                                                                                                                        (dateValidityStart x |> Fugit.isBeforeOrEqual currentTime
-                                                                                                                       && dateValidityEnd x |> Fugit.isAfter currentTime)
+                                                                                                                       && 
+                                                                                                                       dateValidityEnd x |> Fugit.isAfterOrEqual currentTime)
                                                                                                                        &&
                                                                                                                        (not <| fileNameFull.Contains("_v") 
                                                                                                                        && not <| fileNameFull.Contains("X")
