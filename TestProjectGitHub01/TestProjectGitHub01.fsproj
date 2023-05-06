@@ -26,6 +26,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="TestProjectGitHub01_TemporaryKey.pfx" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="canopy" Version="2.1.5" />
     <PackageReference Include="ExcelDataReader" Version="3.7.0-develop00310" />
     <PackageReference Include="ExcelDataReader.DataSet" Version="3.7.0-develop00310" />

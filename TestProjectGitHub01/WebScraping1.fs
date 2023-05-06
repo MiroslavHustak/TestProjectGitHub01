@@ -542,16 +542,16 @@ let private filterTimetables param pathToDir diggingResult = //I
                                                              | true  -> str.Remove(0, 1)                                                                                  
                                              
                                              let link = 
-                                                match item.Contains("_t") with 
-                                                | true  -> (sprintf "%s%s%s" pathKodisAmazonLink @"timetables/" str).Replace("_t", String.Empty)
-                                                | false -> sprintf "%s%s" pathKodisAmazonLink str                                                
+                                                 match item.Contains("_t") with 
+                                                 | true  -> (sprintf "%s%s%s" pathKodisAmazonLink @"timetables/" str).Replace("_t", String.Empty)
+                                                 | false -> sprintf "%s%s" pathKodisAmazonLink str                                                
 
                                              let path =     
-                                                match item.Contains("_t") with 
-                                                | true  -> 
+                                                 match item.Contains("_t") with 
+                                                 | true  -> 
                                                            let fileName = item.Substring(0, item.Length) //zatim bez generovaneho kodu, sem tam to zkontrolovat
                                                            sprintf "%s/%s" pathToDir fileName   
-                                                | false -> 
+                                                 | false -> 
                                                            let fileName = item.Substring(0, item.Length - 15) //bez 15 znaku s generovanym kodem a priponou pdf dostaneme toto: 113_2022_12_11_2023_12_09 
                                                            sprintf "%s/%s%s" pathToDir fileName ".pdf"  //pdf opet musime pridat
                                                            
