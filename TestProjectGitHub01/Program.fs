@@ -27,7 +27,7 @@ let main argv =
 
     let myWebscraping1 x = 
         printfn "Hromadne stahovani jizdnich radu ODIS z webu https://www.kodis.cz"           
-        printfn "Datum posledni aktualizace json souboru s odkazy na JR: 05-05-2023" 
+        printfn "Datum posledni aktualizace programu: 05-05-2023" 
         printfn "********************************************************************"
         printfn "Vyber si adresar pro ulozeni jizdnich radu. Ve vybranem adresari bude vymazan jeho soucasny obsah!!!"
         printfn "Precti si pozorne vyse uvedene a bud stiskni ENTER pro vybrani adresare anebo krizkem ukonci aplikaci."
@@ -53,14 +53,14 @@ let main argv =
         Console.Clear()
        
         printfn "Sqele! Adresar byl vybran. Nyni zadej cislici plus ENTER pro vyber varianty."
-        printfn "1 = ZAKLADNI VARIANTA, tj. JR strikne platne dnesni den, tj. pokud je napr. pro dnesni"
-        printfn "%4cden platny pouze jednodenni vylukovy JR, stahne se tento JR, ne JR platny dalsi den." <| char(32)
-        printfn "2 = JR platne v budouci dobe, ktere se uz vyskytuji na webu KODISu."
-        printfn "3 = Pouze aktualni vylukove JR, JR NAD a JR X linek."
-        printfn "4 = JR dlouhodobe platne bez jakykoliv vyluk. Mohou se hodit v pripade,"
-        printfn "%4ckdy zakladni varianta obsahuje jedno ci dvoudenni vylukove JR." <| char(32)
+        printfn "%c" <| char(32)
+        printfn "1 = JR strikne platne dnesni den, tj. pokud je napr. pro dnesni den"
+        printfn "%4cplatny pouze urcity jednodenni vylukovy JR, stahne se tento JR, ne JR platny od dalsiho dne." <| char(32)
+        printfn "2 = JR (vcetne vylukovych JR) platne az v budouci dobe, ktere se vsak uz nyni vyskytuji na webu KODISu."
+        printfn "3 = Pouze aktualni vylukove JR, JR NAD a JR X linek (kratkodobe i dlouhodobe)."
+        printfn "4 = JR teoreticky dlouhodobe platne bez jakykoliv (i dlouhodobych) vyluk ci NAD."
         printfn "%c" <| char(32) 
-        printfn "Jakakoliv jina klavesa = stahne se vsechno vyse uvedene najednou.\r"        
+        printfn "Jakakoliv jina klavesa = stahne se vsechno vyse uvedene najednou (do separatnich adresaru).\r"        
         printfn "%c" <| char(32) 
         printfn "%c" <| char(32) 
         printfn "Staci stisknout ENTER pro stahnuti vsech variant najednou."
