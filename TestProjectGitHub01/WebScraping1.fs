@@ -638,7 +638,6 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
     
     printfn "Dokonceno stahovani jizdnich radu a jejich ukladani do [%s]." pathToDir
     //printfn "Pocet jizdnich radu, ktere se aplikace pokousela stahnout: %i" (filterTimetables |> List.length)  
-    //printfn "%c" <| char(32)  
 
 let webscraping1 pathToDir (variant: Validity list) = //I  
     
@@ -664,8 +663,8 @@ let webscraping1 pathToDir (variant: Validity list) = //I
            (variant, dirList)
            ||> List.iter2 (fun variant dir -> x variant dir)                    
     
-    |> client.Dispose 
-    |> processEnd 
+    |> (client.Dispose >> processEnd)
+    
 
     //CurrentValidity = JR striktne platne k danemu dni, tj. pokud je napr. na dany den vylukovy JR, stahne se tento JR, ne JR platny dalsi den
     //FutureValidity = JR platne v budouci dobe, ktere se uz vyskytuji na webu KODISu
