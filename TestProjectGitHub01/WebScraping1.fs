@@ -621,7 +621,7 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
     //************************download pdf souboru, ktere jsou aktualni*******************************************
     
     //tryWith je ve funkci downloadFileTaskAsync
-    printfn "Probiha stahovani prislusnych jizdnich radu a jejich ukladani do [%s]." pathToDir 
+    printfn "Probiha stahovani prislusnych JR a jejich ukladani do [%s]." pathToDir 
 
     let downloadTimetables() = //I
         let l = filterTimetables |> List.length
@@ -636,7 +636,7 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
 
     downloadTimetables() //progressBarContinuous
     
-    printfn "Dokonceno stahovani jizdnich radu a jejich ukladani do [%s]." pathToDir
+    printfn "Dokonceno stahovani prislusnych JR a jejich ukladani do [%s]." pathToDir
     //printfn "Pocet jizdnich radu, ktere se aplikace pokousela stahnout: %i" (filterTimetables |> List.length)  
 
 let webscraping1 pathToDir (variant: Validity list) = //I  

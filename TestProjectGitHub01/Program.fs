@@ -53,6 +53,7 @@ let main argv =
         Console.Clear()
        
         printfn "Sqele! Adresar byl vybran. Nyni zadej cislici plus ENTER pro vyber varianty."
+        printfn "Ovsem stale jeste mas moznost ukoncit krizkem program, aniz by doslo k vymazani obsahu vybraneho adresare."
         printfn "%c" <| char(32)
         printfn "1 = JR strikne platne dnesni den, tj. pokud je napr. pro dnesni den"
         printfn "%4cplatny pouze urcity jednodenni vylukovy JR, stahne se tento JR, ne JR platny od dalsiho dne." <| char(32)
@@ -60,10 +61,10 @@ let main argv =
         printfn "3 = Pouze aktualni vylukove JR, JR NAD a JR X linek (kratkodobe i dlouhodobe)."
         printfn "4 = JR teoreticky dlouhodobe platne bez jakykoliv (i dlouhodobych) vyluk ci NAD."
         printfn "%c" <| char(32) 
-        printfn "Jakakoliv jina klavesa = stahne se vsechno vyse uvedene najednou (do separatnich adresaru).\r"        
+        printfn "Jakakoliv jina klavesa = KOMPLETNI stahnuti vsech variant JR (do separatnich adresaru).\r"        
         printfn "%c" <| char(32) 
         printfn "%c" <| char(32) 
-        printfn "Staci stisknout ENTER pro stahnuti vsech variant najednou."
+        printfn "Staci stisknout ENTER pro KOMPLETNI stahnuti vsech variant JR."
 
         let variant = 
             Console.ReadLine()
