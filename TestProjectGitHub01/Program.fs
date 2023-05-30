@@ -5,6 +5,7 @@ open System.Data
 open System.Threading
 
 open Csv
+open Settings
 open WebScraping1
 open WebScraping2
 open WebScraping3
@@ -23,23 +24,20 @@ let main argv =
     Console.InputEncoding   <- System.Text.Encoding.Unicode
     Console.OutputEncoding  <- System.Text.Encoding.Unicode
     
-    //*****************************WebScraping1******************************
-
+    //*****************************WebScraping1******************************   
     let myWebscraping1 x = 
         printfn "Hromadne stahovani jizdnich radu ODIS z webu https://www.kodis.cz"           
         printfn "Datum posledni aktualizace programu: 30-05-2023" 
         printfn "********************************************************************"
         printfn "Vyber si adresar pro ulozeni jizdnich radu."
         printfn "Pokud ve vybranem adresari existuji nasledujici podadresare, jejich obsah bude nahrazen nove stahnutymi JR."
-        printfn "%4c[JR_ODIS_aktualni_vcetne_vyluk]" <| char(32) 
-        printfn "%4c[JR_ODIS_pouze_budouci_platnost]" <| char(32) 
-        printfn "%4c[JR_ODIS_pouze_vyluky]" <| char(32) 
-        printfn "%4c[JR_ODIS_kompletni_bez_vyluk]" <| char(32)   
+        printfn "%4c[%s]" <| char(32) <| ODIS.Default.odisDir1
+        printfn "%4c[%s]" <| char(32) <| ODIS.Default.odisDir2
+        printfn "%4c[%s]" <| char(32) <| ODIS.Default.odisDir3
+        printfn "%4c[%s]" <| char(32) <| ODIS.Default.odisDir4  
         printfn "%c" <| char(32) 
         printfn "Precti si pozorne vyse uvedene a bud stiskni ENTER pro vybrani adresare anebo krizkem ukonci aplikaci."
-        Console.ReadKey() |> ignore
-
- 
+        Console.ReadKey() |> ignore 
     
         let pathToFolder = 
             let (str, value) = openFolderBrowserDialog()

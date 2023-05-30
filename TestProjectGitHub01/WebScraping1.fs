@@ -610,10 +610,10 @@ let private deleteAllODISDirectories pathToDir = //I
             |> Array.Parallel.iter (fun item -> item.Delete(true))
 
         let task1 = 
-            Task.Factory.StartNew (fun () -> a "JR_ODIS_aktualni_vcetne_vyluk" "JR_ODIS_pouze_budouci_platnost")
+            Task.Factory.StartNew (fun () -> a ODIS.Default.odisDir1 ODIS.Default.odisDir2)
       
         let task2 = 
-            Task.Factory.StartNew (fun () -> a "JR_ODIS_pouze_vyluky" "JR_ODIS_kompletni_bez_vyluk")
+            Task.Factory.StartNew (fun () -> a ODIS.Default.odisDir3 ODIS.Default.odisDir4)
                                           
         Task.WaitAll( [| task1; task2 |])   
            
