@@ -2,7 +2,6 @@
 
 open System
 open System.Data
-open System.Threading
 
 open Csv
 open Settings

@@ -3,6 +3,7 @@
 open System
 open System.IO
 open System.Net
+open System.Threading.Tasks
 
 open Fugit
 open FSharp.Data
@@ -13,7 +14,6 @@ open TryWith.TryWith
 open ProgressBarFSharp
 open DiscriminatedUnions
 open PatternBuilders.PattternBuilders
-open System.Threading.Tasks
 
 do System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance)
     
@@ -466,7 +466,7 @@ let private filterTimetables param pathToDir diggingResult = //I
                                                                                
                                                                    let condNAD = xor (condNAD rangeN1) (condNAD rangeN2) 
                                                                                 
-                                                                   let x = 
+                                                                   let x = //korekce pozice znaku v retezci
                                                                        match fileNameFull.Contains("NAD") && condNAD = true with
                                                                        | true  -> 2 
                                                                        | false -> 0 
@@ -503,7 +503,7 @@ let private filterTimetables param pathToDir diggingResult = //I
                                                                                               
                                                                                   let condNAD = xor (condNAD rangeN1) (condNAD rangeN2) 
                                                                                                
-                                                                                  let x = 
+                                                                                  let x = //korekce pozice znaku v retezci
                                                                                       match item.Contains("NAD") && condNAD = true with
                                                                                       | true  -> 2 
                                                                                       | false -> 0 
@@ -629,7 +629,7 @@ let private deleteAllODISDirectories pathToDir = //I
         sprintf"%s\%s"pathToDir ODIS.Default.odisDir4
     ]  
 
-let private deleteOneODISDirectory param pathToDir= //I 
+let private deleteOneODISDirectory param pathToDir = //I 
 
     //smazeme pouze jeden adresar obsahujici stare JR, ostatni ponechame 
     let dirName =
