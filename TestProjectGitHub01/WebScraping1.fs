@@ -8,6 +8,7 @@ open Fugit
 open FSharp.Data
 
 open Helpers
+open Settings
 open TryWith.TryWith
 open ProgressBarFSharp
 open DiscriminatedUnions
@@ -570,13 +571,14 @@ let private filterTimetables param pathToDir diggingResult = //I
                               not <| String.IsNullOrEmpty(snd item))                                         
                    ) |> List.sort                                             
         
-let private deleteFilesAndFolders pathToDir = //I 
+let private deleteAllODISDirectories pathToDir = //I 
 
     let myDeleteFunction x = //I  
 
         //rozdil mezi Directory a DirectoryInfo viz Unique_Identifier_And_Metadata_File_Creator.sln -> MainLogicDG.fs
         let dirInfo = new DirectoryInfo(pathToDir) |> optionToSRTP "Error8" (new DirectoryInfo(pathToDir)) 
              
+        (*            
         //smazeme vsechny soubory v korenu vybraneho adresare  
         let task1 = 
             Task.Factory.StartNew (fun () ->
@@ -596,18 +598,63 @@ let private deleteFilesAndFolders pathToDir = //I
                                   )   
 
         Task.WaitAll( [| task1; task2 |])
+        *) 
+
+        //smazeme pouze adresare obsahujici stare JR, ostatni ponechame 
+           
+        let a dirName1 dirName2 = 
+            dirInfo.EnumerateDirectories()
+            |> optionToSRTP "Error11g" Seq.empty  
+            |> Array.ofSeq
+            |> Array.filter (fun item -> item.Name = dirName1 || item.Name = dirName2) 
+            |> Array.Parallel.iter (fun item -> item.Delete(true))
+
+        let task1 = 
+            Task.Factory.StartNew (fun () -> a "JR_ODIS_aktualni_vcetne_vyluk" "JR_ODIS_pouze_budouci_platnost")
+      
+        let task2 = 
+            Task.Factory.StartNew (fun () -> a "JR_ODIS_pouze_vyluky" "JR_ODIS_kompletni_bez_vyluk")
+                                          
+        Task.WaitAll( [| task1; task2 |])   
            
     tryWith myDeleteFunction (fun x -> ()) () String.Empty () |> deconstructor
 
     printfn "Dokoncena filtrace odkazu na neplatne jizdni rady."
-    printfn "Provedeno mazani uplne vseho ve vybranem adresari."
+    printfn "Provedeno mazani vsech starych JR, pokud existovaly."
    
     [
-        sprintf"%s\%s"pathToDir "JR_ODIS_aktualni_vcetne_vyluk"
-        sprintf"%s\%s"pathToDir "JR_ODIS_pouze_budouci_platnost"
-        sprintf"%s\%s"pathToDir "JR_ODIS_pouze_vyluky"
-        sprintf"%s\%s"pathToDir "JR_ODIS_kompletni_bez_vyluk" 
+        sprintf"%s\%s"pathToDir ODIS.Default.odisDir1
+        sprintf"%s\%s"pathToDir ODIS.Default.odisDir2
+        sprintf"%s\%s"pathToDir ODIS.Default.odisDir3
+        sprintf"%s\%s"pathToDir ODIS.Default.odisDir4
     ]  
+
+let private deleteOneODISDirectory param pathToDir= //I 
+
+    //smazeme pouze jeden adresar obsahujici stare JR, ostatni ponechame 
+    let dirName =
+        match param with 
+        | CurrentValidity           -> ODIS.Default.odisDir1
+        | FutureValidity            -> ODIS.Default.odisDir2
+        | ReplacementService        -> ODIS.Default.odisDir3                                     
+        | WithoutReplacementService -> ODIS.Default.odisDir4   
+
+    let myDeleteFunction x = //I  
+
+        //rozdil mezi Directory a DirectoryInfo viz Unique_Identifier_And_Metadata_File_Creator.sln -> MainLogicDG.fs
+        let dirInfo = new DirectoryInfo(pathToDir) |> optionToSRTP "Error8" (new DirectoryInfo(pathToDir))        
+       
+        dirInfo.EnumerateDirectories()
+        |> optionToSRTP "Error11h" Seq.empty  
+        |> Seq.filter (fun item -> item.Name = dirName) 
+        |> Seq.iter (fun item -> item.Delete(true)) //trochu je to hack, ale nemusim se zabyvat tryHead, bo moze byt empty kolekce
+                  
+    tryWith myDeleteFunction (fun x -> ()) () String.Empty () |> deconstructor
+
+    printfn "Dokoncena filtrace odkazu na neplatne jizdni rady."
+    printfn "Provedeno mazani starych JR v dane variante."
+   
+    [ sprintf"%s\%s"pathToDir dirName ] //list -> aby bylo mozno pouzit funkci createFolders bez uprav  
 
 let private createFolders dirList = //I 
 
@@ -639,7 +686,7 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
     printfn "Dokonceno stahovani prislusnych JR a jejich ukladani do [%s]." pathToDir
     //printfn "Pocet jizdnich radu, ktere se aplikace pokousela stahnout: %i" (filterTimetables |> List.length)  
 
-let webscraping1 pathToDir (variant: Validity list) = //I  
+let webscraping1 pathToDir (variantList: Validity list) = //I  
     
     let x variant dir = 
         match dir |> Directory.Exists with 
@@ -652,15 +699,18 @@ let webscraping1 pathToDir (variant: Validity list) = //I
                    |> downloadAndSaveTimetables dir   
 
     processStart()
-    downloadAndSaveUpdatedJson()
+    downloadAndSaveUpdatedJson()    
 
-    let dirList = deleteFilesAndFolders pathToDir
-
-    match variant |> List.length with
-    | 1 -> x (variant |> List.head) pathToDir              
-    | _ ->            
+    match variantList |> List.length with
+    | 1 -> 
+           let variant = variantList |> List.head
+           let dirList = deleteOneODISDirectory variant pathToDir
            createFolders dirList
-           (variant, dirList)
+           x variant (dirList |> List.head)              
+    | _ ->    
+           let dirList = deleteAllODISDirectories pathToDir
+           createFolders dirList
+           (variantList, dirList)
            ||> List.iter2 (fun variant dir -> x variant dir)                    
     
     |> (client.Dispose >> processEnd)

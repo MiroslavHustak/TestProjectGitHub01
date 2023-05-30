@@ -1,6 +1,22 @@
 ﻿module Settings
 
 open System
+
+[<Struct>]  //vhodne pro 16 bytes => 4096 characters
+type ODIS = 
+    {        
+        odisDir1: string
+        odisDir2: string
+        odisDir3: string
+        odisDir4: string
+    }
+    static member Default = 
+        {          
+            odisDir1 = "JR_ODIS_aktualni_vcetne_vyluk"
+            odisDir2 = "JR_ODIS_pouze_budouci_platnost"
+            odisDir3 = "JR_ODIS_pouze_vyluky"
+            odisDir4 = "JR_ODIS_kompletni_bez_vyluk" 
+        }
     
 [<Struct>]  //vhodne pro 16 bytes => 4096 characters
 type Common_Settings = 

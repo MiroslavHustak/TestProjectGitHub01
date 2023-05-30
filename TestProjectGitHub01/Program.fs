@@ -27,11 +27,19 @@ let main argv =
 
     let myWebscraping1 x = 
         printfn "Hromadne stahovani jizdnich radu ODIS z webu https://www.kodis.cz"           
-        printfn "Datum posledni aktualizace programu: 05-05-2023" 
+        printfn "Datum posledni aktualizace programu: 30-05-2023" 
         printfn "********************************************************************"
-        printfn "Vyber si adresar pro ulozeni jizdnich radu. Ve vybranem adresari bude vymazan jeho soucasny obsah!!!"
+        printfn "Vyber si adresar pro ulozeni jizdnich radu."
+        printfn "Pokud ve vybranem adresari existuji nasledujici podadresare, jejich obsah bude nahrazen nove stahnutymi JR."
+        printfn "%4c[JR_ODIS_aktualni_vcetne_vyluk]" <| char(32) 
+        printfn "%4c[JR_ODIS_pouze_budouci_platnost]" <| char(32) 
+        printfn "%4c[JR_ODIS_pouze_vyluky]" <| char(32) 
+        printfn "%4c[JR_ODIS_kompletni_bez_vyluk]" <| char(32)   
+        printfn "%c" <| char(32) 
         printfn "Precti si pozorne vyse uvedene a bud stiskni ENTER pro vybrani adresare anebo krizkem ukonci aplikaci."
         Console.ReadKey() |> ignore
+
+ 
     
         let pathToFolder = 
             let (str, value) = openFolderBrowserDialog()
@@ -53,15 +61,14 @@ let main argv =
         Console.Clear()
        
         printfn "Sqele! Adresar byl vybran. Nyni zadej cislici plus ENTER pro vyber varianty."
-        printfn "Ovsem stale jeste mas moznost ukoncit krizkem program, aniz by doslo k vymazani obsahu vybraneho adresare."
         printfn "%c" <| char(32)
-        printfn "1 = JR strikne platne dnesni den, tj. pokud je napr. pro dnesni den"
+        printfn "1 = Aktualni JR strikne platne dnesni den, tj. pokud je napr. pro dnesni den"
         printfn "%4cplatny pouze urcity jednodenni vylukovy JR, stahne se tento JR, ne JR platny od dalsiho dne." <| char(32)
         printfn "2 = JR (vcetne vylukovych JR) platne az v budouci dobe, ktere se vsak uz nyni vyskytuji na webu KODISu."
         printfn "3 = Pouze aktualni vylukove JR, JR NAD a JR X linek (kratkodobe i dlouhodobe)."
         printfn "4 = JR teoreticky dlouhodobe platne bez jakykoliv (i dlouhodobych) vyluk ci NAD."
         printfn "%c" <| char(32) 
-        printfn "Jakakoliv jina klavesa = KOMPLETNI stahnuti vsech variant JR (do separatnich adresaru).\r"        
+        printfn "Jakakoliv jina klavesa = KOMPLETNI stahnuti vsech variant JR.\r"        
         printfn "%c" <| char(32) 
         printfn "%c" <| char(32) 
         printfn "Staci stisknout ENTER pro KOMPLETNI stahnuti vsech variant JR."
