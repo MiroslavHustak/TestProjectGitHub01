@@ -9,6 +9,7 @@ type ODIS =
         odisDir2: string
         odisDir3: string
         odisDir4: string
+        odisDir5: string
     }
     static member Default = 
         {          
@@ -16,6 +17,7 @@ type ODIS =
             odisDir2 = "JR_ODIS_pouze_budouci_platnost"
             odisDir3 = "JR_ODIS_pouze_vyluky"
             odisDir4 = "JR_ODIS_kompletni_bez_vyluk" 
+            odisDir5 = "JR_ODIS_pouze_linky_dopravce_DPO_(aktualni_vcetne_vyluk)" 
         }
     
 [<Struct>]  //vhodne pro 16 bytes => 4096 characters

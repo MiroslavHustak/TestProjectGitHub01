@@ -21,7 +21,8 @@
     <Compile Include="Csv.fs" />
     <Compile Include="WebScraping3.fs" />
     <Compile Include="WebScraping2.fs" />
-    <Compile Include="WebScraping1.fs" />
+    <Compile Include="WebScraping1-DPO.fs" />
+    <Compile Include="WebScraping1-KODIS.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

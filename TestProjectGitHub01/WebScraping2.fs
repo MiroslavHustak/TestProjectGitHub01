@@ -1,5 +1,7 @@
 ﻿module WebScraping2
 
+open System
+
 open FSharp.Data
 
 open HtmlAgilityPack
@@ -28,9 +30,9 @@ let normalScraping() =
                             let url = (querySelector "a").AttributeValue "href"    
                             let image = (querySelector "img").AttributeValue "src" 
                             let name = (querySelector "h2").InnerText()
-                            let price = (querySelector "span").InnerText()
-                        
-                            printfn "productHTMLElements1 %s%s%s%s" url image name price    
+                            let price = (querySelector "span").InnerText() 
+                            ()
+                           // printfn "productHTMLElements1 %s%s%s%s" url image name price    
                  )
 
     let url2 = "https://www.bbc.com/news" 
@@ -47,8 +49,7 @@ let normalScraping() =
         |> Seq.map (fun (_, item2)    -> sprintf"%s%s" "https://www.bbc.com/" item2 )
         |> Seq.toList
 
-    printfn "War in Ukraine %A" links 
-
+    printfn "War in Ukraine %A" links        
 
     //*******************HtmlAgilityPack (.NET) *********************************         
             
@@ -63,8 +64,9 @@ let normalScraping() =
   
     productHTMLElements42 
     |> Seq.iter (fun item ->   
-                           let url = string <| HtmlEntity.DeEntitize(item.QuerySelector("a").Attributes["href"].Value)                   
-                           printfn "productHTMLElements %s" url
+                           let url = string <| HtmlEntity.DeEntitize(item.QuerySelector("a").Attributes["href"].Value)   
+                           ()
+                           //printfn "productHTMLElements %s" url
                 )
  
 

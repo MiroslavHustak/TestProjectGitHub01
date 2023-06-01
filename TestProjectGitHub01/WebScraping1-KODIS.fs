@@ -1,4 +1,4 @@
-﻿module WebScraping1
+﻿module WebScraping1_KODIS
 
 open System
 open System.IO
@@ -622,6 +622,7 @@ let private deleteAllODISDirectories pathToDir = //I
     printfn "Dokoncena filtrace odkazu na neplatne jizdni rady."
     printfn "Provedeno mazani vsech starych JR, pokud existovaly."
    
+    //po vymazani starych vytvorime nove podadresare
     [
         sprintf"%s\%s"pathToDir ODIS.Default.odisDir1
         sprintf"%s\%s"pathToDir ODIS.Default.odisDir2
@@ -653,7 +654,8 @@ let private deleteOneODISDirectory param pathToDir = //I
 
     printfn "Dokoncena filtrace odkazu na neplatne jizdni rady."
     printfn "Provedeno mazani starych JR v dane variante."
-   
+    
+    //po vymazani stareho vytvorime novy podadresar
     [ sprintf"%s\%s"pathToDir dirName ] //list -> aby bylo mozno pouzit funkci createFolders bez uprav  
 
 let private createFolders dirList = //I 
@@ -686,7 +688,7 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
     printfn "Dokonceno stahovani prislusnych JR a jejich ukladani do [%s]." pathToDir
     //printfn "Pocet jizdnich radu, ktere se aplikace pokousela stahnout: %i" (filterTimetables |> List.length)  
 
-let webscraping1 pathToDir (variantList: Validity list) = //I  
+let webscraping1_KODIS pathToDir (variantList: Validity list) = //I  
     
     let x variant dir = 
         match dir |> Directory.Exists with 
@@ -704,7 +706,7 @@ let webscraping1 pathToDir (variantList: Validity list) = //I
     match variantList |> List.length with
     | 1 -> 
            let variant = variantList |> List.head
-           let dirList = deleteOneODISDirectory variant pathToDir
+           let dirList = deleteOneODISDirectory variant pathToDir //list -> aby bylo mozno pouzit funkci createFolders bez uprav  
            createFolders dirList
            x variant (dirList |> List.head)              
     | _ ->    
