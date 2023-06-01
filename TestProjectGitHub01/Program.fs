@@ -62,7 +62,7 @@ let main argv =
                               
         Console.Clear()
 
-        webscraping1_DPO pathToFolder 
+        webscraping1_DPO (string pathToFolder) 
                 
         printfn "%c" <| char(32)   
         printfn "Stiskni cokoliv pro ukonceni aplikace."
@@ -126,7 +126,7 @@ let main argv =
                   
            Console.Clear()
 
-           webscraping1_KODIS pathToFolder variant 
+           webscraping1_KODIS (string pathToFolder) variant 
            
            printfn "%c" <| char(32)  
            printfn "Udaje KODISu nemaji konzistentni retezec, proto mohlo dojit ke stazeni i neceho, co do daneho vyberu nepatri."

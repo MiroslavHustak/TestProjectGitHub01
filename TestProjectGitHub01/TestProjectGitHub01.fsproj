@@ -34,9 +34,9 @@
     <PackageReference Include="canopy" Version="2.1.5" />
     <PackageReference Include="ExcelDataReader" Version="3.7.0-develop00310" />
     <PackageReference Include="ExcelDataReader.DataSet" Version="3.7.0-develop00310" />
-    <PackageReference Include="Fantomas.Core" Version="5.1.0-alpha-005" />
+    <PackageReference Include="Fantomas.Core" Version="6.0.3" />
     <PackageReference Include="Fizzler.Systems.HtmlAgilityPack" Version="1.2.1" />
-    <PackageReference Include="FSharp.Data" Version="6.0.1-beta002" />
+    <PackageReference Include="FSharp.Data" Version="6.2.0" />
     <PackageReference Include="Fugit" Version="0.4.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
@@ -46,7 +46,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="6.0.7" />
+    <PackageReference Update="FSharp.Core" Version="7.0.300" />
   </ItemGroup>
 
 </Project>

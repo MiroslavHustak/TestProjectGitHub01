@@ -15,14 +15,15 @@ open canopy.configuration
 
 open System
 
+ //!!! nutne pred pouzitim canopy stahnout odpovidajici verzi chromedriver.exe a strcit ho do c:/temp/driver
 // Download chromedriver.exe from
 // https://chromedriver.chromium.org/downloads
 
 let webscrapingFromPage() = 
-
-    canopy.configuration.chromeDir <- "c:/temp/driver"
+  
+    canopy.configuration.chromeDir <- @"c:/temp/driver" 
     
-    start chrome    
+    start chrome    //nutnost spustit stranku v browseru -> vhodne jen asi pro jednostrankove zalezitosti
 
     url "https://www.kodis.cz/lines/region?tab=232-293"
 
