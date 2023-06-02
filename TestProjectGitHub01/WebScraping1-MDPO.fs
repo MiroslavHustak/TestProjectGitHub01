@@ -1,4 +1,4 @@
-﻿module WebScraping1_DPO
+﻿module WebScraping1_MDPO
 
 open System
 open System.IO
@@ -20,13 +20,13 @@ Console.OutputEncoding  <- System.Text.Encoding.Unicode
 
 //************************Constants and types**********************************************************************
 
-let [<Literal>] pathDpoWeb = @"https://www.dpo.cz"
+let [<Literal>] pathMdpoWeb = @"https://www.mdpo.cz"
 
 //************************Helpers**********************************************************************************
 
 //Pro ostatni helpers viz WebScraping1-Helpers.fs
 
-let client = client() 
+let client = client()    
         
 let private downloadFileTaskAsync (client: Http.HttpClient) (uri: string) (path: string) =   //I 
     
@@ -53,27 +53,11 @@ let private downloadFileTaskAsync (client: Http.HttpClient) (uri: string) (path:
             }     
  
 //************************Main code***********************************************************
-let private filterTimetables pathToDir = //I
-
-    let getLastThreeCharacters input =
-        match String.length input <= 3 with
-        | true  -> 
-                   printfn "Chyba v retezci [%s]." input 
-                   input 
-        | false -> input.Substring(input.Length - 3)
-
-    let removeLastFourCharacters input =
-        match String.length input <= 4 with
-        | true  -> 
-                   printfn "Chyba v retezci [%s]." input 
-                   String.Empty
-        | false -> input.[..(input.Length - 5)]                    
+let private filterTimetables pathToDir = //I  
     
     let urlList = 
         [
-            @"https://www.dpo.cz/pro-cestujici/jizdni-rady/jr-bus.html" 
-            @"https://www.dpo.cz/pro-cestujici/jizdni-rady/jr-trol.html" 
-            @"https://www.dpo.cz/pro-cestujici/jizdni-rady/jr-tram.html" 
+            @"https://www.mdpo.cz/jizdni-rady"             
         ]
     
     urlList
@@ -84,22 +68,12 @@ let private filterTimetables pathToDir = //I
                               |> Seq.choose (fun x ->
                                                     x.TryGetAttribute("href")
                                                     |> Option.map (fun a -> string <| x.InnerText(), string <| a.Value()) //inner text zatim nepotrebuji, cisla linek mam resena jinak                                           
-                                            )  
-                              |> Seq.filter (fun (_ , item2) -> item2.Contains @"/jr/" && item2.Contains ".pdf")
-                              |> Seq.map (fun (_ , item2)    ->  
+                                            )      
+                              |> Seq.filter (fun (_ , item2) -> item2.Contains @"/qr/" && item2.Contains ".pdf")
+                              |> Seq.map (fun (_ , item2)    ->                                                                 
                                                                 let linkToPdf = 
-                                                                    sprintf"%s%s" pathDpoWeb item2  //https://www.dpo.cz // /jr/2023-04-01/024.pdf
-                                                                let adaptedLineName =
-                                                                    let s = item2.Replace(@"/jr/", String.Empty).Replace(@"/", "?").Replace(".pdf", String.Empty) 
-                                                                    let rec x s =                                                                            
-                                                                        match (getLastThreeCharacters s).Contains(@"?") with
-                                                                        | true  -> x <| sprintf "%s%s" s "_"                                                                             
-                                                                        | false -> s
-                                                                    x s
-                                                                let lineName = 
-                                                                    let s = sprintf"%s_%s" (getLastThreeCharacters adaptedLineName) adaptedLineName  
-                                                                    let s1 = removeLastFourCharacters s 
-                                                                    sprintf"%s%s" s1 ".pdf"
+                                                                    sprintf"%s%s" pathMdpoWeb item2  //https://www.mdpo.cz // /qr/201.pdf
+                                                                let lineName = item2.Replace(@"/qr/", String.Empty)  
                                                                 let pathToFile = 
                                                                     sprintf "%s/%s" pathToDir lineName
                                                                 linkToPdf, pathToFile
@@ -111,7 +85,7 @@ let private filterTimetables pathToDir = //I
 let private deleteOneODISDirectory pathToDir = //I 
 
     //smazeme pouze jeden adresar obsahujici stare JR, ostatni ponechame 
-    let dirName = ODIS.Default.odisDir5
+    let dirName = ODIS.Default.odisDir6
       
     let myDeleteFunction x = //I  
 
@@ -159,7 +133,7 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
     
     printfn "Dokonceno stahovani prislusnych JR a jejich ukladani do [%s]." pathToDir
 
-let webscraping1_DPO pathToDir = //I  
+let webscraping1_MDPO pathToDir = //I  
     
     let x dir = 
         match dir |> Directory.Exists with 
@@ -177,3 +151,4 @@ let webscraping1_DPO pathToDir = //I
     x (dirList |> List.head)                   
     
     |> (client.Dispose >> processEnd)
+

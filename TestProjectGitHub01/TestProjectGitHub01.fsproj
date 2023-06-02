@@ -8,19 +8,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="OtherWebscraping\WebScraping3.fs" />
+    <Compile Include="OtherWebscraping\WebScraping2.fs" />
     <Content Include="KODISJson\kodisMHDTotal.json" />
+    <Content Include="Auxiliaries\JSONFile1.json" />
+    <Content Include="Auxiliaries\HTMLFile1.html" />
+    <Compile Include="Auxiliaries\Settings.fs" />
     <Compile Include="Auxiliaries\PattternBuilders.fs" />
     <Compile Include="Auxiliaries\DiscriminatedUnions.fs" />
     <Compile Include="Auxiliaries\TryWith.fs" />
     <Compile Include="Auxiliaries\Helpers.fs" />
     <Compile Include="Auxiliaries\ProgressBarFSharp.fs" />
-    <Content Include="JSONFile1.json" />
-    <Content Include="HTMLFile1.html" />
-    <Compile Include="CodeChallenge.fs" />
-    <Compile Include="Settings.fs" />
-    <Compile Include="Csv.fs" />
-    <Compile Include="WebScraping3.fs" />
-    <Compile Include="WebScraping2.fs" />
+    <Compile Include="Learning\CodeChallenge.fs" />
+    <Compile Include="Learning\Csv.fs" />
+    <Compile Include="WebScraping1-Helpers.fs" />
+    <Compile Include="WebScraping1-MDPO.fs" />
     <Compile Include="WebScraping1-DPO.fs" />
     <Compile Include="WebScraping1-KODIS.fs" />
     <Compile Include="Program.fs" />

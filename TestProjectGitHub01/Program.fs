@@ -7,6 +7,7 @@ open Csv
 open Settings
 
 open WebScraping1_DPO
+open WebScraping1_MDPO
 open WebScraping1_KODIS
 
 open WebScraping2
@@ -29,10 +30,10 @@ let main argv =
     //*****************************WebScraping1******************************   
     let myWebscraping1_DPO x = 
         Console.Clear()
-        printfn "Hromadne stahovani aktualnich jizdnich radu ODIS (vcetne vyluk) dopravce DPO z webu https://www.dpo.cz"           
+        printfn "Hromadne stahovani aktualnich JR ODIS (vcetne vyluk) dopravce DP Ostrava z webu https://www.dpo.cz"           
         printfn "Datum posledni aktualizace SW: 01-06-2023" 
         printfn "********************************************************************"
-        printfn "Nyni je treba vybrat si adresar pro ulozeni jizdnich radu dopravce DPO."
+        printfn "Nyni je treba vybrat si adresar pro ulozeni JR dopravce DP Ostrava."
         printfn "Pokud ve vybranem adresari existuje nasledujici podadresar, jeho obsah bude nahrazen nove stahnutymi JR."
         printfn "[%s]" <| ODIS.Default.odisDir5       
         printfn "%c" <| char(32) 
@@ -58,7 +59,7 @@ let main argv =
    
         Console.Clear()
        
-        printfn "Sqele! Adresar byl vybran. Nyni stiskni cokoliv pro stazeni aktualnich JR dopravce DPO."
+        printfn "Sqele! Adresar byl vybran. Nyni stiskni cokoliv pro stazeni aktualnich JR dopravce DP Ostrava."
                               
         Console.Clear()
 
@@ -68,12 +69,53 @@ let main argv =
         printfn "Stiskni cokoliv pro ukonceni aplikace."
         Console.ReadKey() |> ignore
 
+    let myWebscraping1_MDPO x = 
+        Console.Clear()
+        printfn "Hromadne stahovani aktualnich JR ODIS dopravce MDP Opava z webu https://www.mdpo.cz"           
+        printfn "Datum posledni aktualizace SW: 02-06-2023" 
+        printfn "********************************************************************"
+        printfn "Nyni je treba vybrat si adresar pro ulozeni JR dopravce MDP Opava."
+        printfn "Pokud ve vybranem adresari existuje nasledujici podadresar, jeho obsah bude nahrazen nove stahnutymi JR."
+        printfn "[%s]" <| ODIS.Default.odisDir6       
+        printfn "%c" <| char(32) 
+        printfn "Precti si pozorne vyse uvedene a stiskni bud ENTER pro vybrani adresare anebo krizkem ukonci aplikaci."
+        Console.ReadKey() |> ignore 
+           
+        let pathToFolder = 
+            let (str, value) = openFolderBrowserDialog()
+            match value with
+            | false                           -> str       
+            | true when (<>) str String.Empty -> 
+                                                Console.Clear()
+                                                printfn"%s%s" "\nNo jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" str
+                                                do Console.ReadKey() |> ignore 
+                                                do System.Environment.Exit(1)  
+                                                String.Empty
+            | _                               -> 
+                                                Console.Clear()
+                                                printfn "\nNebyl vybran adresar. Zmackni cokoliv pro ukonceni programu. \n"
+                                                do Console.ReadKey() |> ignore 
+                                                do System.Environment.Exit(1) 
+                                                String.Empty  
+          
+        Console.Clear()
+              
+        printfn "Sqele! Adresar byl vybran. Nyni stiskni cokoliv pro stazeni aktualnich JR dopravce MDP Opava."
+                                     
+        Console.Clear()
+
+        webscraping1_MDPO (string pathToFolder) 
+                       
+        printfn "%c" <| char(32)   
+        printfn "Stiskni cokoliv pro ukonceni aplikace."
+        Console.ReadKey() |> ignore
+
     let myWebscraping1_KODIS x = 
            Console.Clear()
-           printfn "Hromadne stahovani jizdnich radu ODIS vsech dopravcu z webu https://www.kodis.cz"           
+           printfn "Hromadne stahovani JR ODIS vsech dopravcu v systemu ODIS z webu https://www.kodis.cz"           
            printfn "Datum posledni aktualizace SW: 30-05-2023" 
            printfn "********************************************************************"
-           printfn "Nyni je treba vybrat si adresar pro ulozeni jizdnich radu vsech dopravcu v systemu ODIS."
+           printfn "Nyni je treba vybrat si adresar pro ulozeni JR vsech dopravcu v systemu ODIS."
            printfn "Pokud ve vybranem adresari existuji nasledujici podadresare, jejich obsah bude nahrazen nove stahnutymi JR."
            printfn "%4c[%s]" <| char(32) <| ODIS.Default.odisDir1
            printfn "%4c[%s]" <| char(32) <| ODIS.Default.odisDir2
@@ -138,14 +180,16 @@ let main argv =
 
     let rec variant() = 
 
-        printfn "Zdravim nadsence do jizdnich radu. Nyni prosim zadejte cislici plus ENTER pro vyber varianty."        
-        printfn "1 = Hromadne stahovani jizdnich radu ODIS pouze dopravce DPO z webu https://www.dpo.cz"
-        printfn "2 = Hromadne stahovani jizdnich radu ODIS vsech dopravcu z webu https://www.kodis.cz"
+        printfn "Zdravim nadsence do klasickych jizdnich radu. Nyni prosim zadejte cislici plus ENTER pro vyber varianty."        
+        printfn "1 = Hromadne stahovani jizdnich radu ODIS pouze dopravce DP Ostrava z webu https://www.dpo.cz"
+        printfn "2 = Hromadne stahovani jizdnich radu ODIS pouze dopravce MDP Opava z webu https://www.mdpo.cz"
+        printfn "3 = Hromadne stahovani jizdnich radu ODIS vsech dopravcu v systemu ODIS z webu https://www.kodis.cz"
 
         Console.ReadLine()
         |> function 
             | "1" -> tryWith myWebscraping1_DPO (fun x -> ()) () String.Empty () |> deconstructor
-            | "2" -> tryWith myWebscraping1_KODIS (fun x -> ()) () String.Empty () |> deconstructor                     
+            | "2" -> tryWith myWebscraping1_MDPO (fun x -> ()) () String.Empty () |> deconstructor    
+            | "3" -> tryWith myWebscraping1_KODIS (fun x -> ()) () String.Empty () |> deconstructor    
             | _   ->
                      printfn "Varianta nebyla vybrana. Prosim zadej znovu."
                      variant()
