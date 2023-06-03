@@ -13,12 +13,7 @@ open WebScraping1_Helpers
 
 //************************Console**********************************************************************************
 
-do System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance)
-    
-Console.BackgroundColor <- ConsoleColor.Blue 
-Console.ForegroundColor <- ConsoleColor.White 
-Console.InputEncoding   <- System.Text.Encoding.Unicode
-Console.OutputEncoding  <- System.Text.Encoding.Unicode
+consoleAppProblemFixer()
 
 //************************Constants and types**********************************************************************
 

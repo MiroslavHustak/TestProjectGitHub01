@@ -3,6 +3,16 @@
 open System
 open TryWith.TryWith
 
+let consoleAppProblemFixer() =
+    do System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance)
+
+    Console.BackgroundColor <- ConsoleColor.Blue 
+    Console.ForegroundColor <- ConsoleColor.White 
+    Console.InputEncoding   <- System.Text.Encoding.Unicode
+    Console.OutputEncoding  <- System.Text.Encoding.Unicode
+
+//***************************************************************************************************************
+
 let xor a b = (a && not b) || (not a && b) //P
 
 let errorStr str err = str |> (optionToSRTP err String.Empty) //AP                            
