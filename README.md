@@ -1,1 +1,1 @@
-A webscraping tool under development
+Draft code for a webscraping tool for bulk downloading of timetables of the ODIS public transport integrated system. Still under development, however the code is functional and may be used as a console application.

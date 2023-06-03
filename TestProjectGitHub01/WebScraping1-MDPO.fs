@@ -11,6 +11,8 @@ open TryWith.TryWith
 open ProgressBarFSharp
 open WebScraping1_Helpers
 
+//************************Console**********************************************************************************
+
 do System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance)
     
 Console.BackgroundColor <- ConsoleColor.Blue 
@@ -26,33 +28,10 @@ let [<Literal>] pathMdpoWeb = @"https://www.mdpo.cz"
 
 //Pro ostatni helpers viz WebScraping1-Helpers.fs
 
-let client = client()    
-        
-let private downloadFileTaskAsync (client: Http.HttpClient) (uri: string) (path: string) =   //I 
-    
-        let errMsg ex = 
-            printfn "\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
-            do Console.ReadKey() |> ignore 
-            do client.Dispose()
-            do System.Environment.Exit(1)
-
-        async
-            {   
-                //TODO vyzkusaj Async.Catch
-                try //muj custom made tryWith nezachyti exception u async
-                    let! stream = client.GetStreamAsync(uri) |> Async.AwaitTask                             
-                    use fileStream = new FileStream(path, FileMode.CreateNew) //|> (optionToGenerics "Error9" (new FileStream(path, FileMode.CreateNew))) //nelze, vytvari to dalsi stream a uklada to znovu                                
-                    return! stream.CopyToAsync(fileStream) |> Async.AwaitTask 
-                with 
-                | :? AggregateException as ex -> 
-                                                 printfn "\n%s%s" "Jizdni rad s timto odkazem se nepodarilo stahnout: \n" uri
-                                                 return()                                              
-                | ex                          -> 
-                                                 errMsg ex
-                                                 return()                                
-            }     
+let client = client()  
  
-//************************Main code***********************************************************
+//************************Main code********************************************************************************
+
 let private filterTimetables pathToDir = //I  
     
     let urlList = 
@@ -65,9 +44,9 @@ let private filterTimetables pathToDir = //I
                               let document = FSharp.Data.HtmlDocument.Load(url)        
                            
                               document.Descendants "a"
-                              |> Seq.choose (fun x ->
-                                                    x.TryGetAttribute("href")
-                                                    |> Option.map (fun a -> string <| x.InnerText(), string <| a.Value()) //inner text zatim nepotrebuji, cisla linek mam resena jinak                                           
+                              |> Seq.choose (fun htmlNode ->
+                                                           htmlNode.TryGetAttribute("href") //inner text zatim nepotrebuji, cisla linek mam resena jinak 
+                                                           |> Option.map (fun a -> string <| htmlNode.InnerText(), string <| a.Value())                                           
                                             )      
                               |> Seq.filter (fun (_ , item2) -> item2.Contains @"/qr/" && item2.Contains ".pdf")
                               |> Seq.map (fun (_ , item2)    ->                                                                 
@@ -112,8 +91,30 @@ let private createFolders dirList = //I
    tryWith myFolderCreation (fun x -> ()) () String.Empty () |> deconstructor   
 
 let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*string) list) = //I 
-            
-    //************************download pdf souboru, ktere jsou aktualni*******************************************
+
+    let downloadFileTaskAsync (client: Http.HttpClient) (uri: string) (path: string) =   //I 
+        
+            let errMsg ex = 
+                printfn "\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
+                do Console.ReadKey() |> ignore 
+                do client.Dispose()
+                do System.Environment.Exit(1)
+    
+            async
+                {   
+                    //TODO vyzkusaj Async.Catch
+                    try //muj custom made tryWith nezachyti exception u async
+                        let! stream = client.GetStreamAsync(uri) |> Async.AwaitTask                             
+                        use fileStream = new FileStream(path, FileMode.CreateNew) //|> (optionToGenerics "Error9" (new FileStream(path, FileMode.CreateNew))) //nelze, vytvari to dalsi stream a uklada to znovu                                
+                        return! stream.CopyToAsync(fileStream) |> Async.AwaitTask 
+                    with 
+                    | :? AggregateException as ex -> 
+                                                     printfn "\n%s%s" "Jizdni rad s timto odkazem se nepodarilo stahnout: \n" uri
+                                                     return()                                              
+                    | ex                          -> 
+                                                     errMsg ex
+                                                     return()                                
+                }  
     
     //tryWith je ve funkci downloadFileTaskAsync
     printfn "Probiha stahovani prislusnych JR a jejich ukladani do [%s]." pathToDir 

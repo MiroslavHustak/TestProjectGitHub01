@@ -19,6 +19,8 @@ open BrowserDialogWindow
 
 [<EntryPoint; STAThread>]
 let main argv =
+
+    //*****************************Console******************************   
     
     do System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance)
 
@@ -28,6 +30,7 @@ let main argv =
     Console.OutputEncoding  <- System.Text.Encoding.Unicode
     
     //*****************************WebScraping1******************************   
+
     let myWebscraping1_DPO x = 
         Console.Clear()
         printfn "Hromadne stahovani aktualnich JR ODIS (vcetne vyluk) dopravce DP Ostrava z webu https://www.dpo.cz"           
@@ -195,16 +198,16 @@ let main argv =
                      variant()
 
     
-    //*****************************WebScraping1******************************
+    //*****************************WebScraping1**********************************************
     variant() 
    
-    //*****************************WebScraping2******************************
+    //*****************************WebScraping2**********************************************
     //normalScraping()
 
-    //*****************************WebScraping3****************************** 
+    //*****************************WebScraping3**********************************************
     //webscrapingFromPage()
 
-    //*****************************CodeChallenge*****************************
+    //*****************************CodeChallenge*********************************************
     //codeChallenge()
 
     //*****************************Vyukovy kod (priklad s csv) ****************************** 

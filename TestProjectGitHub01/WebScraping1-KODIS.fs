@@ -82,30 +82,6 @@ let private splitListByPrefix (list: string list) : string list list = //I
 //ekvivalent splitListByPrefix za predpokladu existence teto podminky shodnosti k.Substring(0, lineNumberLength) = k.Substring(0, lineNumberLength)   
 let private splitList1 (list: string list) : string list list = //P
     list |> List.groupBy (fun (item: string) -> item.Substring(0, lineNumberLength)) |> List.map (fun (key, group) -> group) 
-    
-let private downloadFileTaskAsync (client: Http.HttpClient) (uri: string) (path: string) =   //I 
-    
-        let errMsg ex = 
-            printfn "\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
-            do Console.ReadKey() |> ignore 
-            do client.Dispose()
-            do System.Environment.Exit(1)
-
-        async
-            {   
-                //TODO vyzkusaj Async.Catch
-                try //muj custom made tryWith nezachyti exception u async
-                    let! stream = client.GetStreamAsync(uri) |> Async.AwaitTask                             
-                    use fileStream = new FileStream(path, FileMode.CreateNew) //|> (optionToGenerics "Error9" (new FileStream(path, FileMode.CreateNew))) //nelze, vytvari to dalsi stream a uklada to znovu                                
-                    return! stream.CopyToAsync(fileStream) |> Async.AwaitTask 
-                with 
-                | :? AggregateException as ex -> 
-                                                 printfn "\n%s%s" "Jizdni rad s timto odkazem se nepodarilo stahnout: \n" uri
-                                                 return()                                              
-                | ex                          -> 
-                                                 errMsg ex
-                                                 return()                                
-            }     
  
 //************************Main code***********************************************************
 
@@ -648,9 +624,31 @@ let private createFolders dirList = //I
    tryWith myFolderCreation (fun x -> ()) () String.Empty () |> deconstructor   
 
 let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*string) list) = //I 
-            
-    //************************download pdf souboru, ktere jsou aktualni*******************************************
+
+    let downloadFileTaskAsync (client: Http.HttpClient) (uri: string) (path: string) =   //I 
+        
+            let errMsg ex = 
+                printfn "\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
+                do Console.ReadKey() |> ignore 
+                do client.Dispose()
+                do System.Environment.Exit(1)
     
+            async
+                {   
+                    //TODO vyzkusaj Async.Catch
+                    try //muj custom made tryWith nezachyti exception u async
+                        let! stream = client.GetStreamAsync(uri) |> Async.AwaitTask                             
+                        use fileStream = new FileStream(path, FileMode.CreateNew) //|> (optionToGenerics "Error9" (new FileStream(path, FileMode.CreateNew))) //nelze, vytvari to dalsi stream a uklada to znovu                                
+                        return! stream.CopyToAsync(fileStream) |> Async.AwaitTask 
+                    with 
+                    | :? AggregateException as ex -> 
+                                                     printfn "\n%s%s" "Jizdni rad s timto odkazem se nepodarilo stahnout: \n" uri
+                                                     return()                                              
+                    | ex                          -> 
+                                                     errMsg ex
+                                                     return()                                
+                }     
+
     //tryWith je ve funkci downloadFileTaskAsync
     printfn "Probiha stahovani prislusnych JR a jejich ukladani do [%s]." pathToDir 
 
