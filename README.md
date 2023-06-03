@@ -1,1 +1,1 @@
-Draft code for a webscraping tool for bulk downloading of timetables of the ODIS public transport integrated system. Still under development, however the code is functional and may be used as a console application.
+Draft code for a web scraping tool designed to facilitate bulk downloading of timetables from the ODIS public transport integrated system. Still under development, however the code is functional (not only in the direct sense :-) ) and may be used as a console application.
