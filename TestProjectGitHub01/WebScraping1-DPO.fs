@@ -23,7 +23,7 @@ let [<Literal>] pathDpoWeb = @"https://www.dpo.cz"
 
 //Pro ostatni helpers viz WebScraping1-Helpers.fs
 
-let client = client() 
+let private client = client() 
 
 //************************Main code********************************************************************************
 
@@ -101,8 +101,9 @@ let private deleteOneODISDirectory pathToDir = //I
 
     printfn "Provedeno mazani starych JR v dane variante."
     
-    //po vymazani stareho vytvorime novy podadresar
-    [ sprintf"%s\%s"pathToDir dirName ] //list -> aby bylo mozno pouzit funkci createFolders bez uprav  
+    dirName  
+
+let private newDirectory pathToDir dirName = [ sprintf"%s\%s"pathToDir dirName ] //list -> aby bylo mozno pouzit funkci createFolders bez uprav  
 
 let private createFolders dirList = //I 
 
@@ -123,7 +124,6 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
 
             async
                 {   
-                    //TODO vyzkusaj Async.Catch
                     try //muj custom made tryWith nezachyti exception u async
                         let! stream = client.GetStreamAsync(uri) |> Async.AwaitTask                             
                         use fileStream = new FileStream(path, FileMode.CreateNew) //|> (optionToGenerics "Error9" (new FileStream(path, FileMode.CreateNew))) //nelze, vytvari to dalsi stream a uklada to znovu                                
@@ -143,10 +143,14 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
     let downloadTimetables() = //I
         let l = filterTimetables |> List.length
         filterTimetables 
-        |> List.iteri (fun i (link, pathToFile) ->  //Array.Parallel.iter tady nelze  
-                                                 progressBarContinuous i l
-                                                 async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously  
-                                                 //async { printfn"%s" pathToFile; return! Async.Sleep 0 } |> Async.RunSynchronously
+        |> List.iteri (fun i (link, pathToFile) ->  
+                                                 let dispatch = 
+                                                     async                                                 
+                                                         {
+                                                             progressBarContinuous i l
+                                                             async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously
+                                                         }
+                                                 Async.StartImmediate dispatch 
                       )    
    
     //progressBarIndeterminate <| downloadTimetables  
@@ -167,9 +171,8 @@ let webscraping1_DPO pathToDir = //I
                   |> downloadAndSaveTimetables dir 
     
     processStart()
-
-    let dirList = deleteOneODISDirectory pathToDir //list -> aby bylo mozno pouzit funkci createFolders bez uprav  
+    let dirName = deleteOneODISDirectory pathToDir 
+    let dirList = newDirectory pathToDir dirName //list -> aby bylo mozno pouzit funkci createFolders bez uprav  
     createFolders dirList
-    x (dirList |> List.head)                   
-    
+    x (dirList |> List.head) 
     |> (client.Dispose >> processEnd)

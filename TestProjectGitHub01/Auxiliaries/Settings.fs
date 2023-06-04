@@ -2,7 +2,7 @@
 
 open System
 
-[<Struct>]  //vhodne pro 16 bytes => 4096 characters
+//[<Struct>]  //vhodne pro 16 bytes => 4096 characters
 type ODIS = 
     {        
         odisDir1: string

@@ -3,10 +3,12 @@
 open System
 open System.IO
 open System.Net
+open System.Reflection
 open System.Threading.Tasks
 
 open Fugit
 open FSharp.Data
+open FSharp.Reflection
 
 open Helpers
 open Settings
@@ -15,6 +17,7 @@ open ProgressBarFSharp
 open DiscriminatedUnions
 open WebScraping1_Helpers
 open PatternBuilders.PattternBuilders
+
 
 //************************Console**********************************************************************************
 
@@ -49,9 +52,16 @@ type KodisTimetables = JsonProvider<pathJson>
 //************************Helpers**********************************************************************
 //Pro ostatni helpers viz WebScraping1-Helpers.fs
 
-let client = client()
+let private client = client()
+
+let private getDefaultRecordValues = //record -> Array //open FSharp.Reflection
+
+    FSharpType.GetRecordFields(typeof<ODIS>) //dostanu pole hodnot typu PropertyInfo
+    |> Array.map (fun (prop: PropertyInfo) -> prop.GetGetMethod().Invoke(ODIS.Default, [||]) :?> string)            
+    |> Array.take 4 //jen prvni 4 polozky jsou pro celo-KODIS variantu
 
 let private splitList list = //I 
+
     let mySplitting x = //P
         let folder (a: string, b: string) (cur, acc) =
             let cond = a.Substring(0, lineNumberLength) = b.Substring(0, lineNumberLength) 
@@ -68,6 +78,7 @@ let private splitList list = //I
     *)
 
 let private splitListByPrefix (list: string list) : string list list = //I 
+
     let mySplitting x = //P
         let prefix = (fun (x: string) -> x.Substring(0, lineNumberLength))
         let groups = list |> List.groupBy prefix  
@@ -78,11 +89,13 @@ let private splitListByPrefix (list: string list) : string list list = //I
 
 //ekvivalent splitListByPrefix za predpokladu existence teto podminky shodnosti k.Substring(0, lineNumberLength) = k.Substring(0, lineNumberLength)   
 let private splitList1 (list: string list) : string list list = //P
+
     list |> List.groupBy (fun (item: string) -> item.Substring(0, lineNumberLength)) |> List.map (fun (key, group) -> group) 
  
 //************************Main code***********************************************************
 
 let private jsonLinkList = //P
+
     [
         sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=MHD%20Bruntál&group_in%5B1%5D=MHD%20Český%20Těšín&group_in%5B2%5D=MHD%20Frýdek-Místek&group_in%5B3%5D=MHD%20Havířov&group_in%5B4%5D=MHD%20Karviná&group_in%5B5%5D=MHD%20Krnov&group_in%5B6%5D=MHD%20Nový%20Jičín&group_in%5B7%5D=MHD%20Opava&group_in%5B8%5D=MHD%20Orlová&group_in%5B9%5D=MHD%20Ostrava&group_in%5B10%5D=MHD%20Studénka&group_in%5B11%5D=MHD%20Třinec&group_in%5B12%5D=NAD%20MHD&_sort=numeric_label"
         sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=12&group_in%5B0%5D=MHD%20Bruntál&group_in%5B1%5D=MHD%20Český%20Těšín&group_in%5B2%5D=MHD%20Frýdek-Místek&group_in%5B3%5D=MHD%20Havířov&group_in%5B4%5D=MHD%20Karviná&group_in%5B5%5D=MHD%20Krnov&group_in%5B6%5D=MHD%20Nový%20Jičín&group_in%5B7%5D=MHD%20Opava&group_in%5B8%5D=MHD%20Orlová&group_in%5B9%5D=MHD%20Ostrava&group_in%5B10%5D=MHD%20Studénka&group_in%5B11%5D=MHD%20Třinec&group_in%5B12%5D=NAD%20MHD&_sort=numeric_label"
@@ -117,7 +130,8 @@ let private jsonLinkList = //P
         sprintf "%s%s" pathKodisWeb @"linky?_limit=12&_start=0&group_in%5B0%5D=NAD&_sort=numeric_label"     
     ]
 
-let private pathToJsonList =  //P  
+let private pathToJsonList =  //P 
+    
     [
         sprintf "%s%s" partialPathJson @"kodisMHDTotal.json"
         sprintf "%s%s" partialPathJson @"kodisMHDTotal1.json"
@@ -531,39 +545,19 @@ let private deleteAllODISDirectories pathToDir = //I
     let myDeleteFunction x = //I  
 
         //rozdil mezi Directory a DirectoryInfo viz Unique_Identifier_And_Metadata_File_Creator.sln -> MainLogicDG.fs
-        let dirInfo = new DirectoryInfo(pathToDir) |> optionToSRTP "Error8" (new DirectoryInfo(pathToDir)) 
-             
-        (*            
-        //smazeme vsechny soubory v korenu vybraneho adresare  
-        let task1 = 
-            Task.Factory.StartNew (fun () ->
-                                           dirInfo.EnumerateFiles()
-                                           |> optionToSRTP "Error11f" Seq.empty       
-                                           |> Array.ofSeq
-                                           |> Array.Parallel.iter (fun item -> item.Delete())
-                                  )
-      
-        //smazeme vsechny adresare ve vybranem adresari 
-        let task2 = 
-            Task.Factory.StartNew (fun () ->
-                                           dirInfo.EnumerateDirectories()
-                                           |> optionToSRTP "Error11d" Seq.empty       
-                                           |> Array.ofSeq
-                                           |> Array.Parallel.iter (fun item -> item.Delete(true))
-                                  )   
-
-        Task.WaitAll( [| task1; task2 |])
-        *) 
-
-        //smazeme pouze adresare obsahujici stare JR, ostatni ponechame 
-           
-        let a dirName1 dirName2 = 
+        let dirInfo = new DirectoryInfo(pathToDir) |> optionToSRTP "Error8" (new DirectoryInfo(pathToDir))             
+       
+        //smazeme pouze adresare obsahujici stare JR, ostatni ponechame   
+        let deleteIt = 
             dirInfo.EnumerateDirectories()
             |> optionToSRTP "Error11g" Seq.empty  
             |> Array.ofSeq
-            |> Array.filter (fun item -> item.Name = dirName1 || item.Name = dirName2) 
-            |> Array.Parallel.iter (fun item -> item.Delete(true))
-        
+            |> Array.filter (fun item -> (getDefaultRecordValues |> Array.contains item.Name)) //prunik dvou kolekci (plus jeste Array.distinct pro unique items)
+            |> Array.distinct 
+            |> Array.Parallel.iter (fun item -> item.Delete(true))     
+        deleteIt                
+
+        //nasledujici kod je pouze pro vyukove potreby v ramci F# mentorship programme
         (* 
         let myTasks() =           
             [ 
@@ -577,7 +571,7 @@ let private deleteAllODISDirectories pathToDir = //I
                 |> function
                     | Choice1Of2 result    -> result 
                     | Choice2Of2 (ex: exn) -> printfn "Error20 %s" (string ex)
-        
+                    
         myTasks()
        
         
@@ -588,8 +582,7 @@ let private deleteAllODISDirectories pathToDir = //I
             Task.Factory.StartNew (fun () -> a ODIS.Default.odisDir3 ODIS.Default.odisDir4)
                                           
         Task.WaitAll( [| task1; task2 |]) 
-        *)  
-
+        
         let myTasks() = 
             task
                 {
@@ -598,19 +591,18 @@ let private deleteAllODISDirectories pathToDir = //I
                 }            
         
         myTasks().Wait() 
-           
+        *)  
+        
     tryWith myDeleteFunction (fun x -> ()) () String.Empty () |> deconstructor
 
     printfn "Dokoncena filtrace odkazu na neplatne jizdni rady."
     printfn "Provedeno mazani vsech starych JR, pokud existovaly."
-   
-    //po vymazani starych vytvorime nove podadresare
-    [
-        sprintf"%s\%s"pathToDir ODIS.Default.odisDir1
-        sprintf"%s\%s"pathToDir ODIS.Default.odisDir2
-        sprintf"%s\%s"pathToDir ODIS.Default.odisDir3
-        sprintf"%s\%s"pathToDir ODIS.Default.odisDir4
-    ]  
+ 
+let private listOfNewDirectories pathToDir = 
+     
+    getDefaultRecordValues 
+    |> List.ofArray
+    |> List.map (fun item -> sprintf"%s\%s"pathToDir item) 
 
 let private deleteOneODISDirectory param pathToDir = //I 
 
@@ -637,8 +629,9 @@ let private deleteOneODISDirectory param pathToDir = //I
     printfn "Dokoncena filtrace odkazu na neplatne jizdni rady."
     printfn "Provedeno mazani starych JR v dane variante."
     
-    //po vymazani stareho vytvorime novy podadresar
-    [ sprintf"%s\%s"pathToDir dirName ] //list -> aby bylo mozno pouzit funkci createFolders bez uprav  
+    dirName   
+
+let private newDirectory pathToDir dirName = [ sprintf"%s\%s"pathToDir dirName ] //list -> aby bylo mozno pouzit funkci createFolders bez uprav  
 
 let private createFolders dirList = //I 
 
@@ -647,7 +640,7 @@ let private createFolders dirList = //I
               
    tryWith myFolderCreation (fun x -> ()) () String.Empty () |> deconstructor   
 
-let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*string) list) = //I 
+let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*string) list) = //I     
 
     let downloadFileTaskAsync (client: Http.HttpClient) (uri: string) (path: string) =   //I 
         
@@ -655,15 +648,15 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
                 printfn "\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
                 do Console.ReadKey() |> ignore 
                 do client.Dispose()
-                do System.Environment.Exit(1)
+                do System.Environment.Exit(1)           
     
             async
-                {   
-                    //TODO vyzkusaj Async.Catch
-                    try //muj custom made tryWith nezachyti exception u async
+                {   //muj custom-made tryWith nezachyti exception u async
+                    //info about the complexity of concurrent downloading https://stackoverflow.com/questions/6219726/throttled-async-download-in-f
+                    try 
                         let! stream = client.GetStreamAsync(uri) |> Async.AwaitTask                             
                         use fileStream = new FileStream(path, FileMode.CreateNew) //|> (optionToGenerics "Error9" (new FileStream(path, FileMode.CreateNew))) //nelze, vytvari to dalsi stream a uklada to znovu                                
-                        return! stream.CopyToAsync(fileStream) |> Async.AwaitTask 
+                        return! stream.CopyToAsync(fileStream) |> Async.AwaitTask                        
                     with 
                     | :? AggregateException as ex -> 
                                                      printfn "\n%s%s" "Jizdni rad s timto odkazem se nepodarilo stahnout: \n" uri
@@ -676,7 +669,8 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
     //tryWith je ve funkci downloadFileTaskAsync
     printfn "Probiha stahovani prislusnych JR a jejich ukladani do [%s]." pathToDir 
 
-    let downloadTimetables() = //I
+    let downloadTimetables1() = //I  //sequential?
+
         let l = filterTimetables |> List.length
         filterTimetables 
         |> List.iteri (fun i (link, pathToFile) ->  //Array.Parallel.iter tady nelze  
@@ -684,10 +678,25 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
                                                  async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously  
                                                  //async { printfn"%s" pathToFile; return! Async.Sleep 0 } |> Async.RunSynchronously
                       )    
+
+    let downloadTimetables2() = //I  //concurrent?
+
+        let l = filterTimetables |> List.length
+        filterTimetables 
+        |> List.iteri (fun i (link, pathToFile) ->  //Array.Parallel.iter tady nelze  
+                                                 let dispatch = 
+                                                     async                                                 
+                                                         {
+                                                             progressBarContinuous i l
+                                                             async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously
+                                                             //async { printfn"%s" pathToFile; return! Async.Sleep 0 } |> Async.RunSynchronously
+                                                         }
+                                                 Async.StartImmediate dispatch 
+                      )                           
    
     //progressBarIndeterminate <| downloadTimetables  
 
-    downloadTimetables() //progressBarContinuous
+    downloadTimetables2() //progressBarContinuous
     
     printfn "Dokonceno stahovani prislusnych JR a jejich ukladani do [%s]." pathToDir
     //printfn "Pocet jizdnich radu, ktere se aplikace pokousela stahnout: %i" (filterTimetables |> List.length)  
@@ -710,14 +719,16 @@ let webscraping1_KODIS pathToDir (variantList: Validity list) = //I
     match variantList |> List.length with
     | 1 -> 
            let variant = variantList |> List.head
-           let dirList = deleteOneODISDirectory variant pathToDir //list -> aby bylo mozno pouzit funkci createFolders bez uprav  
+           let dirName = deleteOneODISDirectory variant pathToDir 
+           let dirList = newDirectory pathToDir dirName //list -> aby bylo mozno pouzit funkci createFolders bez uprav  
            createFolders dirList
            x variant (dirList |> List.head)              
-    | _ ->    
-           let dirList = deleteAllODISDirectories pathToDir
+    | _ ->  
+           deleteAllODISDirectories pathToDir
+           let dirList = listOfNewDirectories pathToDir
            createFolders dirList
            (variantList, dirList)
-           ||> List.iter2 (fun variant dir -> x variant dir)                    
+           ||> List.iter2 (fun variant dir -> x variant dir)            
     
     |> (client.Dispose >> processEnd)
     
