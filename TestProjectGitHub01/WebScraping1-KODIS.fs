@@ -563,14 +563,41 @@ let private deleteAllODISDirectories pathToDir = //I
             |> Array.ofSeq
             |> Array.filter (fun item -> item.Name = dirName1 || item.Name = dirName2) 
             |> Array.Parallel.iter (fun item -> item.Delete(true))
-
+        
+        (* 
+        let myTasks() =           
+            [ 
+                async { return a ODIS.Default.odisDir1 ODIS.Default.odisDir2 }   
+                async { return a ODIS.Default.odisDir3 ODIS.Default.odisDir4 }      
+            ] 
+            |> Async.Parallel 
+            |> Async.Ignore
+            |> Async.Catch
+            |> Async.RunSynchronously            
+                |> function
+                    | Choice1Of2 result    -> result 
+                    | Choice2Of2 (ex: exn) -> printfn "Error20 %s" (string ex)
+        
+        myTasks()
+       
+        
         let task1 = 
             Task.Factory.StartNew (fun () -> a ODIS.Default.odisDir1 ODIS.Default.odisDir2)
       
         let task2 = 
             Task.Factory.StartNew (fun () -> a ODIS.Default.odisDir3 ODIS.Default.odisDir4)
                                           
-        Task.WaitAll( [| task1; task2 |])   
+        Task.WaitAll( [| task1; task2 |]) 
+        *)  
+
+        let myTasks() = 
+            task
+                {
+                    a ODIS.Default.odisDir1 ODIS.Default.odisDir2
+                    a ODIS.Default.odisDir3 ODIS.Default.odisDir4
+                }            
+        
+        myTasks().Wait() 
            
     tryWith myDeleteFunction (fun x -> ()) () String.Empty () |> deconstructor
 
