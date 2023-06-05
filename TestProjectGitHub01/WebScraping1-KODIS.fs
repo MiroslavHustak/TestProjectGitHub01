@@ -177,7 +177,6 @@ let private downloadAndSaveUpdatedJson() =
                                       //updateJson x nezachyti exception v async
                                       async  
                                           { 
-                                              //TODO priste zrob Async.Catch
                                               try 
                                                   return! client.GetStringAsync(item) |> Async.AwaitTask 
                                               with
@@ -609,10 +608,10 @@ let private deleteOneODISDirectory param pathToDir = //I
     //smazeme pouze jeden adresar obsahujici stare JR, ostatni ponechame 
     let dirName =
         match param with 
-        | CurrentValidity           -> ODIS.Default.odisDir1
-        | FutureValidity            -> ODIS.Default.odisDir2
-        | ReplacementService        -> ODIS.Default.odisDir3                                     
-        | WithoutReplacementService -> ODIS.Default.odisDir4   
+        | CurrentValidity           -> getDefaultRecordValues |> Array.item 0
+        | FutureValidity            -> getDefaultRecordValues |> Array.item 1
+        | ReplacementService        -> getDefaultRecordValues |> Array.item 2                                
+        | WithoutReplacementService -> getDefaultRecordValues |> Array.item 3
 
     let myDeleteFunction x = //I  
 
@@ -646,9 +645,9 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
         
             let errMsg ex = 
                 printfn "\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
-                do Console.ReadKey() |> ignore 
-                do client.Dispose()
-                do System.Environment.Exit(1)           
+                Console.ReadKey() |> ignore 
+                client.Dispose()
+                System.Environment.Exit(1)           
     
             async
                 {   //muj custom-made tryWith nezachyti exception u async
@@ -676,7 +675,6 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
         |> List.iteri (fun i (link, pathToFile) ->  //Array.Parallel.iter tady nelze  
                                                  progressBarContinuous i l
                                                  async { return! downloadFileTaskAsync client link pathToFile } |> Async.RunSynchronously  
-                                                 //async { printfn"%s" pathToFile; return! Async.Sleep 0 } |> Async.RunSynchronously
                       )    
 
     let downloadTimetables2() = //I  //concurrent?
@@ -694,12 +692,11 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
                                                  Async.StartImmediate dispatch 
                       )                           
    
-    //progressBarIndeterminate <| downloadTimetables  
+    //progressBarIndeterminate <| downloadTimetables2()  
 
     downloadTimetables2() //progressBarContinuous
     
     printfn "Dokonceno stahovani prislusnych JR a jejich ukladani do [%s]." pathToDir
-    //printfn "Pocet jizdnich radu, ktere se aplikace pokousela stahnout: %i" (filterTimetables |> List.length)  
 
 let webscraping1_KODIS pathToDir (variantList: Validity list) = //I  
     
@@ -708,13 +705,10 @@ let webscraping1_KODIS pathToDir (variantList: Validity list) = //I
         | false -> 
                    printfn "Adresar [%s] neexistuje, prislusne JR do nej urceny nemohly byt stazeny." dir
                    printfn "Pravdepodobne nekdo dany adresar v prubehu prace tohoto programu smazal."                                                    
-        | true  ->
-                   digThroughJsonStructure()
-                   |> filterTimetables variant dir 
-                   |> downloadAndSaveTimetables dir   
+        | true  ->                  
+                   digThroughJsonStructure >> filterTimetables variant dir >> downloadAndSaveTimetables dir <| ()  
 
-    processStart()
-    downloadAndSaveUpdatedJson()    
+    processStart >> downloadAndSaveUpdatedJson <| ()     
 
     match variantList |> List.length with
     | 1 -> 

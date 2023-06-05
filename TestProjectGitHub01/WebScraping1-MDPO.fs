@@ -140,9 +140,8 @@ let webscraping1_MDPO pathToDir = //I
         | false -> 
                   printfn "Adresar [%s] neexistuje, prislusne JR do nej urceny nemohly byt stazeny." dir
                   printfn "Pravdepodobne nekdo dany adresar v prubehu prace tohoto programu smazal."                                                    
-        | true  ->         
-                  filterTimetables dir
-                  |> downloadAndSaveTimetables dir 
+        | true  -> 
+                 filterTimetables >> downloadAndSaveTimetables dir <| dir                   
     
     processStart()
     let dirName = deleteOneODISDirectory pathToDir 
