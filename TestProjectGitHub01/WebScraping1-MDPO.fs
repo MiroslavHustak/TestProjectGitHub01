@@ -92,9 +92,9 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
         
             let errMsg ex = 
                 printfn "\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
-                do Console.ReadKey() |> ignore 
-                do client.Dispose()
-                do System.Environment.Exit(1)
+                Console.ReadKey() |> ignore 
+                client.Dispose()
+                System.Environment.Exit(1)
     
             async
                 {   
@@ -141,7 +141,7 @@ let webscraping1_MDPO pathToDir = //I
                   printfn "Adresar [%s] neexistuje, prislusne JR do nej urceny nemohly byt stazeny." dir
                   printfn "Pravdepodobne nekdo dany adresar v prubehu prace tohoto programu smazal."                                                    
         | true  -> 
-                 filterTimetables >> downloadAndSaveTimetables dir <| dir                   
+                  filterTimetables >> downloadAndSaveTimetables dir <| dir                   
     
     processStart()
     let dirName = deleteOneODISDirectory pathToDir 

@@ -81,5 +81,6 @@ let progressBarContinuous (currentProgress : int) (totalProgress : int) : unit =
 
     match currentProgress < (totalProgress - 1) with
     | true  -> updateProgressBar currentProgress totalProgress
-    | false -> Console.Write("\r" + new string(' ', Console.WindowWidth - 1) + "\r")
+    | false -> 
+               Console.Write("\r" + new string(' ', Console.WindowWidth - 1) + "\r")
                Console.CursorLeft <- 0             

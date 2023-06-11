@@ -118,9 +118,9 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
     
             let errMsg ex = 
                 printfn "\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
-                do Console.ReadKey() |> ignore 
-                do client.Dispose()
-                do System.Environment.Exit(1)
+                Console.ReadKey() |> ignore 
+                client.Dispose()
+                System.Environment.Exit(1)
 
             async
                 {   
