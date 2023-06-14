@@ -9,7 +9,9 @@ open FSharp.Data
 open Settings
 open TryWith.TryWith
 open ProgressBarFSharp
+open Messages.Messages
 open WebScraping1_Helpers
+open ErrorFunctions.ErrorFunctions
 
 //************************Console**********************************************************************************
 
@@ -73,7 +75,7 @@ let private deleteOneODISDirectory pathToDir = //I
                   
     tryWith myDeleteFunction (fun x -> ()) () String.Empty () |> deconstructor
 
-    printfn "Provedeno mazani starych JR v dane variante."
+    msg12() 
     
     dirName  
     
@@ -88,14 +90,8 @@ let private createFolders dirList = //I
 
 let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*string) list) = //I 
 
-    let downloadFileTaskAsync (client: Http.HttpClient) (uri: string) (path: string) =   //I 
-        
-            let errMsg ex = 
-                printfn "\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
-                Console.ReadKey() |> ignore 
-                client.Dispose()
-                System.Environment.Exit(1)
-    
+    let downloadFileTaskAsync (client: Http.HttpClient) (uri: string) (path: string) =   //I         
+               
             async
                 {   
                     try //muj custom made tryWith nezachyti exception u async
@@ -104,15 +100,15 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
                         return! stream.CopyToAsync(fileStream) |> Async.AwaitTask 
                     with 
                     | :? AggregateException as ex -> 
-                                                     printfn "\n%s%s" "Jizdni rad s timto odkazem se nepodarilo stahnout: \n" uri
+                                                     msgParam2 uri 
                                                      return()                                              
                     | ex                          -> 
-                                                     errMsg ex
+                                                     deconstructorError <| msgParam1 ex <| client.Dispose()
                                                      return()                                
                 }  
     
     //tryWith je ve funkci downloadFileTaskAsync
-    printfn "Probiha stahovani prislusnych JR a jejich ukladani do [%s]." pathToDir 
+    msgParam3 pathToDir 
 
     let downloadTimetables() = //I
         let l = filterTimetables |> List.length
@@ -131,15 +127,15 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
 
     downloadTimetables() //progressBarContinuous
     
-    printfn "Dokonceno stahovani prislusnych JR a jejich ukladani do [%s]." pathToDir
+    msgParam4 pathToDir 
 
 let webscraping1_MDPO pathToDir = //I  
     
     let x dir = 
         match dir |> Directory.Exists with 
         | false -> 
-                  printfn "Adresar [%s] neexistuje, prislusne JR do nej urceny nemohly byt stazeny." dir
-                  printfn "Pravdepodobne nekdo dany adresar v prubehu prace tohoto programu smazal."                                                    
+                  msgParam5 dir 
+                  msg13()                                              
         | true  -> 
                   filterTimetables >> downloadAndSaveTimetables dir <| dir  
     

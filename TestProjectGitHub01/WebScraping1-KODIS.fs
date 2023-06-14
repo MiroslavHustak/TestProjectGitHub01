@@ -13,9 +13,11 @@ open FSharp.Reflection
 open Helpers
 open Settings
 open TryWith.TryWith
+open Messages.Messages
 open ProgressBarFSharp
 open DiscriminatedUnions
 open WebScraping1_Helpers
+open ErrorFunctions.ErrorFunctions
 open PatternBuilders.PattternBuilders
 
 
@@ -181,9 +183,7 @@ let private downloadAndSaveUpdatedJson() =
                                                   return! client.GetStringAsync(item) |> Async.AwaitTask 
                                               with
                                               | ex -> 
-                                                      printfn "\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
-                                                      do Console.ReadKey() |> ignore 
-                                                      do System.Environment.Exit(1)
+                                                      deconstructorError <| msgParam1 ex <| ()
                                                       return! client.GetStringAsync(String.Empty) |> Async.AwaitTask //whatever of that type
                                           } |> Async.RunSynchronously
                         
@@ -192,7 +192,7 @@ let private downloadAndSaveUpdatedJson() =
         //save updated json files
         match (<>) (pathToJsonList |> List.length) (loadAndSaveJsonFiles |> List.length) with
         | true  -> 
-                  printfn "\nZase se nekdo vrtal do listu s odkazy a cestami. Je nutna jejich kontrola. Zmackni cokoliv pro ukonceni programu." 
+                  msg1()
                   do Console.ReadKey() |> ignore 
                   do System.Environment.Exit(1)
         | false ->
@@ -203,12 +203,12 @@ let private downloadAndSaveUpdatedJson() =
                                                     streamWriter.Flush()   
                                   ) 
 
-    printfn "Probiha stahovani a ukladani json souboru do prislusneho adresare."    
+    msg2() 
 
     tryWith updateJson (fun x -> ()) () String.Empty () |> deconstructor    
 
-    printfn "Dokonceno stahovani a ukladani json souboru do prislusneho adresare."
-    printfn "Probiha filtrace odkazu na neplatne jizdni rady."
+    msg3() 
+    msg4() 
 
 let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
     
@@ -225,7 +225,7 @@ let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
                                               |> function 
                                                   | Some value -> value |> Array.map (fun item -> item.Timetable) //quli tomuto je nutno Array
                                                   | None       -> 
-                                                                  printfn "%s" "Error5"
+                                                                  msg5() 
                                                                   Array.empty    
                              ) 
         tryWith myFunction (fun x -> ()) () String.Empty Array.empty |> deconstructor
@@ -258,7 +258,7 @@ let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
                                                   |> function 
                                                       | Some value -> value |> fn1
                                                       | None       -> 
-                                                                      printfn "%s" "Error6c"
+                                                                      msg6() 
                                                                       Array.empty                 
 
                                               let fn3 (item: JsonProvider<pathJson>.Root) =  //quli tomuto je nutno Array //AP
@@ -266,7 +266,7 @@ let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
                                                   |> function 
                                                       | Some value -> value |> Array.collect fn2 
                                                       | None       ->
-                                                                      printfn "%s" "Error6b"
+                                                                      msg7() 
                                                                       Array.empty 
                                               
                                               let kodisJsonSamples = KodisTimetables.Parse(File.ReadAllText pathToJson) |> Option.ofObj //I
@@ -275,7 +275,7 @@ let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
                                               |> function 
                                                   | Some value -> value |> Array.collect fn3 
                                                   | None       -> 
-                                                                  printfn "%s" "Error6a"
+                                                                  msg8() 
                                                                   Array.empty                                 
                              ) 
         tryWith myFunction (fun x -> ()) () String.Empty Array.empty |> deconstructor          
@@ -314,7 +314,7 @@ let private filterTimetables param pathToDir diggingResult = //I
                                                             match fileName |> String.length >= lineNumberLength with  
                                                             | true  -> fileName.ToCharArray() |> Array.toList |> List.take lineNumberLength
                                                             | false -> 
-                                                                       printfn "Error11"
+                                                                       msg9() 
                                                                        List.empty
                                              
                                                         let a i range = range |> List.filter (fun item -> (charList |> List.item i = item)) 
@@ -554,48 +554,12 @@ let private deleteAllODISDirectories pathToDir = //I
             |> Array.filter (fun item -> (getDefaultRecordValues |> Array.contains item.Name)) //prunik dvou kolekci (plus jeste Array.distinct pro unique items)
             |> Array.distinct 
             |> Array.Parallel.iter (fun item -> item.Delete(true))     
-        deleteIt                
-
-        //nasledujici kod je pouze pro vyukove potreby v ramci F# mentorship programme
-        (* 
-        let myTasks() =           
-            [ 
-                async { return a ODIS.Default.odisDir1 ODIS.Default.odisDir2 }   
-                async { return a ODIS.Default.odisDir3 ODIS.Default.odisDir4 }      
-            ] 
-            |> Async.Parallel 
-            |> Async.Ignore
-            |> Async.Catch
-            |> Async.RunSynchronously            
-                |> function
-                    | Choice1Of2 result    -> result 
-                    | Choice2Of2 (ex: exn) -> printfn "Error20 %s" (string ex)
-                    
-        myTasks()
-       
-        
-        let task1 = 
-            Task.Factory.StartNew (fun () -> a ODIS.Default.odisDir1 ODIS.Default.odisDir2)
-      
-        let task2 = 
-            Task.Factory.StartNew (fun () -> a ODIS.Default.odisDir3 ODIS.Default.odisDir4)
-                                          
-        Task.WaitAll( [| task1; task2 |]) 
-        
-        let myTasks() = 
-            task
-                {
-                    a ODIS.Default.odisDir1 ODIS.Default.odisDir2
-                    a ODIS.Default.odisDir3 ODIS.Default.odisDir4
-                }            
-        
-        myTasks().Wait() 
-        *)  
+        deleteIt 
         
     tryWith myDeleteFunction (fun x -> ()) () String.Empty () |> deconstructor
 
-    printfn "Dokoncena filtrace odkazu na neplatne jizdni rady."
-    printfn "Provedeno mazani vsech starych JR, pokud existovaly."
+    msg10() 
+    msg11() 
  
 let private listOfNewDirectories pathToDir = 
      
@@ -625,8 +589,8 @@ let private deleteOneODISDirectory param pathToDir = //I
                   
     tryWith myDeleteFunction (fun x -> ()) () String.Empty () |> deconstructor
 
-    printfn "Dokoncena filtrace odkazu na neplatne jizdni rady."
-    printfn "Provedeno mazani starych JR v dane variante."
+    msg10() 
+    msg11() 
     
     dirName   
 
@@ -642,13 +606,7 @@ let private createFolders dirList = //I
 let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*string) list) = //I     
 
     let downloadFileTaskAsync (client: Http.HttpClient) (uri: string) (path: string) =   //I 
-        
-            let errMsg ex = 
-                printfn "\n%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" (string ex)
-                Console.ReadKey() |> ignore 
-                client.Dispose()
-                System.Environment.Exit(1)           
-    
+
             async
                 {   //muj custom-made tryWith nezachyti exception u async
                     //info about the complexity of concurrent downloading https://stackoverflow.com/questions/6219726/throttled-async-download-in-f
@@ -658,15 +616,15 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
                         return! stream.CopyToAsync(fileStream) |> Async.AwaitTask                        
                     with 
                     | :? AggregateException as ex -> 
-                                                     printfn "\n%s%s" "Jizdni rad s timto odkazem se nepodarilo stahnout: \n" uri
+                                                     msgParam2 uri //printfn "\n%s%s" "Jizdni rad s timto odkazem se nepodarilo stahnout: \n" uri  //msgParam2
                                                      return()                                              
                     | ex                          -> 
-                                                     errMsg ex
+                                                     deconstructorError <| msgParam1 ex <| client.Dispose()
                                                      return()                                
                 }     
 
     //tryWith je ve funkci downloadFileTaskAsync
-    printfn "Probiha stahovani prislusnych JR a jejich ukladani do [%s]." pathToDir 
+    msgParam3 pathToDir 
 
     let downloadTimetables1() = //I  //sequential?
 
@@ -696,15 +654,15 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
 
     downloadTimetables2() //progressBarContinuous
     
-    printfn "Dokonceno stahovani prislusnych JR a jejich ukladani do [%s]." pathToDir
+    msgParam4 pathToDir 
 
 let webscraping1_KODIS pathToDir (variantList: Validity list) = //I  
     
     let x variant dir = 
         match dir |> Directory.Exists with 
         | false -> 
-                   printfn "Adresar [%s] neexistuje, prislusne JR do nej urceny nemohly byt stazeny." dir
-                   printfn "Pravdepodobne nekdo dany adresar v prubehu prace tohoto programu smazal."                                                    
+                   msgParam5 dir 
+                   msg13()                                                
         | true  ->                  
                    digThroughJsonStructure >> filterTimetables variant dir >> downloadAndSaveTimetables dir <| ()  
 

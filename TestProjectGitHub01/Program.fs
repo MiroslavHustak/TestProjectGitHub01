@@ -14,27 +14,26 @@ open WebScraping2
 open WebScraping3
 open CodeChallenge
 open TryWith.TryWith
+open Messages.Messages
 open DiscriminatedUnions
 open BrowserDialogWindow
+
+open WebScraping1_Helpers
+open ErrorFunctions.ErrorFunctions
 
 [<EntryPoint; STAThread>]
 let main argv =
 
     //*****************************Console******************************   
     
-    do System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance)
-
-    Console.BackgroundColor <- ConsoleColor.Blue 
-    Console.ForegroundColor <- ConsoleColor.White 
-    Console.InputEncoding   <- System.Text.Encoding.Unicode
-    Console.OutputEncoding  <- System.Text.Encoding.Unicode
+    consoleAppProblemFixer()
     
     //*****************************WebScraping1******************************   
 
     let myWebscraping1_DPO x = 
         Console.Clear()
         printfn "Hromadne stahovani aktualnich JR ODIS (vcetne vyluk) dopravce DP Ostrava z webu https://www.dpo.cz"           
-        printfn "Datum posledni aktualizace SW: 01-06-2023" 
+        printfn "Datum posledni aktualizace SW: 14-06-2023" 
         printfn "********************************************************************"
         printfn "Nyni je treba vybrat si adresar pro ulozeni JR dopravce DP Ostrava."
         printfn "Pokud ve vybranem adresari existuje nasledujici podadresar, jeho obsah bude nahrazen nove stahnutymi JR."
@@ -49,15 +48,11 @@ let main argv =
             | false                           -> str       
             | true when (<>) str String.Empty -> 
                                                 Console.Clear()
-                                                printfn"%s%s" "\nNo jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" str
-                                                do Console.ReadKey() |> ignore 
-                                                do System.Environment.Exit(1)  
+                                                deconstructorError <| msgParam1 str <| ()                                              
                                                 String.Empty
             | _                               -> 
                                                 Console.Clear()
-                                                printfn "\nNebyl vybran adresar. Zmackni cokoliv pro ukonceni programu. \n"
-                                                do Console.ReadKey() |> ignore 
-                                                do System.Environment.Exit(1) 
+                                                deconstructorError <| printfn "\nNebyl vybran adresar. Zmackni cokoliv pro ukonceni programu. \n" <| ()                                           
                                                 String.Empty  
    
         Console.Clear()
@@ -75,7 +70,7 @@ let main argv =
     let myWebscraping1_MDPO x = 
         Console.Clear()
         printfn "Hromadne stahovani aktualnich JR ODIS dopravce MDP Opava z webu https://www.mdpo.cz"           
-        printfn "Datum posledni aktualizace SW: 02-06-2023" 
+        printfn "Datum posledni aktualizace SW: 14-06-2023" 
         printfn "********************************************************************"
         printfn "Nyni je treba vybrat si adresar pro ulozeni JR dopravce MDP Opava."
         printfn "Pokud ve vybranem adresari existuje nasledujici podadresar, jeho obsah bude nahrazen nove stahnutymi JR."
@@ -90,15 +85,11 @@ let main argv =
             | false                           -> str       
             | true when (<>) str String.Empty -> 
                                                 Console.Clear()
-                                                printfn"%s%s" "\nNo jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" str
-                                                do Console.ReadKey() |> ignore 
-                                                do System.Environment.Exit(1)  
+                                                deconstructorError <| msgParam1 str <| ()   
                                                 String.Empty
             | _                               -> 
                                                 Console.Clear()
-                                                printfn "\nNebyl vybran adresar. Zmackni cokoliv pro ukonceni programu. \n"
-                                                do Console.ReadKey() |> ignore 
-                                                do System.Environment.Exit(1) 
+                                                deconstructorError <| printfn "\nNebyl vybran adresar. Zmackni cokoliv pro ukonceni programu. \n" <| ()
                                                 String.Empty  
           
         Console.Clear()
@@ -116,7 +107,7 @@ let main argv =
     let myWebscraping1_KODIS x = 
            Console.Clear()
            printfn "Hromadne stahovani JR ODIS vsech dopravcu v systemu ODIS z webu https://www.kodis.cz"           
-           printfn "Datum posledni aktualizace SW: 30-05-2023" 
+           printfn "Datum posledni aktualizace SW: 14-06-2023" 
            printfn "********************************************************************"
            printfn "Nyni je treba vybrat si adresar pro ulozeni JR vsech dopravcu v systemu ODIS."
            printfn "Pokud ve vybranem adresari existuji nasledujici podadresare, jejich obsah bude nahrazen nove stahnutymi JR."
@@ -134,15 +125,11 @@ let main argv =
                | false                           -> str       
                | true when (<>) str String.Empty -> 
                                                    Console.Clear()
-                                                   printfn"%s%s" "\nNo jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" str
-                                                   do Console.ReadKey() |> ignore 
-                                                   do System.Environment.Exit(1)  
+                                                   deconstructorError <| msgParam1 str <| ()   
                                                    String.Empty
                | _                               -> 
                                                    Console.Clear()
-                                                   printfn "\nNebyl vybran adresar. Zmackni cokoliv pro ukonceni programu. \n"
-                                                   do Console.ReadKey() |> ignore 
-                                                   do System.Environment.Exit(1) 
+                                                   deconstructorError <| printfn "\nNebyl vybran adresar. Zmackni cokoliv pro ukonceni programu. \n" <| ()
                                                    String.Empty  
       
            Console.Clear()

@@ -8,11 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="KODISStructure\JSONFile1.json" />
+    <Content Include="KODISStructure\HTMLFile1.html" />
     <Compile Include="OtherWebscraping\WebScraping3.fs" />
     <Compile Include="OtherWebscraping\WebScraping2.fs" />
     <Content Include="KODISJson\kodisMHDTotal.json" />
-    <Content Include="Auxiliaries\JSONFile1.json" />
-    <Content Include="Auxiliaries\HTMLFile1.html" />
+    <Compile Include="Auxiliaries\Messages.fs" />
+    <Compile Include="Auxiliaries\ErrorFunctions.fs" />
     <Compile Include="Auxiliaries\Settings.fs" />
     <Compile Include="Auxiliaries\PattternBuilders.fs" />
     <Compile Include="Auxiliaries\DiscriminatedUnions.fs" />

@@ -3,11 +3,13 @@
 open System
 open System.IO
 
+open Messages.Messages
 open DiscriminatedUnions
+open ErrorFunctions.ErrorFunctions
 
 module TryWith =
 
-    let tryWith f1 f2 f3 x y = 
+    let tryWith f1 f2 f3 x y = //P
         try
             try          
                f1 x |> Success
@@ -18,21 +20,19 @@ module TryWith =
                f3
                Failure (ex.Message, y)  
 
-    let deconstructor =          
+    let deconstructor =  //I        
         function
         | Success x       -> x                                                   
         | Failure (ex, y) -> 
-                             printfn"%s%s" "No jeje, nekde nastala chyba. Zmackni cokoliv pro ukonceni programu. Popis chyby: \n" ex
-                             do Console.ReadKey() |> ignore 
-                             do System.Environment.Exit(1) 
+                             deconstructorError <| msgParam1 ex <| ()
                              y    
                               
-    let inline optionToSRTP err (srtp: ^a) value = 
+    let inline optionToSRTP err (srtp: ^a) value = //I
         value
         |> Option.ofObj 
         |> function 
             | Some value -> value  
             | None       -> 
-                            printfn"%s" err
+                            msgParam7 err
                             srtp
 
