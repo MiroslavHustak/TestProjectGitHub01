@@ -616,7 +616,7 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
                         return! stream.CopyToAsync(fileStream) |> Async.AwaitTask                        
                     with 
                     | :? AggregateException as ex -> 
-                                                     msgParam2 uri //printfn "\n%s%s" "Jizdni rad s timto odkazem se nepodarilo stahnout: \n" uri  //msgParam2
+                                                     msgParam2 uri 
                                                      return()                                              
                     | ex                          -> 
                                                      deconstructorError <| msgParam1 ex <| client.Dispose()
