@@ -5,19 +5,20 @@ open System.IO
 open System.Diagnostics
 
 open TryWith.TryWith
+open Messages.Messages
 
     module CopyingFiles =  
     
-       let copyFiles source destination =
+       let copyFiles source destination = //I
                                                                 
           let perform x =                                    
               let sourceFilepath =
                   Path.GetFullPath(source)
-                  |> optionToSRTP "Chyba při čtení cesty k souboru" String.Empty 
+                  |> optionToSRTP (lazy (msgParam7 "Chyba při čtení cesty k souboru")) <| String.Empty 
 
               let destinFilepath =
                   Path.GetFullPath(destination) 
-                  |> optionToSRTP "Chyba při čtení cesty k souboru" String.Empty 
+                  |> optionToSRTP (lazy (msgParam7 "Chyba při čtení cesty k souboru")) String.Empty 
                 
               let fInfodat: FileInfo = new FileInfo(sourceFilepath)  
               match fInfodat.Exists with 
@@ -29,7 +30,7 @@ open TryWith.TryWith
     module MyString = 
         //priklad pouziti: getString(8, "0")//tuple a compiled nazev velkym kvuli DLL pro C#
         [<CompiledName "GetString">]
-        let getString (numberOfStrings: int, stringToAdd: string): string =   
+        let getString (numberOfStrings: int, stringToAdd: string): string =   //P
             let initialString = String.Empty                //initial value of the string
             let listRange = [ 1 .. numberOfStrings ]
             let rec loop list acc auxStringToAdd =

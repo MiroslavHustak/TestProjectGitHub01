@@ -4,23 +4,26 @@ open System
 open System.Threading
 
 open TryWith.TryWith
+open Messages.Messages
 
+
+//TODO Errors :-)
 let private (++) a = (+) a 1
 
-let private cancellationTokenSource = 
-    new CancellationTokenSource() |> optionToSRTP "ErrorPB1" (new CancellationTokenSource())  
+let private cancellationTokenSource = //I
+    new CancellationTokenSource() |> optionToSRTP (lazy (msgParam7 "ErrorPB1")) (new CancellationTokenSource())  
 
-let private animateProgress () = 
+let private animateProgress () = //I
 
     let rec loop counter =
         Console.CursorLeft <- 0
-        Console.Write("Tezce na tom pracuji " + new string('.', counter % 4)) //neslo to se sprintf
+        Console.Write("Těžce na tom pracuji " + new string('.', counter % 4)) //neslo to se sprintf
         System.Threading.Thread.Sleep(100) 
 
         match cancellationTokenSource.IsCancellationRequested with
         | true  ->
                   Console.CursorLeft <- 0
-                  printfn "Nadrel jsem se, ale ukol jsem uspesne dokoncil :-)"                
+                  printfn "Nadřel jsem se, ale úkol jsem úspěšně dokončil :-)"                
         | false ->
                   let c = (++) counter 
                   loop c
@@ -32,33 +35,33 @@ let private animateProgress () =
     Therefore, the function is tail-recursive and can be optimized by the F# compiler to avoid stack overflow errors.  
     *)
 
-let progressBarIndeterminate (longRunningProcess: unit -> unit) = 
+let progressBarIndeterminate (longRunningProcess: unit -> unit) = //I
 
     let myFunction x = 
         let progressThread = 
-            new Thread(animateProgress) |> optionToSRTP "ErrorPB2" (new Thread(animateProgress)) 
+            new Thread(animateProgress) |> optionToSRTP (lazy (msgParam7 "ErrorPB2")) (new Thread(animateProgress)) 
         
         progressThread.Start() 
 
         let processThread = 
-            new Thread(longRunningProcess) |> optionToSRTP "ErrorPB3" (new Thread(longRunningProcess)) 
+            new Thread(longRunningProcess) |> optionToSRTP (lazy (msgParam7 "ErrorPB3")) (new Thread(longRunningProcess)) 
 
         processThread.Start()
         processThread.Join() 
         cancellationTokenSource.Cancel() 
         progressThread.Join()
 
-    tryWith myFunction (fun x -> ()) () String.Empty () |> deconstructor
+    tryWith myFunction (fun x -> ()) () String.Empty () |> deconstructor msgParam1
 
 let private updateProgressBar (currentProgress : int) (totalProgress : int) : unit =
     
     let myFunction x = 
 
         let bytes = //437 je tzv. Extended ASCII  
-            System.Text.Encoding.GetEncoding(437).GetBytes("█") |> optionToSRTP "ErrorPB4" Array.empty 
+            System.Text.Encoding.GetEncoding(437).GetBytes("█") |> optionToSRTP (lazy (msgParam7 "ErrorPB4")) Array.empty 
                    
         let output =
-            System.Text.Encoding.GetEncoding(852).GetChars(bytes) |> optionToSRTP "ErrorPB5" Array.empty   
+            System.Text.Encoding.GetEncoding(852).GetChars(bytes) |> optionToSRTP (lazy (msgParam7 "ErrorPB5")) Array.empty   
         
         let progressBar = 
             let barWidth = 50 //nastavit delku dle potreby            
@@ -66,16 +69,16 @@ let private updateProgressBar (currentProgress : int) (totalProgress : int) : un
             let barFill = (/) ((*) currentProgress barWidth) totalProgress // :-)  
                
             let characterToFill = string (Array.item 0 output) //moze byt baj "#"
-            let bar = String.replicate barFill characterToFill |> optionToSRTP "ErrorPB5" String.Empty 
-            let remaining = String.replicate (barWidth - (++) barFill) "*" |> optionToSRTP "ErrorPB6" String.Empty // :-)
+            let bar = String.replicate barFill characterToFill |> optionToSRTP (lazy (msgParam7 "ErrorPB5")) String.Empty 
+            let remaining = String.replicate (barWidth - (++) barFill) "*" |> optionToSRTP (lazy (msgParam7 "ErrorPB6")) String.Empty // :-)
               
             sprintf "<%s%s> %d%%" bar remaining percentComplete 
 
         match (=) currentProgress totalProgress with
-        | true  -> printfn "%s\n" progressBar
-        | false -> printf "%s\r" progressBar
+        | true  -> msgParam8 progressBar
+        | false -> msgParam9 progressBar
 
-    tryWith myFunction (fun x -> ()) () String.Empty () |> deconstructor
+    tryWith myFunction (fun x -> ()) () String.Empty () |> deconstructor msgParam1
 
 let progressBarContinuous (currentProgress : int) (totalProgress : int) : unit =
 

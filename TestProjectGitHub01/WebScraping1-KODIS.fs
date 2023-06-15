@@ -3,12 +3,10 @@
 open System
 open System.IO
 open System.Net
-open System.Reflection
 open System.Threading.Tasks
 
 open Fugit
 open FSharp.Data
-open FSharp.Reflection
 
 open Helpers
 open Settings
@@ -20,6 +18,7 @@ open WebScraping1_Helpers
 open ErrorFunctions.ErrorFunctions
 open PatternBuilders.PattternBuilders
 
+//TODO Errors :-)
 
 //************************Console**********************************************************************************
 
@@ -56,11 +55,7 @@ type KodisTimetables = JsonProvider<pathJson>
 
 let private client = client()
 
-let private getDefaultRecordValues = //record -> Array //open FSharp.Reflection
-
-    FSharpType.GetRecordFields(typeof<ODIS>) //dostanu pole hodnot typu PropertyInfo
-    |> Array.map (fun (prop: PropertyInfo) -> prop.GetGetMethod().Invoke(ODIS.Default, [||]) :?> string)            
-    |> Array.take 4 //jen prvni 4 polozky jsou pro celo-KODIS variantu
+let private getDefaultRecordValues = getDefaultRecordValues typeof<ODIS> ODIS.Default 4
 
 let private splitList list = //I 
 
@@ -72,7 +67,7 @@ let private splitList list = //I
             | _           -> [a], cur::acc
         let result = List.foldBack folder (List.pairwise list) ([ List.last list ], []) 
         (fst result)::(snd result)
-    tryWith mySplitting (fun x -> ()) () String.Empty [ List.empty ] |> deconstructor
+    tryWith mySplitting (fun x -> ()) () String.Empty [ List.empty ] |> deconstructor msgParam1
 
     (*
     splitList will split the input list into groups of adjacent elements that have the same prefix.
@@ -87,7 +82,7 @@ let private splitListByPrefix (list: string list) : string list list = //I
         let filteredGroups = groups |> List.filter (fun (k, _) -> k.Substring(0, lineNumberLength) = k.Substring(0, lineNumberLength))
         let result = filteredGroups |> List.map snd
         result
-    tryWith mySplitting (fun x -> ()) () String.Empty [ List.empty ] |> deconstructor
+    tryWith mySplitting (fun x -> ()) () String.Empty [ List.empty ] |> deconstructor msgParam1
 
 //ekvivalent splitListByPrefix za predpokladu existence teto podminky shodnosti k.Substring(0, lineNumberLength) = k.Substring(0, lineNumberLength)   
 let private splitList1 (list: string list) : string list list = //P
@@ -168,7 +163,7 @@ let private pathToJsonList =  //P
         sprintf "%s%s" partialPathJson @"kodisNAD.json"
     ]
 
-let private downloadAndSaveUpdatedJson() = 
+let private downloadAndSaveUpdatedJson() = //printfn -> additional 9 parameters
 
     let updateJson x = //I
         let loadAndSaveJsonFiles = //I
@@ -183,7 +178,7 @@ let private downloadAndSaveUpdatedJson() =
                                                   return! client.GetStringAsync(item) |> Async.AwaitTask 
                                               with
                                               | ex -> 
-                                                      deconstructorError <| msgParam1 ex <| ()
+                                                      deconstructorError <| msgParam1 (string ex) <| ()
                                                       return! client.GetStringAsync(String.Empty) |> Async.AwaitTask //whatever of that type
                                           } |> Async.RunSynchronously
                         
@@ -205,12 +200,12 @@ let private downloadAndSaveUpdatedJson() =
 
     msg2() 
 
-    tryWith updateJson (fun x -> ()) () String.Empty () |> deconstructor    
+    tryWith updateJson (fun x -> ()) () String.Empty () |> deconstructor msgParam1    
 
     msg3() 
     msg4() 
 
-let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
+let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru //printfn -> additional 4 parameters
     
     let kodisTimetables() = //I
 
@@ -228,7 +223,7 @@ let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
                                                                   msg5() 
                                                                   Array.empty    
                              ) 
-        tryWith myFunction (fun x -> ()) () String.Empty Array.empty |> deconstructor
+        tryWith myFunction (fun x -> ()) () String.Empty Array.empty |> deconstructor msgParam1
 
     let kodisAttachments() = //I
 
@@ -278,13 +273,13 @@ let private digThroughJsonStructure() = //prohrabeme se strukturou json souboru
                                                                   msg8() 
                                                                   Array.empty                                 
                              ) 
-        tryWith myFunction (fun x -> ()) () String.Empty Array.empty |> deconstructor          
+        tryWith myFunction (fun x -> ()) () String.Empty Array.empty |> deconstructor msgParam1          
 
     (Array.append <| kodisAttachments() <| kodisTimetables()) |> Set.ofArray //jen z vyukovych duvodu -> konverzi na Set vyhodime stejne polozky, jinak staci jen |> Array.distinct 
     //kodisAttachments() |> Set.ofArray //over cas od casu
     //kodisTimetables() |> Set.ofArray //over cas od casu
 
-let private filterTimetables param pathToDir diggingResult = //I
+let private filterTimetables param pathToDir diggingResult = //I  //printfn -> additional 2 parameters
 
     //****************prvni filtrace odkazu na neplatne jizdni rady***********************   
     
@@ -442,7 +437,7 @@ let private filterTimetables param pathToDir diggingResult = //I
                                                                    result x
                                                    
                                   ) |> Array.toList |> List.distinct 
-        tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor
+        tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor msgParam1
     
     let myList1 = //P
         myList |> List.filter (fun item -> not <| String.IsNullOrWhiteSpace(item) && not <| String.IsNullOrEmpty(item))     
@@ -491,7 +486,7 @@ let private filterTimetables param pathToDir diggingResult = //I
                                                                    ) |> List.maxBy snd                                                        
                                                    [ fst latestValidityStart ]                                                   
                             ) |> List.distinct                              
-        tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor 
+        tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor msgParam1
         
     let myList3 = //P
         myList2 |> List.filter (fun item -> not <| String.IsNullOrWhiteSpace(item) && not <| String.IsNullOrEmpty(item))
@@ -526,7 +521,7 @@ let private filterTimetables param pathToDir diggingResult = //I
                                                            
                                              link, path 
                         )
-        tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor   
+        tryWith myFunction (fun x -> ()) () String.Empty List.empty |> deconstructor msgParam1   
     
     myList4 
     |> List.filter (fun item -> 
@@ -539,24 +534,24 @@ let private filterTimetables param pathToDir diggingResult = //I
                               not <| String.IsNullOrEmpty(snd item))                                         
                    ) |> List.sort                                             
         
-let private deleteAllODISDirectories pathToDir = //I 
+let private deleteAllODISDirectories pathToDir = //I  //printfn -> additional 4 parameters
 
     let myDeleteFunction x = //I  
 
         //rozdil mezi Directory a DirectoryInfo viz Unique_Identifier_And_Metadata_File_Creator.sln -> MainLogicDG.fs
-        let dirInfo = new DirectoryInfo(pathToDir) |> optionToSRTP "Error8" (new DirectoryInfo(pathToDir))             
+        let dirInfo = new DirectoryInfo(pathToDir) |> optionToSRTP (lazy (msgParam7 "Error8")) (new DirectoryInfo(pathToDir))             
        
         //smazeme pouze adresare obsahujici stare JR, ostatni ponechame   
         let deleteIt = 
             dirInfo.EnumerateDirectories()
-            |> optionToSRTP "Error11g" Seq.empty  
+            |> optionToSRTP (lazy (msgParam7 "Error11g")) Seq.empty  
             |> Array.ofSeq
             |> Array.filter (fun item -> (getDefaultRecordValues |> Array.contains item.Name)) //prunik dvou kolekci (plus jeste Array.distinct pro unique items)
             |> Array.distinct 
             |> Array.Parallel.iter (fun item -> item.Delete(true))     
         deleteIt 
         
-    tryWith myDeleteFunction (fun x -> ()) () String.Empty () |> deconstructor
+    tryWith myDeleteFunction (fun x -> ()) () String.Empty () |> deconstructor msgParam1
 
     msg10() 
     msg11() 
@@ -567,7 +562,7 @@ let private listOfNewDirectories pathToDir =
     |> List.ofArray
     |> List.map (fun item -> sprintf"%s\%s"pathToDir item) 
 
-let private deleteOneODISDirectory param pathToDir = //I 
+let private deleteOneODISDirectory param pathToDir = //I //printfn -> additional 4 parameters
 
     //smazeme pouze jeden adresar obsahujici stare JR, ostatni ponechame 
     let dirName =
@@ -580,14 +575,14 @@ let private deleteOneODISDirectory param pathToDir = //I
     let myDeleteFunction x = //I  
 
         //rozdil mezi Directory a DirectoryInfo viz Unique_Identifier_And_Metadata_File_Creator.sln -> MainLogicDG.fs
-        let dirInfo = new DirectoryInfo(pathToDir) |> optionToSRTP "Error8" (new DirectoryInfo(pathToDir))        
+        let dirInfo = new DirectoryInfo(pathToDir) |> optionToSRTP (lazy (msgParam7 "Error8")) (new DirectoryInfo(pathToDir))        
        
         dirInfo.EnumerateDirectories()
-        |> optionToSRTP "Error11h" Seq.empty  
+        |> optionToSRTP (lazy (msgParam7 "Error11h")) Seq.empty  
         |> Seq.filter (fun item -> item.Name = dirName) 
         |> Seq.iter (fun item -> item.Delete(true)) //trochu je to hack, ale nemusim se zabyvat tryHead, bo moze byt empty kolekce
                   
-    tryWith myDeleteFunction (fun x -> ()) () String.Empty () |> deconstructor
+    tryWith myDeleteFunction (fun x -> ()) () String.Empty () |> deconstructor msgParam1
 
     msg10() 
     msg11() 
@@ -601,9 +596,9 @@ let private createFolders dirList = //I
    let myFolderCreation x = //I  
        dirList |> List.iter (fun dir -> Directory.CreateDirectory(dir) |> ignore)  
               
-   tryWith myFolderCreation (fun x -> ()) () String.Empty () |> deconstructor   
+   tryWith myFolderCreation (fun x -> ()) () String.Empty () |> deconstructor msgParam1   
 
-let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*string) list) = //I     
+let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*string) list) = //I    //printfn -> additional 6 parameters 
 
     let downloadFileTaskAsync (client: Http.HttpClient) (uri: string) (path: string) =   //I 
 
@@ -619,7 +614,7 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
                                                      msgParam2 uri 
                                                      return()                                              
                     | ex                          -> 
-                                                     deconstructorError <| msgParam1 ex <| client.Dispose()
+                                                     deconstructorError <| msgParam1 (string ex) <| client.Dispose()
                                                      return()                                
                 }     
 

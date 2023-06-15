@@ -13,6 +13,8 @@ open Messages.Messages
 open WebScraping1_Helpers
 open ErrorFunctions.ErrorFunctions
 
+//TODO Errors :-)
+
 //************************Console**********************************************************************************
 
 consoleAppProblemFixer()
@@ -66,14 +68,14 @@ let private deleteOneODISDirectory pathToDir = //I
     let myDeleteFunction x = //I  
 
         //rozdil mezi Directory a DirectoryInfo viz Unique_Identifier_And_Metadata_File_Creator.sln -> MainLogicDG.fs
-        let dirInfo = new DirectoryInfo(pathToDir) |> optionToSRTP "Error8" (new DirectoryInfo(pathToDir))        
+        let dirInfo = new DirectoryInfo(pathToDir) |> optionToSRTP (lazy (msgParam7 "Error8")) (new DirectoryInfo(pathToDir))        
        
         dirInfo.EnumerateDirectories()
-        |> optionToSRTP "Error11h" Seq.empty  
+        |> optionToSRTP (lazy (msgParam7 "Error11h")) Seq.empty  
         |> Seq.filter (fun item -> item.Name = dirName) 
         |> Seq.iter (fun item -> item.Delete(true)) //trochu je to hack, ale nemusim se zabyvat tryHead, bo moze byt empty kolekce
                   
-    tryWith myDeleteFunction (fun x -> ()) () String.Empty () |> deconstructor
+    tryWith myDeleteFunction (fun x -> ()) () String.Empty () |> deconstructor msgParam1
 
     msg12() 
     
@@ -86,7 +88,7 @@ let private createFolders dirList = //I
    let myFolderCreation x = //I  
        dirList |> List.iter (fun dir -> Directory.CreateDirectory(dir) |> ignore)  
               
-   tryWith myFolderCreation (fun x -> ()) () String.Empty () |> deconstructor   
+   tryWith myFolderCreation (fun x -> ()) () String.Empty () |> deconstructor msgParam1    
 
 let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*string) list) = //I 
 
@@ -103,7 +105,7 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
                                                      msgParam2 uri 
                                                      return()                                              
                     | ex                          -> 
-                                                     deconstructorError <| msgParam1 ex <| client.Dispose()
+                                                     deconstructorError <| msgParam1 (string ex) <| client.Dispose()
                                                      return()                                
                 }  
     

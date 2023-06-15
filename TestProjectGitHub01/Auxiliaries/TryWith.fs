@@ -18,21 +18,21 @@ module TryWith =
         with
         | ex -> 
                f3
-               Failure (ex.Message, y)  
+               Failure (ex.Message, y)      
 
-    let deconstructor =  //I        
+    let deconstructor (printError: string -> unit) =  //I        
         function
         | Success x       -> x                                                   
         | Failure (ex, y) -> 
-                             deconstructorError <| msgParam1 ex <| ()
-                             y    
+                             deconstructorError <| printError (string ex) <| ()                             
+                             y   
                               
-    let inline optionToSRTP err (srtp: ^a) value = //I
+    let inline optionToSRTP (printError: Lazy<unit>) (srtp: ^a) value = //I
         value
         |> Option.ofObj 
         |> function 
             | Some value -> value  
             | None       -> 
-                            msgParam7 err
+                            printError.Force() 
                             srtp
 
