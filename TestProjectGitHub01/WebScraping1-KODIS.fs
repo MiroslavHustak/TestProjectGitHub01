@@ -55,7 +55,7 @@ type KodisTimetables = JsonProvider<pathJson>
 
 let private client = client()
 
-let private getDefaultRecordValues = getDefaultRecordValues typeof<ODIS> ODIS.Default 4
+let private getDefaultRecordValues = getDefaultRecordValues typeof<ODIS> ODIS.Default 4 //jen prvni 4 polozky jsou pro celo-KODIS variantu
 
 let private splitList list = //I 
 

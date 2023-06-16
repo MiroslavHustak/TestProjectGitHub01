@@ -50,5 +50,5 @@ let getDefaultRecordValues (t: Type) (r: ODIS) itemNo = //P //record -> Array //
     //dostanu pole hodnot typu PropertyInfo
     FSharpType.GetRecordFields(t) 
     |> Array.map (fun (prop: PropertyInfo) -> prop.GetGetMethod().Invoke(r, [||]) :?> string)            
-    |> Array.take itemNo //jen prvni 4 polozky jsou pro celo-KODIS variantu
+    |> Array.take itemNo 
 
