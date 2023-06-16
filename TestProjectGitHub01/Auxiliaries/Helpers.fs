@@ -9,7 +9,7 @@ open Messages.Messages
 
     module CopyingFiles =  
     
-       let copyFiles source destination = //I
+       let copyFiles source destination = //I //The function signature already contains a unit type
                                                                 
           let perform x =                                    
               let sourceFilepath =
@@ -47,18 +47,36 @@ open Messages.Messages
             | true, value -> Some value
             | false, _    -> None
         let parseInt = tryParseWith <| System.Int32.TryParse  
-        let (|Int|_|) = parseInt        
+        let (|Int|_|) = parseInt  
+        
+   module private TryParserDate = //tohle je pro parsing textoveho retezce do DateTime, ne pro overovani new DateTime()
+          let tryParseWith (tryParseFunc: string -> bool * _) =
+              tryParseFunc >> function
+              | true, value -> Some value
+              | false, _    -> None
+          let parseDate= tryParseWith <| System.DateTime.TryParse 
+          let (|Date|_|) = parseDate     
 
    module Parsing =
-        let f x = let isANumber = x                                          
-                  isANumber        
-        let rec parseMe =
+        let f x = 
+            let isANumber = x                                          
+            isANumber        
+        let rec parseMeInt (printError: string -> unit) =
             function            
             | TryParserInt.Int i -> f i 
             | notANumber         ->  
-                                    //printfn "Parsovani neprobehlo korektne u teto hodnoty: %s" notANumber 
+                                    printError notANumber 
                                     -1 
-   
+        let f_date x = 
+            let isADate = x       
+            isADate                    
+        let rec parseMeDate (printError: string -> unit) =
+            function            
+            | TryParserDate.Date d -> f_date d 
+            | notADate             -> 
+                                      printError notADate
+                                      DateTime.MinValue
+                                      
    //Toto neni pouzivany kod, ale jen pattern pro tvorbu TryParserInt, TryParserDate atd. Neautorsky kod.
    module private TryParser =
         let tryParseWith (tryParseFunc: string -> bool * _) = 

@@ -181,8 +181,8 @@ let main argv =
             | "2" -> tryWith myWebscraping1_MDPO (fun x -> ()) () String.Empty () |> deconstructor msgParam1    
             | "3" -> tryWith myWebscraping1_KODIS (fun x -> ()) () String.Empty () |> deconstructor msgParam1   
             | _   ->
-                    printfn "Varianta nebyla vybrána. Prosím zadej znovu."
-                    variant()
+                     printfn "Varianta nebyla vybrána. Prosím zadej znovu."
+                     variant()
            
     
     //*****************************WebScraping1**********************************************

@@ -27,7 +27,7 @@ module TryWith =
                              deconstructorError <| printError (string ex) <| ()                             
                              y   
                               
-    let inline optionToSRTP (printError: Lazy<unit>) (srtp: ^a) value = //I
+    let inline optionToSRTP (printError: Lazy<unit>) (srtp: ^a) value = //I (ale bez printError by to bylo P)
         value
         |> Option.ofObj 
         |> function 

@@ -27,3 +27,4 @@ module Messages =
     let msgParam7 = printfn"%s" //to enable easy mocking for unit tests let msgParam7 = () in the optionToSRTP function
     let msgParam8 = printfn "%s\n" 
     let msgParam9 = printf "%s\r" 
+    let msgParam10 = printfn "Parsování neproběhlo korektně u této hodnoty: %s."  

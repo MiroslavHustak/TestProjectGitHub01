@@ -339,13 +339,13 @@ let private filterTimetables param pathToDir diggingResult = //I  //printfn -> a
                                                         match not (fileNameFull |> String.length >= numberOfChar) with 
                                                         | true  -> String.Empty
                                                         | false ->     
-                                                                   let yearValidityStart x = Parsing.parseMe(fileNameFull.Substring(4 + x, 4)) 
-                                                                   let monthValidityStart x = Parsing.parseMe(fileNameFull.Substring(9 + x, 2))
-                                                                   let dayValidityStart x = Parsing.parseMe(fileNameFull.Substring(12 + x, 2))
+                                                                   let yearValidityStart x = Parsing.parseMeInt <| msgParam10 <| fileNameFull.Substring(4 + x, 4) 
+                                                                   let monthValidityStart x = Parsing.parseMeInt <| msgParam10 <| fileNameFull.Substring(9 + x, 2)
+                                                                   let dayValidityStart x = Parsing.parseMeInt <| msgParam10 <| fileNameFull.Substring(12 + x, 2)
 
-                                                                   let yearValidityEnd x = Parsing.parseMe(fileNameFull.Substring(15 + x, 4))
-                                                                   let monthValidityEnd x = Parsing.parseMe(fileNameFull.Substring(20 + x, 2))
-                                                                   let dayValidityEnd x = Parsing.parseMe(fileNameFull.Substring(23 + x, 2))
+                                                                   let yearValidityEnd x = Parsing.parseMeInt <| msgParam10 <| fileNameFull.Substring(15 + x, 4)
+                                                                   let monthValidityEnd x = Parsing.parseMeInt <| msgParam10 <| fileNameFull.Substring(20 + x, 2)
+                                                                   let dayValidityEnd x = Parsing.parseMeInt <| msgParam10 <| fileNameFull.Substring(23 + x, 2)
                                                                                                                                                                   
                                                                    let a x =
                                                                        [ 
@@ -380,7 +380,7 @@ let private filterTimetables param pathToDir diggingResult = //I  //printfn -> a
                                                                               
                                                                        | false -> 
                                                                                 try                                                                                  
-                                                                                    let dateValidityStart x = new DateTime(yearValidityStart x, monthValidityStart x, dayValidityStart x) 
+                                                                                    let dateValidityStart x = new DateTime(yearValidityStart x, monthValidityStart x, dayValidityStart x)                                                                                       
                                                                                     let dateValidityEnd x = new DateTime(yearValidityEnd x, monthValidityEnd x, dayValidityEnd x) 
                                                                                 
                                                                                     let cond = 
@@ -471,13 +471,13 @@ let private filterTimetables param pathToDir diggingResult = //I  //printfn -> a
                                                                                       | true  -> 2 
                                                                                       | false -> 0 
                                                                                   
-                                                                                  let yearValidityStart x = Parsing.parseMe(item.Substring(4 + x, 4)) //overovat, jestli se v jsonu neco nezmenilo //113_2022_12_11_2023_12_09.....
-                                                                                  let monthValidityStart x = Parsing.parseMe(item.Substring(9 + x, 2))
-                                                                                  let dayValidityStart x = Parsing.parseMe(item.Substring(12 + x, 2))
+                                                                                  let yearValidityStart x = Parsing.parseMeInt <| msgParam10 <| item.Substring(4 + x, 4) //overovat, jestli se v jsonu neco nezmenilo //113_2022_12_11_2023_12_09.....
+                                                                                  let monthValidityStart x = Parsing.parseMeInt <| msgParam10 <| item.Substring(9 + x, 2)
+                                                                                  let dayValidityStart x = Parsing.parseMeInt <| msgParam10 <| item.Substring(12 + x, 2)
 
-                                                                                  let yearValidityEnd x = Parsing.parseMe(item.Substring(15 + x, 4))
-                                                                                  let monthValidityEnd x = Parsing.parseMe(item.Substring(20 + x, 2))
-                                                                                  let dayValidityEnd x = Parsing.parseMe(item.Substring(23 + x, 2))
+                                                                                  let yearValidityEnd x = Parsing.parseMeInt <| msgParam10 <| item.Substring(15 + x, 4)
+                                                                                  let monthValidityEnd x = Parsing.parseMeInt <| msgParam10 <| item.Substring(20 + x, 2)
+                                                                                  let dayValidityEnd x = Parsing.parseMeInt <| msgParam10 <| item.Substring(23 + x, 2)
 
                                                                                   item, new DateTime(yearValidityStart x, monthValidityStart x, dayValidityStart x) 
                                                                                   //item, new DateTime(yearValidityEnd x, monthValidityEnd x, dayValidityEnd x) //pro pripadnou zmenu logiky
