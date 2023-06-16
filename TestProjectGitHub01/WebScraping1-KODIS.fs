@@ -651,7 +651,7 @@ let private downloadAndSaveTimetables pathToDir (filterTimetables: (string*strin
     
     msgParam4 pathToDir 
 
-let webscraping1_KODIS pathToDir (variantList: Validity list) = //I  
+let webscraping1_KODIS pathToDir (variantList: Validity list) = //I  //The function signature already contains a unit type
     
     let x variant dir = 
         match dir |> Directory.Exists with 
