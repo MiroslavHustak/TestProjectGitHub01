@@ -9,6 +9,7 @@ open Messages.Messages
 
     module CopyingFiles =  
     
+       //vyzaduje try with block  
        let copyFiles source destination = //I //The function signature already contains a unit type
                                                                 
           let perform x =                                    
