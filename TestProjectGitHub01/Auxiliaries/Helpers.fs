@@ -11,26 +11,23 @@ open Messages.Messages
     
        //vyzaduje try with block  
        let copyFiles source destination = //I //The function signature already contains a unit type
-                                                                
-          let perform x =                                    
-              let sourceFilepath =
-                  Path.GetFullPath(source)
-                  |> optionToSRTP (lazy (msgParam7 "Chyba při čtení cesty k souboru")) <| String.Empty 
+                                          
+           let sourceFilepath =
+               Path.GetFullPath(source)
+               |> optionToSRTP (lazy (msgParam7 "Chyba při čtení cesty k souboru")) <| String.Empty 
 
-              let destinFilepath =
-                  Path.GetFullPath(destination) 
-                  |> optionToSRTP (lazy (msgParam7 "Chyba při čtení cesty k souboru")) String.Empty 
+           let destinFilepath =
+               Path.GetFullPath(destination) 
+               |> optionToSRTP (lazy (msgParam7 "Chyba při čtení cesty k souboru")) String.Empty 
                 
-              let fInfodat: FileInfo = new FileInfo(sourceFilepath)  
-              match fInfodat.Exists with 
-              | true  -> File.Copy(sourceFilepath, destinFilepath, true)             
-              | false -> failwith (sprintf "Soubor %s nenalezen" source)
-
-          perform ()   
+           let fInfodat: FileInfo = new FileInfo(sourceFilepath)  
+           match fInfodat.Exists with 
+           | true  -> File.Copy(sourceFilepath, destinFilepath, true)             
+           | false -> failwith (sprintf "Soubor %s nenalezen" source)      
        
     module MyString = 
-        //priklad pouziti: getString(8, "0")//tuple a compiled nazev velkym kvuli DLL pro C#
-        [<CompiledName "GetString">]
+        
+        [<CompiledName "GetString">]  //priklad pouziti: getString(8, "0")//tuple a compiled nazev velkym kvuli DLL pro C#
         let getString (numberOfStrings: int, stringToAdd: string): string =   //P
             let initialString = String.Empty                //initial value of the string
             let listRange = [ 1 .. numberOfStrings ]
