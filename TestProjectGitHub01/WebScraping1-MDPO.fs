@@ -11,7 +11,6 @@ open TryWith.TryWith
 open ProgressBarFSharp
 open Messages.Messages
 open WebScraping1_Helpers
-open ErrorFunctions.ErrorFunctions
 
 //TODO Errors :-)
 

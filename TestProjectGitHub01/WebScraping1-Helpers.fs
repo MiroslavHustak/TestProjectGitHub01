@@ -8,7 +8,6 @@ open Microsoft.FSharp.Reflection
 open Settings
 open TryWith.TryWith
 open Messages.Messages
-open ErrorFunctions.ErrorFunctions
 
 let consoleAppProblemFixer() =
     do System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance)

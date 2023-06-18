@@ -5,7 +5,6 @@ open System.IO
 
 open Messages.Messages
 open DiscriminatedUnions
-open ErrorFunctions.ErrorFunctions
 
 module TryWith =
 
@@ -19,6 +18,12 @@ module TryWith =
         | ex -> 
                f3
                Failure (ex.Message, y)      
+
+    let deconstructorError fn1 fn2 =  
+        fn1       
+        do Console.ReadKey() |> ignore 
+        fn2
+        do System.Environment.Exit(1) 
 
     let deconstructor (printError: string -> unit) =  //I        
         function

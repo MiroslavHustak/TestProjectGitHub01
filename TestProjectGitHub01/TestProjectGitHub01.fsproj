@@ -14,7 +14,6 @@
     <Compile Include="OtherWebscraping\WebScraping2.fs" />
     <Content Include="KODISJson\kodisMHDTotal.json" />
     <Compile Include="Auxiliaries\Messages.fs" />
-    <Compile Include="Auxiliaries\ErrorFunctions.fs" />
     <Compile Include="Auxiliaries\Settings.fs" />
     <Compile Include="Auxiliaries\PattternBuilders.fs" />
     <Compile Include="Auxiliaries\DiscriminatedUnions.fs" />

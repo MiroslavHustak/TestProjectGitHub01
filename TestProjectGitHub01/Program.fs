@@ -18,7 +18,6 @@ open Messages.Messages
 open DiscriminatedUnions
 open BrowserDialogWindow
 open WebScraping1_Helpers
-open ErrorFunctions.ErrorFunctions
 
 [<EntryPoint; STAThread>]
 let main argv =

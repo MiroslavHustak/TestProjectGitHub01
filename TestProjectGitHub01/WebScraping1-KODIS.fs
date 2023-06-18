@@ -15,7 +15,6 @@ open Messages.Messages
 open ProgressBarFSharp
 open DiscriminatedUnions
 open WebScraping1_Helpers
-open ErrorFunctions.ErrorFunctions
 open PatternBuilders.PattternBuilders
 
 //TODO Errors :-)
