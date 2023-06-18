@@ -79,6 +79,7 @@ open Messages.Messages
    //**************************************************************************************************                                  
    //Toto neni pouzivany kod, ale jen pattern pro tvorbu TryParserInt, TryParserDate atd. Neautorsky kod.
    module private TryParser =
+
         let tryParseWith (tryParseFunc: string -> bool * _) = 
             tryParseFunc >> function
                             | true, value -> Some value
