@@ -18,8 +18,8 @@ type ODIS =
             odisDir2 = "JR_ODIS_pouze_budouci_platnost"
             odisDir3 = "JR_ODIS_pouze_vyluky"
             odisDir4 = "JR_ODIS_kompletni_bez_vyluk" 
-            odisDir5 = "JR_ODIS_pouze_linky_dopravce_DPO_(aktualni_vcetne_vyluk)" 
-            odisDir6 = "JR_ODIS_pouze_linky_dopravce_MDPO_(aktualni)" 
+            odisDir5 = "JR_ODIS_pouze_linky_dopravce_DPO" 
+            odisDir6 = "JR_ODIS_pouze_linky_dopravce_MDPO" 
         }
     
 [<Struct>]  //vhodne pro 16 bytes => 4096 characters
@@ -68,16 +68,18 @@ type OpenIrfanView_Settings =
      
      let rc = Common_Settings.Default
 
-     let rcR = {
-                   ReadingDataFromExcel_Settings.Default with 
-                       path1 = $@"e:\E\Mirek po osme hodine a o vikendech\LT-15381 az LT-17691 DGSada 27-04-2022.xlsx"  //pouze pro testovani u sebe na pocitaci                              
-               }
+     let rcR = 
+        {
+            ReadingDataFromExcel_Settings.Default with 
+                path1 = $@"e:\E\Mirek po osme hodine a o vikendech\LT-15381 az LT-17691 DGSada 27-04-2022.xlsx"  //pouze pro testovani u sebe na pocitaci                              
+        }
 
-     let rcO = { 
-                   OpenIrfanView_Settings.Default with 
-                       path =  $@"e:\E\Mirek po osme hodine a o vikendech\Kontroly skenu\rozhazovani\" //pouze pro testovani u sebe na pocitaci
-                       path2 = $@"....." //pouze pro testovani u sebe na pocitaci
-               }
+     let rcO = 
+        { 
+            OpenIrfanView_Settings.Default with 
+                path =  $@"e:\E\Mirek po osme hodine a o vikendech\Kontroly skenu\rozhazovani\" //pouze pro testovani u sebe na pocitaci
+                path2 = $@"....." //pouze pro testovani u sebe na pocitaci
+        }
                    
      
 
