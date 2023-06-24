@@ -5,22 +5,6 @@ open System.IO
 open System.Diagnostics
 
 open TryWith.TryWith
-open Messages.Messages
-
-    module CopyingFiles =  
-    
-       //vyzaduje try with block  
-       let copyFiles source destination = //I //The function signature already contains a unit type                                          
-           let sourceFilepath =
-               Path.GetFullPath(source)
-               |> optionToSRTP (lazy (msgParam7 "Chyba při čtení cesty k souboru")) <| String.Empty 
-           let destinFilepath =
-               Path.GetFullPath(destination) 
-               |> optionToSRTP (lazy (msgParam7 "Chyba při čtení cesty k souboru")) String.Empty                 
-           let fInfodat: FileInfo = new FileInfo(sourceFilepath)  
-           match fInfodat.Exists with 
-           | true  -> File.Copy(sourceFilepath, destinFilepath, true)             
-           | false -> failwith (sprintf "Soubor %s nenalezen" source)      
        
     module MyString = 
         
